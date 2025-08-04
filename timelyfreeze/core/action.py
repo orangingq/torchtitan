@@ -3,7 +3,6 @@ from enum import Enum
 import numpy as np
 import torch
 
-
 class ActionType(Enum):
     BUBBLE = 0
     FORWARD = 1

@@ -32,6 +32,9 @@ from torchtitan.tools.profiling import (
     maybe_enable_profiling,
 )
 
+from timelyfreeze.core.freezer import _Freezer, get_freezer
+from timelyfreeze.core.config import global_config as timelyfreeze_config
+
 class Trainer(torch.distributed.checkpoint.stateful.Stateful):
     # core configs
     job_config: JobConfig
@@ -610,9 +613,6 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
 
 
 if __name__ == "__main__":
-    from timelyfreeze.core.config import global_config as timelyfreeze_config
-    from timelyfreeze.core.log import pipeline_log
-
     init_logger()
     config_manager = ConfigManager()
     config = config_manager.parse_args()
@@ -623,7 +623,7 @@ if __name__ == "__main__":
         trainer = Trainer(config)
         # CSH : set global config
         trainer = timelyfreeze_config.update_from_trainer(trainer) 
-        pipeline_log.initialize()
+        trainer.freezer = get_freezer(trainer.model_parts)
         
 
         if config.checkpoint.create_seed_checkpoint:

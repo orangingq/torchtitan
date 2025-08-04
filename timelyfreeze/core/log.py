@@ -43,6 +43,7 @@ class LogType(Enum):
         else:
             return False
 
+
 class PipelineLog:
     '''log the pipeline step.'''
     def __init__(self, type:Union[LogType, str]=LogType.BATCH, log:bool=True) -> None:
