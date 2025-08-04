@@ -3,7 +3,6 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Literal, Optional
 from torch.distributed import ProcessGroup
 import torch.distributed as dist
-from torchtitan.train import Trainer
 
 @dataclass
 class Training:
@@ -153,7 +152,7 @@ class TimelyFreezeConfig:
                 print(f"{key}: {value}")
         return
 
-    def update_from_trainer(self, trainer: Trainer) -> None:
+    def update_from_trainer(self, trainer) -> None:
         """ Update the TimelyFreezeConfig from a Trainer object.
         This is useful for integrating with existing Trainer configurations.
         """
@@ -185,7 +184,6 @@ class TimelyFreezeConfig:
             self.comm.pp, self.comm.pp_rank = 1, 0
             self.comm.pp_group = dist.group.WORLD
 
-        trainer.freezer = get_freezer(trainer.model_parts)
         return trainer
     
 global_config = TimelyFreezeConfig()

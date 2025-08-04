@@ -5,6 +5,7 @@ from typing import List
 import numpy as np
 from .action import ActionType, ActionWithFreezing, ActionWithLog, ActionWithTime
 from .log import pipeline_log
+from .logger import pipeline_logger
 from .schedule import adjust_freeze_ratio, gather_pipeline_schedule, set_freeze_ratio
 from .config import global_config
 from .util import log_time
@@ -75,85 +76,77 @@ class _Freezer:
         self.freeze_ratio_history.append(self.freeze_ratio)
         return
 
-class _Freezer_v3_0714(_Freezer):
-    def __init__(self, model):
-        '''Version 2: Updated on July 14, 2025
-        - Collaborate with ActionWithFreezing to freeze per microbatch block.
-        '''
-        self.model = model
-        self.step_cnt = 0
-        self.epoch_cnt = 0
+# class _Freezer_v3_0714(_Freezer):
+#     def __init__(self, model):
+#         '''Version 2: Updated on July 14, 2025
+#         - Collaborate with ActionWithFreezing to freeze per microbatch block.
+#         '''
+#         self.model = model
+#         self.step_cnt = 0
+#         self.epoch_cnt = 0
 
-        # frozen status
-        self.stability_check_freq = 10 # check the stability every 50 steps (paper: 50)
+#         # frozen status
+#         self.stability_check_freq = 10 # check the stability every 50 steps (paper: 50)
 
-        # Warmup Phase: do nothing
-        self.warmup_phase = max(1, global_config.training.warmup_steps - 1) # first epoch is the warmup phase
-        # Monitoring Phase: do not freeze the model, only analyze the time.
-        self.monitoring_phase = self.warmup_phase + 1 # at least 1 epoch for monitoring
-        self.is_monitoring = True # set to False at the first stability check freq after monitoring phase
-        # Progressive Freezing Phase: gradually increase the freezing_params_num to the expected number.
-        self.progressive_freezing_phase = (self.monitoring_phase + 2) if 'debug' in global_config.training.basename else (self.monitoring_phase + 5)
-        self.log_epoch_cnt = 0
+#         # Warmup Phase: do nothing
+#         self.warmup_phase = max(1, global_config.training.warmup_steps - 1) # first epoch is the warmup phase
+#         # Monitoring Phase: do not freeze the model, only analyze the time.
+#         self.monitoring_phase = self.warmup_phase + 1 # at least 1 epoch for monitoring
+#         self.is_monitoring = True # set to False at the first stability check freq after monitoring phase
+#         # Progressive Freezing Phase: gradually increase the freezing_params_num to the expected number.
+#         self.progressive_freezing_phase = (self.monitoring_phase + 2) if 'debug' in global_config.training.basename else (self.monitoring_phase + 5)
+#         self.log_epoch_cnt = 0
 
-        self.freeze_ratio_history = {stage.stage_idx: [0] * (self.monitoring_phase * global_config.training.num_batches // self.stability_check_freq) if global_config.freezing.freeze else [] for stage in model} # frozen ratio history per stage
-        self.paramwise_frozen_count = {stage.stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage in model} # [frozen, total] count for each layer in each stage
-        return
+#         self.freeze_ratio_history = {stage.stage_idx: [0] * (self.monitoring_phase * global_config.training.num_batches // self.stability_check_freq) if global_config.freezing.freeze else [] for stage in model} # frozen ratio history per stage
+#         self.paramwise_frozen_count = {stage.stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage in model} # [frozen, total] count for each layer in each stage
+#         return
 
-    def _step_count(self):
-        '''Count the number of steps and epochs. 
-        Call this function at the start of each forward pass.
-        Starting from (epoch 1, step 1) for the first microbatch.
-        '''
-        if self.model.training: # only count the steps during training
-            self.step_cnt += 1
-            if self.step_cnt % global_config.training.num_batches == 1:
-                self.epoch_cnt += 1
-        return
+#     def _step_count(self):
+#         '''Count the number of steps and epochs. 
+#         Call this function at the start of each forward pass.
+#         Starting from (epoch 1, step 1) for the first microbatch.
+#         '''
+#         if self.model.training: # only count the steps during training
+#             self.step_cnt += 1
+#             if self.step_cnt % global_config.training.num_batches == 1:
+#                 self.epoch_cnt += 1
+#         return
     
 
-    def freeze_update(self):
-        self._step_count()
-        if not global_config.freezing.freeze or self.epoch_cnt <= self.warmup_phase:
-            return
+#     def freeze_update(self):
+#         self._step_count()
+#         if not global_config.freezing.freeze or self.epoch_cnt <= self.warmup_phase:
+#             return
         
-        if self.step_cnt % self.stability_check_freq == 0:
-            self._set_expected_freeze_ratio()
+#         if self.step_cnt % self.stability_check_freq == 0:
+#             self._set_expected_freeze_ratio()
         
-            if self.monitoring_phase < self.epoch_cnt:
-                self._update_freeze_ratio()
-            if self.log_epoch_cnt < self.epoch_cnt and self.monitoring_phase < self.epoch_cnt and self.epoch_cnt <= self.progressive_freezing_phase + 2:
-                self.log_epoch_cnt = self.epoch_cnt
-                log_time(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in pipeline_log.pipeline_schedule[global_config.comm.pp_rank] if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])}")
-        return
+#             if self.monitoring_phase < self.epoch_cnt:
+#                 self._update_freeze_ratio()
+#             if self.log_epoch_cnt < self.epoch_cnt and self.monitoring_phase < self.epoch_cnt and self.epoch_cnt <= self.progressive_freezing_phase + 2:
+#                 self.log_epoch_cnt = self.epoch_cnt
+#                 log_time(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[global_config.comm.pp_rank] if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])}")
+#         return
 
-    def _set_expected_freeze_ratio(self):
-        raise NotImplementedError("This function should be implemented in the derived class.")
+#     def _set_expected_freeze_ratio(self):
+#         raise NotImplementedError("This function should be implemented in the derived class.")
 
 
-    def _update_freeze_ratio(self):
-        '''Update the frozen ratio based on the current freezing status.'''
-        if self.step_cnt % self.stability_check_freq != 0:
-            return
+#     def _update_freeze_ratio(self):
+#         '''Update the frozen ratio based on the current freezing status.'''
+#         if self.step_cnt % self.stability_check_freq != 0:
+#             return
 
-        for stage in self.model:    
-            for name, _ in stage.named_parameters():
-                self.paramwise_frozen_count[stage.stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in pipeline_log.pipeline_schedule[global_config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
-                self.paramwise_frozen_count[stage.stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in pipeline_log.pipeline_schedule[global_config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
+#         for stage in self.model:    
+#             for name, _ in stage.named_parameters():
+#                 self.paramwise_frozen_count[stage.stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[global_config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
+#                 self.paramwise_frozen_count[stage.stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[global_config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
 
-            average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in pipeline_log.pipeline_schedule[global_config.comm.pp_rank] if a.stage == stage.stage_idx and a.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]))
-            self.freeze_ratio_history[stage.stage_idx].append(average_freeze_ratio)
-        return
+#             average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[global_config.comm.pp_rank] if a.stage == stage.stage_idx and a.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]))
+#             self.freeze_ratio_history[stage.stage_idx].append(average_freeze_ratio)
+#         return
+    
 
-def get_freezer_class_version(freezer:_Freezer)->int:
-    '''Get the version of the freezer class.'''
-    if isinstance(freezer, _Freezer):
-        if issubclass(freezer.__class__, _Freezer_v3_0714):
-            return 1
-        else:
-            return 0
-    else:
-        raise TypeError(f"Freezer should be an instance of _Freezer, but got {type(freezer)}.")
 
 def get_freezer(model)->_Freezer:
     '''Get the freezer based on the metric type.'''
@@ -165,36 +158,70 @@ def get_freezer(model)->_Freezer:
         raise NotImplementedError(f"Metric Type [{global_config.freezing.metric_type}] is not supported.")
 
 
-class FullyRandomFreezer_v6(_Freezer_v3_0714):
+class FullyRandomFreezer_v6(_Freezer_v4_0804):
     def __init__(self, model):
         ''' Updated on July 14, 2025
         Set different expected freeze ratio per microbatch block.
         '''
-        super().__init__(model)
+        super().__init__()
+
+        self.model = model
+
+        # frozen status
+        self.stability_check_freq = 10 # check the stability every 50 steps (paper: 50)
+
+        self.phase_unit = 100 # unit of phase, i.e., 100 steps
+        self.warmup_phase = max(self.phase_unit, global_config.training.warmup_steps - self.phase_unit) # Warmup Phase: do nothing
+        # Monitoring Phase: do not freeze the model, only analyze the time.
+        self.monitoring_phase = self.warmup_phase + self.phase_unit # at least 1 phase unit for monitoring
+        self.is_monitoring = True # set to False at the first stability check freq after monitoring phase
+        # Progressive Freezing Phase: gradually increase the freezing_params_num to the expected number.
+        self.progressive_freezing_phase = (self.monitoring_phase + 2 * self.phase_unit) if 'debug' in global_config.training.basename else (self.monitoring_phase + 5 * self.phase_unit)
+
+        self.freeze_ratio_history = {stage.stage_idx: [0] * (self.monitoring_phase * global_config.training.num_batches // self.stability_check_freq) if global_config.freezing.freeze else [] for stage in model} # frozen ratio history per stage
+        self.paramwise_frozen_count = {stage.stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage in model} # [frozen, total] count for each layer in each stage
+        
+        self.pipeline_schedule:List[List[ActionWithFreezing]] = [] # the pipeline schedule, which is a list of list of ActionWithFreezing
+        self.pp_rank = global_config.comm.pp_rank # current rank
+        self.stage_idx_list = [stage.stage_idx for stage in self.model] # list of stage indices
 
         self.monitored_ub = False # True if monitored the upperbound of batch time. set to True at the first stability check freq after monitoring phase. 
         self.monitoring_lb = False # True if currently monitoring the lowerbound of batch time, i.e., freezing ratio = 1.0 for all actions.
         self.monitored_lb = False # True if monitored the lowerbound of batch time, i.e., freezing ratio = 1.0 for all actions.
         self.monitoring_lb_start = None # starting step of monitoring lowerbound which is used in second monitoring phase
         self.max_batch_time = None
-        # self.freeze_adjust_freq = self.stability_check_freq * (1 + args.num_batches//self.stability_check_freq)
+        self.logger = pipeline_logger.initialize() # logger for the pipeline schedule
         return
 
     def freeze_update(self):
-        self._step_count()
-        if not global_config.freezing.freeze or self.epoch_cnt <= self.warmup_phase:
+        curr_step :int = self.logger.step_cnt
+        if not global_config.freezing.freeze or curr_step <= self.warmup_phase:
             return
         
-        if self.step_cnt % self.stability_check_freq == 0:
+        if curr_step % self.stability_check_freq == 0:
             self._set_expected_freeze_ratio()
         
-            if self.monitoring_phase < self.epoch_cnt:
+            if self.monitoring_phase < curr_step:
                 self._update_freeze_ratio()
 
-            # log the current and expected freeze ratio per microbatch block
-            if self.log_epoch_cnt < self.epoch_cnt and self.monitoring_phase < self.epoch_cnt and self.epoch_cnt <= self.progressive_freezing_phase + 2:
-                self.log_epoch_cnt = self.epoch_cnt
-                log_time(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in pipeline_log.pipeline_schedule[global_config.comm.pp_rank] if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])}")
+        # log the current and expected freeze ratio per microbatch block
+        if curr_step % global_config.training.log_freq == 0 and self.warmup_phase < curr_step and curr_step < self.progressive_freezing_phase + 2 * self.phase_unit:
+            log_time(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{a.microbatch}] {a.actual_freeze_ratio:.2f}/{a.expected_freeze_ratio:.2f}' \
+                                                                            for a in self.pipeline_schedule[self.pp_rank] if a.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])}")
+        return
+
+    def _update_freeze_ratio(self):
+        '''Update the frozen ratio based on the current freezing status.'''
+        if self.logger.step_cnt % self.stability_check_freq != 0:
+            return
+
+        for stage in self.model:
+            for name, _ in stage.named_parameters():
+                self.paramwise_frozen_count[stage.stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
+                self.paramwise_frozen_count[stage.stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
+
+            average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.pp_rank] if a.stage == stage.stage_idx and a.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]))
+            self.freeze_ratio_history[stage.stage_idx].append(average_freeze_ratio)
         return
 
     def _set_expected_freeze_ratio(self):
@@ -205,42 +232,42 @@ class FullyRandomFreezer_v6(_Freezer_v3_0714):
             return
         elif self.epoch_cnt < self.progressive_freezing_phase:
             if not self.monitored_ub: # first stability check freq after monitoring phase
-                pipeline_schedule :List[List[ActionWithFreezing]] = set_freeze_ratio(gather_pipeline_schedule(pipeline_log.log_schedule))
+                pipeline_schedule :List[List[ActionWithFreezing]] = set_freeze_ratio(gather_pipeline_schedule(self.logger.rank_schedule))
 
                 # Set the stage module for each action in the pipeline schedule
                 stage_dict = {stage.stage_idx: stage for stage in self.model}
                 for a in pipeline_schedule[global_config.comm.pp_rank]:
                     a.module = stage_dict[a.stage]
                     a.freeze_flag = True
-                pipeline_log.pipeline_schedule = pipeline_schedule
-                pipeline_log.action_dict = {(action.type, action.rank, action.microbatch, action.stage): action \
+                self.pipeline_schedule = pipeline_schedule
+                self.logger.action_dict = {(action.type, action.rank, action.microbatch, action.stage): action \
                                                     for action in pipeline_schedule[global_config.comm.pp_rank]}
                 self.monitored_ub = True
 
             # during the warmup phase, gradually increase the progressive_freezing
-            for a in pipeline_log.pipeline_schedule[global_config.comm.pp_rank]:
+            for a in self.pipeline_schedule[global_config.comm.pp_rank]:
                 a.progressive_freezing = (self.epoch_cnt-self.monitoring_phase)/(self.progressive_freezing_phase-self.monitoring_phase)
             return
     
         # during the last 10 steps of the progressive freezing phase, monitor the lowerbound of batch time and set min_duration of each action block
         elif self.epoch_cnt == self.progressive_freezing_phase: 
             if not self.monitoring_lb and not self.monitored_lb: # start lowerbound monitoring phase
-                for a in pipeline_log.pipeline_schedule[global_config.comm.pp_rank]:
+                for a in self.pipeline_schedule[global_config.comm.pp_rank]:
                     a.progressive_freezing = 1.0
                     if a.stage == global_config.parallelism.num_stages - 1: # last stage
                         a.expected_freeze_ratio = 1.0 - 1/a.num_params
                     else:
                         a.expected_freeze_ratio = 1.0
                 self.monitoring_lb = True
-                self.monitoring_lb_start = pipeline_log.step_cnt
+                self.monitoring_lb_start = self.logger.step_cnt
 
             elif self.monitoring_lb and not self.monitored_lb: # end lowerbound monitoring phase
-                if len(pipeline_log.log_schedule[0].log_time) <= self.monitoring_lb_start + 20 :
+                if len(self.logger.rank_schedule[0].log_time) <= self.monitoring_lb_start + 20 :
                     # not enough log time data for lowerbound monitoring
                     return
                 # create lowerbound pipeline schedule
-                log_schedule_lb :List[ActionWithLog] = copy.deepcopy(pipeline_log.log_schedule)
-                for la, a, pa in zip(log_schedule_lb, pipeline_log.log_schedule, pipeline_log.pipeline_schedule[global_config.comm.pp_rank]):
+                log_schedule_lb :List[ActionWithLog] = copy.deepcopy(self.logger.rank_schedule)
+                for la, a, pa in zip(log_schedule_lb, self.logger.rank_schedule, self.pipeline_schedule[global_config.comm.pp_rank]):
                     if a.type in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
                         la.log_time = a.log_time[self.monitoring_lb_start:]
                         assert la.get_log_time_mean < pa.max_duration, f"Lowerbound log time {la.get_log_time_mean} is not less than action log time {pa.max_duration}."
@@ -249,23 +276,22 @@ class FullyRandomFreezer_v6(_Freezer_v3_0714):
                 pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(log_schedule_lb)
 
                 # set the min_duration of each action block based on the lowerbound log time
-                for ar_lb, actions_per_rank in zip(pipeline_schedule_lb, pipeline_log.pipeline_schedule):
+                for ar_lb, actions_per_rank in zip(pipeline_schedule_lb, self.pipeline_schedule):
                     for a_lb, a in zip(ar_lb, actions_per_rank):
                         if a.type in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
                             a.min_duration = a_lb.duration
                 
-                pipeline_log.pipeline_schedule = set_freeze_ratio(pipeline_log.pipeline_schedule)
+                self.pipeline_schedule = set_freeze_ratio(self.pipeline_schedule)
 
                 self.monitored_lb = True
                 self.monitoring_lb = False
             else:
                 # after the warmup phase, freeze the model at the expected freeze ratio
-                for a in pipeline_log.pipeline_schedule[global_config.comm.pp_rank]:
+                for a in self.pipeline_schedule[global_config.comm.pp_rank]:
                     a.progressive_freezing = 1
                 return
             return
         
-
 
 class APFFreezer(_Freezer):
     '''
@@ -337,3 +363,4 @@ class APFFreezer(_Freezer):
     
     def _threshold_update(self):
         return
+
