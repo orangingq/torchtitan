@@ -69,6 +69,8 @@ class Metrics:
     enable_wandb: bool = False
     """Whether to log metrics to Weights & Biases"""
 
+    wandb_name: str = "llama3"
+    """Weights & Biases run name"""
 
 @dataclass
 class Model:

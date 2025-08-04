@@ -32,7 +32,6 @@ from torchtitan.tools.profiling import (
     maybe_enable_profiling,
 )
 
-
 class Trainer(torch.distributed.checkpoint.stateful.Stateful):
     # core configs
     job_config: JobConfig
@@ -48,6 +47,7 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
     lr_schedulers: train_spec_module.LRSchedulersContainer
     validator: train_spec_module.BaseValidator
     metrics_processor: train_spec_module.MetricsProcessor
+    freezer: _Freezer | None # CSH: Freezer for timelyfreeze
 
     # non-swappable training components
     checkpointer: CheckpointManager
@@ -487,6 +487,8 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
         self.checkpointer.maybe_wait_for_staging()
         self.optimizers.step()
         self.lr_schedulers.step()
+        self.freezer.freeze_update() # this should be called after optimizer.step()
+
 
         # Reduce the data collected over gradient accumulation steps.
         loss = torch.sum(torch.stack(accumulated_losses))
@@ -573,6 +575,7 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
                 # signal the profiler that the next profiling step has started
                 if torch_profiler:
                     torch_profiler.step()
+
                 if memory_profiler:
                     memory_profiler.step()
 
@@ -607,13 +610,21 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
 
 
 if __name__ == "__main__":
+    from timelyfreeze.core.config import global_config as timelyfreeze_config
+    from timelyfreeze.core.log import pipeline_log
+
     init_logger()
     config_manager = ConfigManager()
     config = config_manager.parse_args()
+
     trainer: Optional[Trainer] = None
 
     try:
         trainer = Trainer(config)
+        # CSH : set global config
+        trainer = timelyfreeze_config.update_from_trainer(trainer) 
+        pipeline_log.initialize()
+        
 
         if config.checkpoint.create_seed_checkpoint:
             assert (
