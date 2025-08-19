@@ -1,25 +1,37 @@
+import os
 import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal, Optional
 from torch.distributed import ProcessGroup
 import torch.distributed as dist
 
-@dataclass
-class Training:
-    total_steps: int = 10000
-    """Number of epochs to train the model"""
+from torchtitan.config.job_config import JobConfig, \
+                    Training as BaseTraining, \
+                    Metrics as BaseMetrics, \
+                    Comm as BaseComm, \
+                    Parallelism as BaseParallelism
 
-    warmup_steps: int = 200
-    """Number of epochs for learning rate warmup"""
+@dataclass
+class Training(BaseTraining):
+    pass
+
+@dataclass
+class Metrics(BaseMetrics):
+    log_freq: int = 100
+    """Frequency of logging during training (steps)"""
+
+    wandb_name: str | None = None
+    """Weights & Biases run name"""
 
     basename: str = time.strftime('%y%m%d_%H%M')
     """Base name for logs, image saving, etc. Initially, it will be set to the current time."""
     
-    log_freq: int = 100 
-    """Frequency of logging during training (steps)"""
+    draw_graph: bool = False
+    """Whether to draw graphs of the model and training process. Can lower throughput due to graph generation overhead."""
+
 
 @dataclass
-class PipelineParallelism:
+class PipelineParallelism(BaseParallelism):
     pp_scheduler: Literal["GPipe", "1FB", "Interleaved1F1B", "InterleavedZeroBubble", "ZBVZeroBubble"] | None = None
     """Pipeline parallelism scheduler. Options: 'gpipe', '1F1B', 'Interleaved1F1B', 'InterleavedZeroBubble' 'ZBVZeroBubble'."""
 
@@ -28,6 +40,9 @@ class PipelineParallelism:
 
     num_stages: int = 1 
     """Number of pipeline parallelism stages. It will be recalculated later as: pp * stages_per_rank."""
+
+    stages_list : list[int] = None
+    """List of pipeline stages of this rank. It will be recalculated based on the pipeline schedule."""
 
     @property
     def bwd_separated(self) -> bool:
@@ -40,7 +55,7 @@ class PipelineParallelism:
     microbatches: int = 4 # number of microbatches for pipeline parallelism
     """Number of microbatches for pipeline parallelism."""
 
-
+@dataclass
 class Freezing:
     """Configuration for model freezing during training.
     This is used to freeze the model weights based on a specific metric.
@@ -48,12 +63,15 @@ class Freezing:
     freeze: bool = False
     """Whether to enable TimelyFreeze."""
 
-    metric_type: str = 'apf'
+    metric_type: str | None = None
     """Metric type for freezing."""
+    
+    phase_unit: int = 100
+    """Number of steps per phase for freezing."""
 
 
 @dataclass
-class Comm:
+class Comm(BaseComm):
     """
     Communication configuration for distributed training.
     """
@@ -126,11 +144,12 @@ class Comm:
 
 
 @dataclass
-class TimelyFreezeConfig:
+class TimelyFreezeConfig(JobConfig):
     """
     Default container for training configuration.
     """
     training: Training = field(default_factory=Training)
+    metrics: Metrics = field(default_factory=Metrics)
     parallelism: PipelineParallelism = field(default_factory=PipelineParallelism)
     freezing: Freezing = field(default_factory=Freezing)
     comm: Comm = field(default_factory=Comm)
@@ -152,20 +171,29 @@ class TimelyFreezeConfig:
                 print(f"{key}: {value}")
         return
 
-    def update_from_trainer(self, trainer) -> None:
-        """ Update the TimelyFreezeConfig from a Trainer object.
+    def update_config(self, trainer) -> None:
+        """ Update the TimelyFreezeConfig from a parallel_dim object.
         This is useful for integrating with existing Trainer configurations.
         """
-        self.training.total_steps = trainer.job_config.training.steps
-        self.training.warmup_steps = trainer.job_config.lr_scheduler.warmup_steps
-        self.training.basename = trainer.job_config.metrics.wandb_name
+        # Update log file/folder names
+        if self.metrics.wandb_name is None:
+            self.metrics.wandb_name = self.metrics.basename
+        self.checkpoint.folder = os.path.join(self.checkpoint.folder, self.metrics.basename)
+        self.comm.save_traces_folder = os.path.join(self.comm.save_traces_folder, self.metrics.basename)
+        self.profiling.save_traces_folder = os.path.join(self.profiling.save_traces_folder, self.metrics.basename)
+        self.profiling.save_memory_snapshot_folder = os.path.join(self.profiling.save_memory_snapshot_folder, self.metrics.basename)
+        self.metrics.save_tb_folder = os.path.join(self.metrics.save_tb_folder, self.metrics.basename)
 
-        self.parallelism.pp_scheduler = trainer.job_config.parallelism.pipeline_parallel_schedule
-        self.parallelism.stages_per_rank = 1 if self.parallelism.pp_scheduler in ["GPipe", "1F1B"] else 2
+        # Update Parallelism configs
+        self.parallelism.stages_per_rank = 1 if self.parallelism.pipeline_parallel_schedule.lower() in ["gpipe", "1f1b"] else 2
         self.parallelism.num_stages = len(trainer.model_parts)
-        self.parallelism.microbatches = trainer.job_config.training.local_batch_size // trainer.job_config.parallelism.pipeline_parallel_microbatch_size
+        self.parallelism.microbatches = trainer.pp_schedule._n_microbatches # self.training.local_batch_size // self.parallelism.pipeline_parallel_microbatch_size
+        self.parallelism.stages_list = list(set(a.stage_index for a in trainer.pp_schedule.pipeline_order[self.comm.local_rank] if a is not None))
 
         self.comm.world_size = trainer.parallel_dims.world_size
+        self.comm.global_rank = trainer.parallel_dims.world_mesh.get_local_rank() #TODO
+        self.comm.local_rank = trainer.parallel_dims.world_mesh.get_local_rank()
+        
         # Data Parallelism
         if trainer.parallel_dims.dp_enabled:
             dp_mesh = trainer.parallel_dims.world_mesh["dp"]
@@ -184,6 +212,6 @@ class TimelyFreezeConfig:
             self.comm.pp, self.comm.pp_rank = 1, 0
             self.comm.pp_group = dist.group.WORLD
 
-        return trainer
+        return
     
 global_config = TimelyFreezeConfig()

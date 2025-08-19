@@ -1275,8 +1275,6 @@ class PipelineScheduleMulti(_PipelineSchedule):
                     if computation_type == _ComputationType.FORWARD:
                         # perform forward computation
                         stage = stage_index_to_stage[stage_index]
-                        # if stage_index == 0 and mb_index in [0, 3, 20]:
-                        #     log_time(f"[MB {mb_index}] param example: {next(iter(stage.parameters()))[100, 1, 2]}")
                         output = stage.forward_one_chunk(
                             mb_index, arg_mbs[mb_index], kwarg_mbs[mb_index]
                         )

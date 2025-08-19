@@ -31,6 +31,19 @@ def _process_c4_text(sample: dict[str, Any]) -> str:
     """Process C4 dataset sample text."""
     return sample["text"]
 
+def _process_slimorca_text(sample: dict[str, Any]) -> str:
+    """Process SlimOrca dataset sample into a single prompt+response text."""
+    sample = sample["conversations"]
+    system_prompt = sample[-3]['value'].strip() if len(sample) > 2 else None
+    question = sample[-2]['value'].strip()
+    response = sample[-1]['value'].strip()
+
+    if system_prompt:
+        prompt = f"<|system|>\n{system_prompt}\n<|user|>\n{question}\n<|assistant|>\n{response}"
+    else:
+        prompt = f"<|user|>\n{question}\n<|assistant|>\n{response}"
+    return prompt
+
 
 @dataclass
 class DatasetConfig:
@@ -55,6 +68,11 @@ DATASETS = {
         path="allenai/c4",
         loader=partial(_load_c4_dataset, split="validation"),
         text_processor=_process_c4_text,
+    ),
+    "slimorca": DatasetConfig(
+        path="Open-Orca/SlimOrca",
+        loader=lambda path: load_dataset(path, split="train"),
+        text_processor=_process_slimorca_text,
     ),
 }
 

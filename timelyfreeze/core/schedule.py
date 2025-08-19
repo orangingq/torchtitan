@@ -6,32 +6,30 @@ import torch.distributed as dist
 from typing import List, Dict, Tuple
 from scipy.optimize import linprog
 import networkx as nx
+from torchtitan.tools.logging import logger
 
 from .action import Action, ActionType, ActionWithTime, ActionWithLog, ActionWithFreezing
-from .util import draw_pipeline_schedule, get_abs_path, log_time
-from .config import global_config
+from .util import draw_pipeline_schedule, get_abs_path
+from .config import TimelyFreezeConfig, Comm
 
-
-def gather_pipeline_schedule(log_schedule:List[ActionWithLog])-> List[List[ActionWithTime]]:
+def gather_pipeline_schedule(log_schedule:List[ActionWithLog], CommConfig: Comm)-> List[List[ActionWithTime]]:
     ''' 
     Gather the pipeline schedule from all ranks and create a pipeline schedule with freezing actions.
     If the rank is not the last stage, it will return an empty list.
     '''
-    # requires communication among all ranks
-    # dist.barrier(group=global_config.comm.pp_group, device_ids=[global_config.comm.local_rank])
 
     # collect the number of actions per rank
     num_actions = len(log_schedule)
-    num_actions_all = [torch.zeros((), device=f'cuda:{global_config.comm.local_rank}', dtype=torch.int32) for _ in range(global_config.comm.pp)]
-    dist.all_gather(tensor_list=num_actions_all, tensor=torch.tensor(num_actions, device=f'cuda:{global_config.comm.local_rank}', dtype=torch.int32), group=global_config.comm.pp_group)
+    num_actions_all = [torch.zeros((), device=f'cuda:{CommConfig.local_rank}', dtype=torch.int32) for _ in range(CommConfig.pp)]
+    dist.all_gather(tensor_list=num_actions_all, tensor=torch.tensor(num_actions, device=f'cuda:{CommConfig.local_rank}', dtype=torch.int32), group=CommConfig.pp_group)
     num_actions_all = torch.stack(num_actions_all).cpu().tolist() # [num_pipelines]
 
     # create a tensor to send/gather from all ranks: (schedule info) x (num_actions)
     schedule_info = len(log_schedule[0].to_tensor(with_median=True)) # 5
     data_to_gather = torch.zeros(schedule_info, max(num_actions_all))
     data_to_gather[:, :num_actions] = torch.stack([action.to_tensor(with_median=True) for action in log_schedule]).T
-    data_gather_list = [torch.zeros_like(data_to_gather, device=f'cuda:{global_config.comm.local_rank}') for _ in range(global_config.comm.pp)]
-    dist.all_gather(tensor_list=data_gather_list, tensor=data_to_gather.to(global_config.comm.local_rank), group=global_config.comm.pp_group)
+    data_gather_list = [torch.zeros_like(data_to_gather, device=f'cuda:{CommConfig.local_rank}') for _ in range(CommConfig.pp)]
+    dist.all_gather(tensor_list=data_gather_list, tensor=data_to_gather.to(CommConfig.local_rank), group=CommConfig.pp_group)
     data_gather_list = torch.stack(data_gather_list).cpu() # [num_pipelines, schedule, num_actions]
 
     # create a pipeline schedule in class ActionWithTime
@@ -60,7 +58,7 @@ def link_actions(pipeline_schedule:List[List[ActionWithTime]])-> List[List[Actio
         next.prev_actions.append(prev)
         return 
     
-    num_ranks: int = len(pipeline_schedule) # same as global_config.comm.pp
+    num_ranks: int = len(pipeline_schedule) 
     stages_per_rank = [list(dict.fromkeys([action.stage for action in pipeline_schedule[rank] if action.type == ActionType.FORWARD and action.stage is not None])) for rank in range(num_ranks)]
     last_stage: int = max([max(stages) for stages in stages_per_rank])
     num_microbatches: int = max([action.microbatch for action in pipeline_schedule[0]])+1
@@ -179,7 +177,7 @@ def schedule_pipeline(pipeline_schedule:List[List[ActionWithTime]],
     Set the start time and end time of each action in the pipeline schedule.
     Update the duration of each action if fwd_time, bwd_time, bwd_input_time, bwd_weight_time are provided.
     '''
-    num_ranks = len(pipeline_schedule) # same as global_config.comm.pp
+    num_ranks = len(pipeline_schedule) 
     num_stages = max([action.stage for actions_per_rank in pipeline_schedule for action in actions_per_rank if action.stage is not None]) + 1 # +1 for the last stage
     assert fwd_time is None or len(fwd_time) == num_stages, f"fwd_time should have the same length as num_stages. fwd_time: {len(fwd_time)}, num_stages: {num_stages}"
     assert bwd_time is None or len(bwd_time) == num_stages, f"bwd_time should have the same length as num_stages. bwd_time: {len(bwd_time)}, num_stages: {num_stages}"
@@ -246,7 +244,7 @@ def schedule_pipeline(pipeline_schedule:List[List[ActionWithTime]],
     return pipeline_schedule
 
 
-def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]])-> List[List[ActionWithFreezing]]:
+def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: TimelyFreezeConfig)-> List[List[ActionWithFreezing]]:
     '''
     Updated on July 29, 2025.
     Assuming the given pipeline_schedule is all scheduled. e.g., Start time and duration of each action are all set.
@@ -278,9 +276,10 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]])-> List[List[A
     timestamp = time.strftime("%y%m%d_%H%M")
     pipeline_schedule_freezing = schedule_pipeline(set_expected_freeze_ratio(pipeline_schedule_freezing, ratio=0, last_block_ratio=0))
     max_batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing]) # get the maximum batch time
-    if global_config.comm.is_last_stage:
-        draw_pipeline_schedule(save_file=f'{global_config.training.basename}/pipeline_schedule/{timestamp}_max_batch_time.svg',
+    if config.comm.is_last_stage and config.metrics.draw_graph:
+        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_max_batch_time.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
+                            config=config,
                             title=f"Max Batch Time: {max_batch_time:.2f} ms",
                             xlabel="Time (ms)", ylabel="Rank"
                             )
@@ -288,9 +287,10 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]])-> List[List[A
     # initialize the duration of each action to have a minimum batch time
     pipeline_schedule_freezing = schedule_pipeline(set_expected_freeze_ratio(pipeline_schedule_freezing, ratio=1))
     min_batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing]) # get the minimum batch time
-    if global_config.comm.is_last_stage:
-        draw_pipeline_schedule(save_file=f'{global_config.training.basename}/pipeline_schedule/{timestamp}_min_batch_time.svg',
+    if config.comm.is_last_stage and config.metrics.draw_graph:
+        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_min_batch_time.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
+                            config=config,
                             title=f"Min Batch Time: {min_batch_time:.2f} ms",
                             xlabel="Time (ms)", ylabel="Rank"
                             )
@@ -298,20 +298,22 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]])-> List[List[A
     # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
     pipeline_schedule_freezing = solve_dag_lp(pipeline_schedule_freezing) # solve the DAG LP problem to find the optimal schedule
 
-    if global_config.comm.is_last_stage:
+    if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
         average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-        draw_pipeline_schedule(save_file=f'{global_config.training.basename}/pipeline_schedule/{timestamp}_frozen_pipeline_schedule.svg',
+        if config.metrics.draw_graph:
+            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_frozen_pipeline_schedule.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
+                            config=config,
                             title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
                             xlabel="Time (ms)", ylabel="Rank"
                             )
-        log_time(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})", rank=False, timestamp='')
+        logger.info(f"> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})", rank=False, timestamp='')
     return pipeline_schedule_freezing
 
 
 
-def adjust_freeze_ratio_with_drawing(pipeline_schedule:List[List[ActionWithFreezing]], monitored_values_dict: Dict[int, List[Tuple[float, float]]])-> List[List[ActionWithFreezing]]:
+def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monitored_values_dict: Dict[int, List[Tuple[float, float]]], config: TimelyFreezeConfig)-> List[List[ActionWithFreezing]]:
     '''
     Assume the given pipeline_schedule is of ActionWithFreezing type.
     Adjust the freeze ratio of each action in the pipeline schedule to minimize the batch time.
@@ -325,8 +327,9 @@ def adjust_freeze_ratio_with_drawing(pipeline_schedule:List[List[ActionWithFreez
     '''
 
     timestamp = time.strftime("%y%m%d_%H%M")
-    n_stages = global_config.parallelism.stages_per_rank
-    fig, axes = plt.subplots(1, n_stages, figsize=(3*n_stages, 3)) # 3 inches per plot, 3 inches height
+    n_stages = config.parallelism.stages_per_rank
+    if config.metrics.draw_graph:
+        fig, axes = plt.subplots(1, n_stages, figsize=(3*n_stages, 3)) # 3 inches per plot, 3 inches height
 
     def draw_trend_line(stage: int, ax: plt.Axes, afrs: List[float], times: List[float], y_range: List[float]) -> Tuple[float, float]:
         ''' Draw the trend line for the monitored values.
@@ -357,36 +360,40 @@ def adjust_freeze_ratio_with_drawing(pipeline_schedule:List[List[ActionWithFreez
         ax.set_title(f'Stage {stage}', fontdict={'fontsize': 9})
         return a, b
 
-    durations_per_stage :torch.Tensor = torch.zeros((n_stages, 2), device=f'cuda:{global_config.comm.local_rank}')
-    stages_order = {s:i for i,s in enumerate(sorted(set(monitored_values_dict.keys())))}
-    monitored_values_dict = {s: [[v[0] for v in monitored_values_dict[s]], [v[1] for v in monitored_values_dict[s]]] for s in stages_order.keys()}
-    y_range_per_stage = {s: [min(monitored_values_dict[s][1]), max(monitored_values_dict[s][1])] for s in stages_order.keys()}
+    durations_per_stage :torch.Tensor = torch.zeros((n_stages, 2), device=f'cuda:{config.comm.local_rank}')
+    stages_list = config.parallelism.stages_list
+    monitored_values_dict = {s: [[v[0] for v in monitored_values_dict[s]], [v[1] for v in monitored_values_dict[s]]] for s in stages_list}
+    y_range_per_stage = {s: [min(monitored_values_dict[s][1]), max(monitored_values_dict[s][1])] for s in stages_list}
 
-    for stage in stages_order.keys():
+    for i, stage in enumerate(stages_list):
         # trend line for of monitored values
-        axis = axes if len(stages_order) == 1 else axes[stages_order[stage]]
-        a, b = draw_trend_line(stage, axis, monitored_values_dict[stage][0], monitored_values_dict[stage][1], y_range_per_stage[stage])
-        durations_per_stage[stages_order[stage]][0] = b # max_duration (no freezing) = a * 0 + b
-        durations_per_stage[stages_order[stage]][1] = a + b # min_duration (all freezing) = a * 1 + b
+        if config.metrics.draw_graph:
+            axis = axes if len(stages_list) == 1 else axes[i]
+            a, b = draw_trend_line(stage, axis, monitored_values_dict[stage][0], monitored_values_dict[stage][1], y_range_per_stage[stage])
+        else:
+            a, b = np.polyfit(monitored_values_dict[stage][0], monitored_values_dict[stage][1], 1)
+        durations_per_stage[i][0] = b # max_duration (no freezing) = a * 0 + b
+        durations_per_stage[i][1] = a + b # min_duration (all freezing) = a * 1 + b
 
     # draw the trend line for the entire rank schedule
-    title = 'Observed values (freeze ratio vs time) with Trend Line'
-    fig.suptitle(title, fontsize=12)
-    plt.tight_layout()
-    save_file = get_abs_path(f'{global_config.training.basename}/pipeline_schedule_adjustment/{timestamp}_rank{global_config.comm.global_rank}_trend_line.svg', 'image', make=True)
-    plt.savefig(save_file)
-    plt.close()
-    log_time(f"{title} is saved as: {save_file}")
+    if config.metrics.draw_graph:
+        title = 'Observed values (freeze ratio vs time) with Trend Line'
+        # fig.suptitle(title, fontsize=12)
+        plt.tight_layout()
+        save_file = get_abs_path(f'{config.metrics.basename}/pipeline_schedule_adjustment/{timestamp}_rank{config.comm.global_rank}_trend_line.svg', 'image', make=True)
+        plt.savefig(save_file)
+        plt.close()
+        logger.info(f"{title} is saved as: {save_file}")
 
 
-    durations :List[torch.Tensor] = [torch.zeros_like(durations_per_stage, device=f'cuda:{global_config.comm.local_rank}') for _ in range(global_config.comm.pp)]
+    durations :List[torch.Tensor] = [torch.zeros_like(durations_per_stage, device=f'cuda:{config.comm.local_rank}') for _ in range(config.comm.pp)]
     # gather trend lines across all pipelines
-    dist.all_gather(durations, durations_per_stage, group=global_config.comm.pp_group) # gather the durations from all ranks
+    dist.all_gather(durations, durations_per_stage, group=config.comm.pp_group) # gather the durations from all ranks
     durations = [d.cpu() for d in durations] # move the durations to CPU for further processing
 
     # set the max_duration and min_duration of each action in the pipeline schedule
     for r, rank_schedule in enumerate(pipeline_schedule):
-        stages_order = {s:i for i,s in enumerate(sorted(set([action.stage for action in rank_schedule])))}
+        stages_order = {s:i for i,s in enumerate(config.parallelism.stages_list)} # map stage to its order
         for action in rank_schedule:
             if action.type not in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
                 continue
@@ -396,139 +403,82 @@ def adjust_freeze_ratio_with_drawing(pipeline_schedule:List[List[ActionWithFreez
     # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
     pipeline_schedule = solve_dag_lp(pipeline_schedule) # solve the DAG LP problem to find the optimal schedule
 
-    if global_config.comm.is_last_stage:
+    if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule])
         average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-        draw_pipeline_schedule(save_file=f'{global_config.training.basename}/pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule.svg',
+        if config.metrics.draw_graph:
+            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule.svg',
                             pipeline_schedule=pipeline_schedule,
+                            config=config,
                             title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
                             xlabel="Time (ms)", ylabel="Rank"
                             )
-        log_time(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})", rank=False, timestamp='')
+        logger.info(f"> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})", rank=False, timestamp='')
     return pipeline_schedule
 
 
+# if __name__ == "__main__":
+#     # Test the draw_pipeline_schedule function
+#     from .util import draw_pipeline_schedule
+#     from .config import global_config
 
-def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monitored_values_dict: Dict[Tuple[ActionType, int, int], List[Tuple[float, float]]])-> List[List[ActionWithFreezing]]:
-    '''
-    Assume the given pipeline_schedule is of ActionWithFreezing type.
-    Adjust the freeze ratio of each action in the pipeline schedule to minimize the batch time.
-    This function will set the expected_freeze_ratio of each action based on the maximum and minimum batch time.
-    It will also visualize the pipeline schedule with the adjusted freeze ratio.
-    Arguments:
-    - pipeline_schedule: List of List of ActionWithFreezing, the pipeline schedule to be adjusted.
-    - monitored_values: Dictionary of monitored values for each action, where the key is a tuple of (ActionType, rank, microbatch) and the value is a list of tuples of (freeze ratio, time).
-    Returns:
-    - Updated pipeline_schedule with adjusted freeze ratio.
-    '''
+#     # # Example pipeline schedule 1 : easy example
+#     # pipeline_schedule = [
+#     #     [ActionWithTime(ActionType.FORWARD, 0, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 0)],
+#     #     [ActionWithTime(ActionType.FORWARD, 1, 0), ActionWithTime(ActionType.FULL_BACKWARD, 1, 0)],
+#     #     [ActionWithTime(ActionType.FORWARD, 2, 0), ActionWithTime(ActionType.FULL_BACKWARD, 2, 0)]
+#     # ]
+#     # fwd_time = [1.0, 1.5, 2.0]
+#     # bwd_time = [1.5, 2.0, 2.5]
+#     # pipeline_schedule = schedule_pipeline(pipeline_schedule, fwd_time, bwd_time)
+#     # draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
+#     # pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule)
+#     # draw_pipeline_schedule("pipeline_schedule_frozen.pdf", pipeline_schedule_freezing)
 
-    timestamp = time.strftime("%y%m%d_%H%M")
-    num_freezable_actions = [sum([1 for action in pipeline_schedule[r] if action.type in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]]) for r in range(global_config.comm.pp)]
-    durations_per_rank :torch.Tensor = torch.zeros((max(num_freezable_actions), 2), device=f'cuda:{global_config.comm.local_rank}')
-    i = 0
-    for action in pipeline_schedule[global_config.comm.pp_rank]:
-        if action.type not in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
-            continue
-        afrs = [v[0] for v in monitored_values_dict[(action.type, action.microbatch, action.stage)]] + [0, 1] # add 0 and 1 for the trend line
-        times = [v[1] for v in monitored_values_dict[(action.type, action.microbatch, action.stage)]] + [action.max_duration, action.min_duration] # add max and min duration for the trend line
-
-        # trend line for of monitored values
-        a, b = np.polyfit(afrs, times, 1)
-        durations_per_rank[i][0] = b # max_duration (no freezing) = a * 0 + b
-        durations_per_rank[i][1] = a + b # min_duration (all freezing) = a * 1 + b
-        i+= 1
-
-    durations :List[torch.Tensor] = [torch.zeros_like(durations_per_rank, device=f'cuda:{global_config.comm.local_rank}') for _ in range(global_config.comm.pp)]
-    # gather trend lines across all pipelines
-    # dist.barrier(global_config.comm.pp_group) # synchronize the processes before communication
-    dist.all_gather(durations, durations_per_rank, group=global_config.comm.pp_group)
-    durations = [d.cpu() for d in durations] # move the durations to CPU for further processing
-
-    # set the max_duration and min_duration of each action in the pipeline schedule
-    for r, rank_schedule in enumerate(pipeline_schedule):
-        i = 0 
-        for action in rank_schedule:
-            if action.type not in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
-                continue
-            action.max_duration = float(durations[r][i][0])
-            action.min_duration = float(durations[r][i][1])
-            i += 1
-
-    # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
-    pipeline_schedule = solve_dag_lp(pipeline_schedule) # solve the DAG LP problem to find the optimal schedule
-
-    if global_config.comm.is_last_stage:
-        batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule])
-        average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-        draw_pipeline_schedule(save_file=f'{global_config.training.basename}/pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule.svg',
-                            pipeline_schedule=pipeline_schedule,
-                            title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                            xlabel="Time (ms)", ylabel="Rank"
-                            )
-        log_time(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})", rank=False, timestamp='')
-    return pipeline_schedule
-
-if __name__ == "__main__":
-    # Test the draw_pipeline_schedule function
-    from .util import draw_pipeline_schedule
-
-    # # Example pipeline schedule 1 : easy example
-    # pipeline_schedule = [
-    #     [ActionWithTime(ActionType.FORWARD, 0, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 0)],
-    #     [ActionWithTime(ActionType.FORWARD, 1, 0), ActionWithTime(ActionType.FULL_BACKWARD, 1, 0)],
-    #     [ActionWithTime(ActionType.FORWARD, 2, 0), ActionWithTime(ActionType.FULL_BACKWARD, 2, 0)]
-    # ]
-    # fwd_time = [1.0, 1.5, 2.0]
-    # bwd_time = [1.5, 2.0, 2.5]
-    # pipeline_schedule = schedule_pipeline(pipeline_schedule, fwd_time, bwd_time)
-    # draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
-    # pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule)
-    # draw_pipeline_schedule("pipeline_schedule_frozen.pdf", pipeline_schedule_freezing)
-
-    # Example pipeline schedule 2 : interleavedzb, 4 ranks, 8 microbatches, 2 stages per rank
-    # 2-1 : Realistic version
-    global_config.parallelism.bwd_separated = True # set the backward separated mode
-    pipeline_schedule = [
-        [ActionWithTime(1, 0, 0, 0), ActionWithTime(1, 0, 1, 0), ActionWithTime(1, 0, 2, 0), ActionWithTime(1, 0, 3, 0), ActionWithTime(1, 0, 0, 4), ActionWithTime(1, 0, 1, 4), ActionWithTime(1, 0, 2, 4), ActionWithTime(1, 0, 3, 4), ActionWithTime(2, 0, 0, 4), ActionWithTime(3, 0, 0, 4), ActionWithTime(1, 0, 4, 0), ActionWithTime(2, 0, 1, 4), ActionWithTime(3, 0, 1, 4), ActionWithTime(1, 0, 5, 0), ActionWithTime(2, 0, 2, 4), ActionWithTime(3, 0, 2, 4), ActionWithTime(1, 0, 6, 0), ActionWithTime(2, 0, 3, 4), ActionWithTime(3, 0, 3, 4), ActionWithTime(1, 0, 7, 0), ActionWithTime(10, 0, 0, 0), ActionWithTime(1, 0, 4, 4), ActionWithTime(10, 0, 1, 0), ActionWithTime(1, 0, 5, 4), ActionWithTime(10, 0, 2, 0), ActionWithTime(1, 0, 6, 4), ActionWithTime(10, 0, 3, 0), ActionWithTime(1, 0, 7, 4), ActionWithTime(2, 0, 4, 4), ActionWithTime(3, 0, 4, 4), ActionWithTime(2, 0, 5, 4), ActionWithTime(3, 0, 5, 4), ActionWithTime(2, 0, 6, 4), ActionWithTime(3, 0, 6, 4), ActionWithTime(2, 0, 7, 4), ActionWithTime(3, 0, 7, 4), ActionWithTime(10, 0, 4, 0), ActionWithTime(10, 0, 5, 0), ActionWithTime(10, 0, 6, 0), ActionWithTime(10, 0, 7, 0)],
-        [ActionWithTime(1, 1, 0, 1), ActionWithTime(1, 1, 1, 1), ActionWithTime(1, 1, 2, 1), ActionWithTime(1, 1, 3, 1), ActionWithTime(1, 1, 0, 5), ActionWithTime(1, 1, 1, 5), ActionWithTime(1, 1, 2, 5), ActionWithTime(2, 1, 0, 5), ActionWithTime(1, 1, 3, 5), ActionWithTime(2, 1, 1, 5), ActionWithTime(3, 1, 0, 5), ActionWithTime(1, 1, 4, 1), ActionWithTime(2, 1, 2, 5), ActionWithTime(3, 1, 1, 5), ActionWithTime(1, 1, 5, 1), ActionWithTime(2, 1, 3, 5), ActionWithTime(3, 1, 2, 5), ActionWithTime(1, 1, 6, 1), ActionWithTime(2, 1, 0, 1), ActionWithTime(3, 1, 3, 5), ActionWithTime(1, 1, 7, 1), ActionWithTime(2, 1, 1, 1), ActionWithTime(3, 1, 0, 1), ActionWithTime(1, 1, 4, 5), ActionWithTime(2, 1, 2, 1), ActionWithTime(3, 1, 1, 1), ActionWithTime(1, 1, 5, 5), ActionWithTime(2, 1, 3, 1), ActionWithTime(3, 1, 2, 1), ActionWithTime(1, 1, 6, 5), ActionWithTime(2, 1, 4, 5), ActionWithTime(3, 1, 3, 1), ActionWithTime(1, 1, 7, 5), ActionWithTime(2, 1, 5, 5), ActionWithTime(3, 1, 4, 5), ActionWithTime(2, 1, 6, 5), ActionWithTime(3, 1, 5, 5), ActionWithTime(2, 1, 7, 5), ActionWithTime(3, 1, 6, 5), ActionWithTime(2, 1, 4, 1), ActionWithTime(3, 1, 7, 5), ActionWithTime(2, 1, 5, 1), ActionWithTime(3, 1, 4, 1), ActionWithTime(2, 1, 6, 1), ActionWithTime(3, 1, 5, 1), ActionWithTime(2, 1, 7, 1), ActionWithTime(3, 1, 6, 1), ActionWithTime(3, 1, 7, 1)], 
-        [ActionWithTime(1, 2, 0, 2), ActionWithTime(1, 2, 1, 2), ActionWithTime(1, 2, 2, 2), ActionWithTime(1, 2, 3, 2), ActionWithTime(1, 2, 0, 6), ActionWithTime(1, 2, 1, 6), ActionWithTime(2, 2, 0, 6), ActionWithTime(1, 2, 2, 6), ActionWithTime(2, 2, 1, 6), ActionWithTime(1, 2, 3, 6), ActionWithTime(2, 2, 2, 6), ActionWithTime(3, 2, 0, 6), ActionWithTime(1, 2, 4, 2), ActionWithTime(2, 2, 3, 6), ActionWithTime(3, 2, 1, 6), ActionWithTime(1, 2, 5, 2), ActionWithTime(2, 2, 0, 2), ActionWithTime(3, 2, 2, 6), ActionWithTime(1, 2, 6, 2), ActionWithTime(2, 2, 1, 2), ActionWithTime(3, 2, 3, 6), ActionWithTime(1, 2, 7, 2), ActionWithTime(2, 2, 2, 2), ActionWithTime(3, 2, 0, 2), ActionWithTime(1, 2, 4, 6), ActionWithTime(2, 2, 3, 2), ActionWithTime(3, 2, 1, 2), ActionWithTime(1, 2, 5, 6), ActionWithTime(2, 2, 4, 6), ActionWithTime(3, 2, 2, 2), ActionWithTime(1, 2, 6, 6), ActionWithTime(2, 2, 5, 6), ActionWithTime(3, 2, 3, 2), ActionWithTime(1, 2, 7, 6), ActionWithTime(2, 2, 6, 6), ActionWithTime(3, 2, 4, 6), ActionWithTime(2, 2, 7, 6), ActionWithTime(3, 2, 5, 6), ActionWithTime(2, 2, 4, 2), ActionWithTime(3, 2, 6, 6), ActionWithTime(2, 2, 5, 2), ActionWithTime(3, 2, 7, 6), ActionWithTime(2, 2, 6, 2), ActionWithTime(3, 2, 4, 2), ActionWithTime(2, 2, 7, 2), ActionWithTime(3, 2, 5, 2), ActionWithTime(3, 2, 6, 2), ActionWithTime(3, 2, 7, 2)], 
-        [ActionWithTime(1, 3, 0, 3), ActionWithTime(1, 3, 1, 3), ActionWithTime(1, 3, 2, 3), ActionWithTime(1, 3, 3, 3), ActionWithTime(1, 3, 0, 7), ActionWithTime(2, 3, 0, 7), ActionWithTime(1, 3, 1, 7), ActionWithTime(2, 3, 1, 7), ActionWithTime(1, 3, 2, 7), ActionWithTime(2, 3, 2, 7), ActionWithTime(1, 3, 3, 7), ActionWithTime(2, 3, 3, 7), ActionWithTime(3, 3, 0, 7), ActionWithTime(1, 3, 4, 3), ActionWithTime(2, 3, 0, 3), ActionWithTime(3, 3, 1, 7), ActionWithTime(1, 3, 5, 3), ActionWithTime(2, 3, 1, 3), ActionWithTime(3, 3, 2, 7), ActionWithTime(1, 3, 6, 3), ActionWithTime(2, 3, 2, 3), ActionWithTime(3, 3, 3, 7), ActionWithTime(1, 3, 7, 3), ActionWithTime(2, 3, 3, 3), ActionWithTime(3, 3, 0, 3), ActionWithTime(1, 3, 4, 7), ActionWithTime(2, 3, 4, 7), ActionWithTime(3, 3, 1, 3), ActionWithTime(1, 3, 5, 7), ActionWithTime(2, 3, 5, 7), ActionWithTime(3, 3, 2, 3), ActionWithTime(1, 3, 6, 7), ActionWithTime(2, 3, 6, 7), ActionWithTime(3, 3, 3, 3), ActionWithTime(1, 3, 7, 7), ActionWithTime(2, 3, 7, 7), ActionWithTime(3, 3, 4, 7), ActionWithTime(2, 3, 4, 3), ActionWithTime(3, 3, 5, 7), ActionWithTime(2, 3, 5, 3), ActionWithTime(3, 3, 6, 7), ActionWithTime(2, 3, 6, 3), ActionWithTime(3, 3, 7, 7), ActionWithTime(2, 3, 7, 3), ActionWithTime(3, 3, 4, 3), ActionWithTime(3, 3, 5, 3), ActionWithTime(3, 3, 6, 3), ActionWithTime(3, 3, 7, 3)]]
-    fwd_time = [7.12, 6.61, 6.65, 6.67, 7.12, 6.61, 6.65, 6.67]
-    bwd_time = [15.1, 0, 0, 0, 15.1, 0, 0, 0]
-    bwd_input_time = [10.7, 8.39, 10.41, 8.4, 10.7, 8.39, 10.41, 8.4]
-    bwd_weight_time = [3.96, 4.79, 3.84, 4.94, 3.96, 4.79, 3.84, 4.94]
-    pipeline_schedule = schedule_pipeline(pipeline_schedule, fwd_time, bwd_time, bwd_input_time, bwd_weight_time)
-    draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
-    pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule)
-    # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-    # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-    # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
+#     # Example pipeline schedule 2 : interleavedzb, 4 ranks, 8 microbatches, 2 stages per rank
+#     # 2-1 : Realistic version
+#     global_config.parallelism.bwd_separated = True # set the backward separated mode
+#     pipeline_schedule = [
+#         [ActionWithTime(1, 0, 0, 0), ActionWithTime(1, 0, 1, 0), ActionWithTime(1, 0, 2, 0), ActionWithTime(1, 0, 3, 0), ActionWithTime(1, 0, 0, 4), ActionWithTime(1, 0, 1, 4), ActionWithTime(1, 0, 2, 4), ActionWithTime(1, 0, 3, 4), ActionWithTime(2, 0, 0, 4), ActionWithTime(3, 0, 0, 4), ActionWithTime(1, 0, 4, 0), ActionWithTime(2, 0, 1, 4), ActionWithTime(3, 0, 1, 4), ActionWithTime(1, 0, 5, 0), ActionWithTime(2, 0, 2, 4), ActionWithTime(3, 0, 2, 4), ActionWithTime(1, 0, 6, 0), ActionWithTime(2, 0, 3, 4), ActionWithTime(3, 0, 3, 4), ActionWithTime(1, 0, 7, 0), ActionWithTime(10, 0, 0, 0), ActionWithTime(1, 0, 4, 4), ActionWithTime(10, 0, 1, 0), ActionWithTime(1, 0, 5, 4), ActionWithTime(10, 0, 2, 0), ActionWithTime(1, 0, 6, 4), ActionWithTime(10, 0, 3, 0), ActionWithTime(1, 0, 7, 4), ActionWithTime(2, 0, 4, 4), ActionWithTime(3, 0, 4, 4), ActionWithTime(2, 0, 5, 4), ActionWithTime(3, 0, 5, 4), ActionWithTime(2, 0, 6, 4), ActionWithTime(3, 0, 6, 4), ActionWithTime(2, 0, 7, 4), ActionWithTime(3, 0, 7, 4), ActionWithTime(10, 0, 4, 0), ActionWithTime(10, 0, 5, 0), ActionWithTime(10, 0, 6, 0), ActionWithTime(10, 0, 7, 0)],
+#         [ActionWithTime(1, 1, 0, 1), ActionWithTime(1, 1, 1, 1), ActionWithTime(1, 1, 2, 1), ActionWithTime(1, 1, 3, 1), ActionWithTime(1, 1, 0, 5), ActionWithTime(1, 1, 1, 5), ActionWithTime(1, 1, 2, 5), ActionWithTime(2, 1, 0, 5), ActionWithTime(1, 1, 3, 5), ActionWithTime(2, 1, 1, 5), ActionWithTime(3, 1, 0, 5), ActionWithTime(1, 1, 4, 1), ActionWithTime(2, 1, 2, 5), ActionWithTime(3, 1, 1, 5), ActionWithTime(1, 1, 5, 1), ActionWithTime(2, 1, 3, 5), ActionWithTime(3, 1, 2, 5), ActionWithTime(1, 1, 6, 1), ActionWithTime(2, 1, 0, 1), ActionWithTime(3, 1, 3, 5), ActionWithTime(1, 1, 7, 1), ActionWithTime(2, 1, 1, 1), ActionWithTime(3, 1, 0, 1), ActionWithTime(1, 1, 4, 5), ActionWithTime(2, 1, 2, 1), ActionWithTime(3, 1, 1, 1), ActionWithTime(1, 1, 5, 5), ActionWithTime(2, 1, 3, 1), ActionWithTime(3, 1, 2, 1), ActionWithTime(1, 1, 6, 5), ActionWithTime(2, 1, 4, 5), ActionWithTime(3, 1, 3, 1), ActionWithTime(1, 1, 7, 5), ActionWithTime(2, 1, 5, 5), ActionWithTime(3, 1, 4, 5), ActionWithTime(2, 1, 6, 5), ActionWithTime(3, 1, 5, 5), ActionWithTime(2, 1, 7, 5), ActionWithTime(3, 1, 6, 5), ActionWithTime(2, 1, 4, 1), ActionWithTime(3, 1, 7, 5), ActionWithTime(2, 1, 5, 1), ActionWithTime(3, 1, 4, 1), ActionWithTime(2, 1, 6, 1), ActionWithTime(3, 1, 5, 1), ActionWithTime(2, 1, 7, 1), ActionWithTime(3, 1, 6, 1), ActionWithTime(3, 1, 7, 1)], 
+#         [ActionWithTime(1, 2, 0, 2), ActionWithTime(1, 2, 1, 2), ActionWithTime(1, 2, 2, 2), ActionWithTime(1, 2, 3, 2), ActionWithTime(1, 2, 0, 6), ActionWithTime(1, 2, 1, 6), ActionWithTime(2, 2, 0, 6), ActionWithTime(1, 2, 2, 6), ActionWithTime(2, 2, 1, 6), ActionWithTime(1, 2, 3, 6), ActionWithTime(2, 2, 2, 6), ActionWithTime(3, 2, 0, 6), ActionWithTime(1, 2, 4, 2), ActionWithTime(2, 2, 3, 6), ActionWithTime(3, 2, 1, 6), ActionWithTime(1, 2, 5, 2), ActionWithTime(2, 2, 0, 2), ActionWithTime(3, 2, 2, 6), ActionWithTime(1, 2, 6, 2), ActionWithTime(2, 2, 1, 2), ActionWithTime(3, 2, 3, 6), ActionWithTime(1, 2, 7, 2), ActionWithTime(2, 2, 2, 2), ActionWithTime(3, 2, 0, 2), ActionWithTime(1, 2, 4, 6), ActionWithTime(2, 2, 3, 2), ActionWithTime(3, 2, 1, 2), ActionWithTime(1, 2, 5, 6), ActionWithTime(2, 2, 4, 6), ActionWithTime(3, 2, 2, 2), ActionWithTime(1, 2, 6, 6), ActionWithTime(2, 2, 5, 6), ActionWithTime(3, 2, 3, 2), ActionWithTime(1, 2, 7, 6), ActionWithTime(2, 2, 6, 6), ActionWithTime(3, 2, 4, 6), ActionWithTime(2, 2, 7, 6), ActionWithTime(3, 2, 5, 6), ActionWithTime(2, 2, 4, 2), ActionWithTime(3, 2, 6, 6), ActionWithTime(2, 2, 5, 2), ActionWithTime(3, 2, 7, 6), ActionWithTime(2, 2, 6, 2), ActionWithTime(3, 2, 4, 2), ActionWithTime(2, 2, 7, 2), ActionWithTime(3, 2, 5, 2), ActionWithTime(3, 2, 6, 2), ActionWithTime(3, 2, 7, 2)], 
+#         [ActionWithTime(1, 3, 0, 3), ActionWithTime(1, 3, 1, 3), ActionWithTime(1, 3, 2, 3), ActionWithTime(1, 3, 3, 3), ActionWithTime(1, 3, 0, 7), ActionWithTime(2, 3, 0, 7), ActionWithTime(1, 3, 1, 7), ActionWithTime(2, 3, 1, 7), ActionWithTime(1, 3, 2, 7), ActionWithTime(2, 3, 2, 7), ActionWithTime(1, 3, 3, 7), ActionWithTime(2, 3, 3, 7), ActionWithTime(3, 3, 0, 7), ActionWithTime(1, 3, 4, 3), ActionWithTime(2, 3, 0, 3), ActionWithTime(3, 3, 1, 7), ActionWithTime(1, 3, 5, 3), ActionWithTime(2, 3, 1, 3), ActionWithTime(3, 3, 2, 7), ActionWithTime(1, 3, 6, 3), ActionWithTime(2, 3, 2, 3), ActionWithTime(3, 3, 3, 7), ActionWithTime(1, 3, 7, 3), ActionWithTime(2, 3, 3, 3), ActionWithTime(3, 3, 0, 3), ActionWithTime(1, 3, 4, 7), ActionWithTime(2, 3, 4, 7), ActionWithTime(3, 3, 1, 3), ActionWithTime(1, 3, 5, 7), ActionWithTime(2, 3, 5, 7), ActionWithTime(3, 3, 2, 3), ActionWithTime(1, 3, 6, 7), ActionWithTime(2, 3, 6, 7), ActionWithTime(3, 3, 3, 3), ActionWithTime(1, 3, 7, 7), ActionWithTime(2, 3, 7, 7), ActionWithTime(3, 3, 4, 7), ActionWithTime(2, 3, 4, 3), ActionWithTime(3, 3, 5, 7), ActionWithTime(2, 3, 5, 3), ActionWithTime(3, 3, 6, 7), ActionWithTime(2, 3, 6, 3), ActionWithTime(3, 3, 7, 7), ActionWithTime(2, 3, 7, 3), ActionWithTime(3, 3, 4, 3), ActionWithTime(3, 3, 5, 3), ActionWithTime(3, 3, 6, 3), ActionWithTime(3, 3, 7, 3)]]
+#     fwd_time = [7.12, 6.61, 6.65, 6.67, 7.12, 6.61, 6.65, 6.67]
+#     bwd_time = [15.1, 0, 0, 0, 15.1, 0, 0, 0]
+#     bwd_input_time = [10.7, 8.39, 10.41, 8.4, 10.7, 8.39, 10.41, 8.4]
+#     bwd_weight_time = [3.96, 4.79, 3.84, 4.94, 3.96, 4.79, 3.84, 4.94]
+#     pipeline_schedule = schedule_pipeline(pipeline_schedule, fwd_time, bwd_time, bwd_input_time, bwd_weight_time)
+#     draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
+#     pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule, global_config)
+#     # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
+#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+#     # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     
     
 
-    # 2-2 : uniform time version
-    uniform_time = [10,10,10,10,10,10,10,10]
-    for actions_per_rank in pipeline_schedule:
-        for action in actions_per_rank:
-            action.scheduled_flag = False # reset the schedule flag
-    pipeline_schedule = schedule_pipeline(pipeline_schedule, uniform_time, [20,20,20,20,20,20,20,20], uniform_time, uniform_time)
-    draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
-    pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule)
-    # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-    # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-    # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
+#     # 2-2 : uniform time version
+#     uniform_time = [10,10,10,10,10,10,10,10]
+#     for actions_per_rank in pipeline_schedule:
+#         for action in actions_per_rank:
+#             action.scheduled_flag = False # reset the schedule flag
+#     pipeline_schedule = schedule_pipeline(pipeline_schedule, uniform_time, [20,20,20,20,20,20,20,20], uniform_time, uniform_time)
+#     draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
+#     pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule, global_config)
+#     # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
+#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+#     # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     
-    # Example pipeline schedule 3 : zbv, 4 ranks, 8 microbatches, 2 stages per rank
-    pipeline_schedule = [[ActionWithTime(ActionType.FORWARD, 0, 0, 0), ActionWithTime(ActionType.FORWARD, 0, 1, 0), ActionWithTime(ActionType.FORWARD, 0, 2, 0), ActionWithTime(ActionType.FORWARD, 0, 3, 0), ActionWithTime(ActionType.FORWARD, 0, 4, 0), ActionWithTime(ActionType.FORWARD, 0, 5, 0), ActionWithTime(ActionType.FORWARD, 0, 6, 0), ActionWithTime(ActionType.FORWARD, 0, 0, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 0, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 0, 3), ActionWithTime(ActionType.FORWARD, 0, 1, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 1, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 1, 3), ActionWithTime(ActionType.FORWARD, 0, 2, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 2, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 2, 3), ActionWithTime(ActionType.FORWARD, 0, 3, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 3, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 3, 3), ActionWithTime(ActionType.FORWARD, 0, 7, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 0, 0), ActionWithTime(ActionType.FORWARD, 0, 4, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 4, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 4, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 1, 0), ActionWithTime(ActionType.FORWARD, 0, 5, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 5, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 5, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 2, 0), ActionWithTime(ActionType.FORWARD, 0, 6, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 6, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 6, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 3, 0), ActionWithTime(ActionType.FORWARD, 0, 7, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 7, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 7, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 4, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 5, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 6, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 7, 0)], 
-                         [ActionWithTime(ActionType.FORWARD, 1, 0, 1), ActionWithTime(ActionType.FORWARD, 1, 1, 1), ActionWithTime(ActionType.FORWARD, 1, 2, 1), ActionWithTime(ActionType.FORWARD, 1, 3, 1), ActionWithTime(ActionType.FORWARD, 1, 4, 1), ActionWithTime(ActionType.FORWARD, 1, 0, 2), ActionWithTime(ActionType.FORWARD, 1, 5, 1), ActionWithTime(ActionType.FORWARD, 1, 1, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 0, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 0, 2), ActionWithTime(ActionType.FORWARD, 1, 2, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 1, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 1, 2), ActionWithTime(ActionType.FORWARD, 1, 3, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 2, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 2, 2), ActionWithTime(ActionType.FORWARD, 1, 6, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 0, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 0, 1), ActionWithTime(ActionType.FORWARD, 1, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 3, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 3, 2), ActionWithTime(ActionType.FORWARD, 1, 7, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 1, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 1, 1), ActionWithTime(ActionType.FORWARD, 1, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 4, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 2, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 2, 1), ActionWithTime(ActionType.FORWARD, 1, 6, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 5, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 3, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 3, 1), ActionWithTime(ActionType.FORWARD, 1, 7, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 6, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 6, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 7, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 5, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 6, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 5, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 7, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 6, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 7, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 7, 1)], 
-                         [ActionWithTime(ActionType.FORWARD, 2, 0, 2), ActionWithTime(ActionType.FORWARD, 2, 1, 2), ActionWithTime(ActionType.FORWARD, 2, 2, 2), ActionWithTime(ActionType.FORWARD, 2, 0, 1), ActionWithTime(ActionType.FORWARD, 2, 3, 2), ActionWithTime(ActionType.FORWARD, 2, 1, 1), ActionWithTime(ActionType.FORWARD, 2, 4, 2), ActionWithTime(ActionType.FORWARD, 2, 2, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 0, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 0, 1), ActionWithTime(ActionType.FORWARD, 2, 3, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 1, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 1, 1), ActionWithTime(ActionType.FORWARD, 2, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 0, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 0, 2), ActionWithTime(ActionType.FORWARD, 2, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 2, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 2, 1), ActionWithTime(ActionType.FORWARD, 2, 6, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 1, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 1, 2), ActionWithTime(ActionType.FORWARD, 2, 5, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 3, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 3, 1), ActionWithTime(ActionType.FORWARD, 2, 7, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 2, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 2, 2), ActionWithTime(ActionType.FORWARD, 2, 6, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 4, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 3, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 3, 2), ActionWithTime(ActionType.FORWARD, 2, 7, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 5, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 5, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 6, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 7, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 6, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 7, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 5, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 6, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 7, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 6, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 7, 2)], 
-                         [ActionWithTime(ActionType.FORWARD, 3, 0, 3), ActionWithTime(ActionType.FORWARD, 3, 0, 0), ActionWithTime(ActionType.FORWARD, 3, 1, 3), ActionWithTime(ActionType.FORWARD, 3, 1, 0), ActionWithTime(ActionType.FORWARD, 3, 2, 3), ActionWithTime(ActionType.FORWARD, 3, 2, 0), ActionWithTime(ActionType.FORWARD, 3, 3, 3), ActionWithTime(ActionType.FORWARD, 3, 3, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 0, 0), ActionWithTime(ActionType.FORWARD, 3, 4, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 0, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 0, 3), ActionWithTime(ActionType.FORWARD, 3, 4, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 1, 0), ActionWithTime(ActionType.FORWARD, 3, 5, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 1, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 1, 3), ActionWithTime(ActionType.FORWARD, 3, 5, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 2, 0), ActionWithTime(ActionType.FORWARD, 3, 6, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 2, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 2, 3), ActionWithTime(ActionType.FORWARD, 3, 6, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 3, 0), ActionWithTime(ActionType.FORWARD, 3, 7, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 3, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 3, 3), ActionWithTime(ActionType.FORWARD, 3, 7, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 4, 0), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 4, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 5, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 6, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 7, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 4, 3), ActionWithTime(ActionType.FULL_BACKWARD, 3, 5, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 6, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 7, 0), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 5, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 6, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 7, 3)]]
-    fwd_time, bwd_time, bwd_input_time, bwd_weight_time \
-        = [8.3101, 10.3417,  9.5100,  7.3098], [14.8432,  0.0000,  0.0000, 13.5128], [11.4721, 16.9559, 10.7292,  9.1316], [10.2950, 26.8687, 15.5081,  7.1363]
-    pipeline_schedule = schedule_pipeline(pipeline_schedule, fwd_time, bwd_time, bwd_input_time, bwd_weight_time)
-    draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
-    pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule)
-    # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-    # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-    # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
+#     # Example pipeline schedule 3 : zbv, 4 ranks, 8 microbatches, 2 stages per rank
+#     pipeline_schedule = [[ActionWithTime(ActionType.FORWARD, 0, 0, 0), ActionWithTime(ActionType.FORWARD, 0, 1, 0), ActionWithTime(ActionType.FORWARD, 0, 2, 0), ActionWithTime(ActionType.FORWARD, 0, 3, 0), ActionWithTime(ActionType.FORWARD, 0, 4, 0), ActionWithTime(ActionType.FORWARD, 0, 5, 0), ActionWithTime(ActionType.FORWARD, 0, 6, 0), ActionWithTime(ActionType.FORWARD, 0, 0, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 0, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 0, 3), ActionWithTime(ActionType.FORWARD, 0, 1, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 1, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 1, 3), ActionWithTime(ActionType.FORWARD, 0, 2, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 2, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 2, 3), ActionWithTime(ActionType.FORWARD, 0, 3, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 3, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 3, 3), ActionWithTime(ActionType.FORWARD, 0, 7, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 0, 0), ActionWithTime(ActionType.FORWARD, 0, 4, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 4, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 4, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 1, 0), ActionWithTime(ActionType.FORWARD, 0, 5, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 5, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 5, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 2, 0), ActionWithTime(ActionType.FORWARD, 0, 6, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 6, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 6, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 3, 0), ActionWithTime(ActionType.FORWARD, 0, 7, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 0, 7, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 0, 7, 3), ActionWithTime(ActionType.FULL_BACKWARD, 0, 4, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 5, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 6, 0), ActionWithTime(ActionType.FULL_BACKWARD, 0, 7, 0)], 
+#                          [ActionWithTime(ActionType.FORWARD, 1, 0, 1), ActionWithTime(ActionType.FORWARD, 1, 1, 1), ActionWithTime(ActionType.FORWARD, 1, 2, 1), ActionWithTime(ActionType.FORWARD, 1, 3, 1), ActionWithTime(ActionType.FORWARD, 1, 4, 1), ActionWithTime(ActionType.FORWARD, 1, 0, 2), ActionWithTime(ActionType.FORWARD, 1, 5, 1), ActionWithTime(ActionType.FORWARD, 1, 1, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 0, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 0, 2), ActionWithTime(ActionType.FORWARD, 1, 2, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 1, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 1, 2), ActionWithTime(ActionType.FORWARD, 1, 3, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 2, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 2, 2), ActionWithTime(ActionType.FORWARD, 1, 6, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 0, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 0, 1), ActionWithTime(ActionType.FORWARD, 1, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 3, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 3, 2), ActionWithTime(ActionType.FORWARD, 1, 7, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 1, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 1, 1), ActionWithTime(ActionType.FORWARD, 1, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 4, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 2, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 2, 1), ActionWithTime(ActionType.FORWARD, 1, 6, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 5, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 3, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 3, 1), ActionWithTime(ActionType.FORWARD, 1, 7, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 6, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 6, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 7, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 5, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 6, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 5, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 1, 7, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 6, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 7, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 1, 7, 1)], 
+#                          [ActionWithTime(ActionType.FORWARD, 2, 0, 2), ActionWithTime(ActionType.FORWARD, 2, 1, 2), ActionWithTime(ActionType.FORWARD, 2, 2, 2), ActionWithTime(ActionType.FORWARD, 2, 0, 1), ActionWithTime(ActionType.FORWARD, 2, 3, 2), ActionWithTime(ActionType.FORWARD, 2, 1, 1), ActionWithTime(ActionType.FORWARD, 2, 4, 2), ActionWithTime(ActionType.FORWARD, 2, 2, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 0, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 0, 1), ActionWithTime(ActionType.FORWARD, 2, 3, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 1, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 1, 1), ActionWithTime(ActionType.FORWARD, 2, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 0, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 0, 2), ActionWithTime(ActionType.FORWARD, 2, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 2, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 2, 1), ActionWithTime(ActionType.FORWARD, 2, 6, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 1, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 1, 2), ActionWithTime(ActionType.FORWARD, 2, 5, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 3, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 3, 1), ActionWithTime(ActionType.FORWARD, 2, 7, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 2, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 2, 2), ActionWithTime(ActionType.FORWARD, 2, 6, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 4, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 4, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 3, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 3, 2), ActionWithTime(ActionType.FORWARD, 2, 7, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 5, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 5, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 6, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 5, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 7, 1), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 6, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 4, 2), ActionWithTime(ActionType.BACKWARD_INPUT, 2, 7, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 5, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 6, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 7, 1), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 6, 2), ActionWithTime(ActionType.BACKWARD_WEIGHT, 2, 7, 2)], 
+#                          [ActionWithTime(ActionType.FORWARD, 3, 0, 3), ActionWithTime(ActionType.FORWARD, 3, 0, 0), ActionWithTime(ActionType.FORWARD, 3, 1, 3), ActionWithTime(ActionType.FORWARD, 3, 1, 0), ActionWithTime(ActionType.FORWARD, 3, 2, 3), ActionWithTime(ActionType.FORWARD, 3, 2, 0), ActionWithTime(ActionType.FORWARD, 3, 3, 3), ActionWithTime(ActionType.FORWARD, 3, 3, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 0, 0), ActionWithTime(ActionType.FORWARD, 3, 4, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 0, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 0, 3), ActionWithTime(ActionType.FORWARD, 3, 4, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 1, 0), ActionWithTime(ActionType.FORWARD, 3, 5, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 1, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 1, 3), ActionWithTime(ActionType.FORWARD, 3, 5, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 2, 0), ActionWithTime(ActionType.FORWARD, 3, 6, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 2, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 2, 3), ActionWithTime(ActionType.FORWARD, 3, 6, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 3, 0), ActionWithTime(ActionType.FORWARD, 3, 7, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 3, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 3, 3), ActionWithTime(ActionType.FORWARD, 3, 7, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 4, 0), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 4, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 5, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 6, 3), ActionWithTime(ActionType.BACKWARD_INPUT, 3, 7, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 4, 3), ActionWithTime(ActionType.FULL_BACKWARD, 3, 5, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 6, 0), ActionWithTime(ActionType.FULL_BACKWARD, 3, 7, 0), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 5, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 6, 3), ActionWithTime(ActionType.BACKWARD_WEIGHT, 3, 7, 3)]]
+#     fwd_time, bwd_time, bwd_input_time, bwd_weight_time \
+#         = [8.3101, 10.3417,  9.5100,  7.3098], [14.8432,  0.0000,  0.0000, 13.5128], [11.4721, 16.9559, 10.7292,  9.1316], [10.2950, 26.8687, 15.5081,  7.1363]
+#     pipeline_schedule = schedule_pipeline(pipeline_schedule, fwd_time, bwd_time, bwd_input_time, bwd_weight_time)
+#     draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
+#     pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule, global_config)
+#     # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
+#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+#     # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     

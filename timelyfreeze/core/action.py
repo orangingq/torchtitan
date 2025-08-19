@@ -3,7 +3,9 @@ from enum import Enum
 import numpy as np
 import torch
 
+
 class ActionType(Enum):
+    NONE = -1
     BUBBLE = 0
     FORWARD = 1
     BACKWARD_INPUT = 2
@@ -172,10 +174,15 @@ class ActionWithFreezing(ActionWithTime):
         self._freeze_flag : bool = False # whether the action can start freezing or not.
         self._expected_freeze_ratio : float = 0.0 # expected freeze ratio
         self.progressive_freezing : float = 0 # the rate of progressive freezing, default is 0. actual_fr = expected_fr * progressive_freezing (will grow to 1 during the training)
+        self.monitored_points = [] # list of (afr, time_duration) pairs, monitored during the progressive freezing phase 
+
         self.freezing_list = None # list of freezing actions
 
         self.freeze_ratio_history = [] # frozen ratio history per stage
         self.paramwise_frozen_count = {} # [frozen, total] count for each layer in each stage
+
+        # cache
+        self.freeze_cache = {} # cache for requires_grad_ state of the parameters, key is the name of the parameter, value is requires_grad
         return
     
     @property
@@ -190,7 +197,7 @@ class ActionWithFreezing(ActionWithTime):
         if self.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]:
             self._min_duration = min(max(0, min_duration), self.max_duration)
         return
-        
+
     @property
     def max_duration(self):
         '''Return the maximum duration of the action.'''
@@ -199,8 +206,8 @@ class ActionWithFreezing(ActionWithTime):
     @max_duration.setter
     def max_duration(self, max_duration:float):
         '''Set the max duration of the action.'''
-        self.max_duration = max(0, max_duration)
-        return self.max_duration
+        self._max_duration = max(0, max_duration)
+        return
     
     @property
     def duration(self, actual=False)-> float:
@@ -267,23 +274,34 @@ class ActionWithFreezing(ActionWithTime):
         '''
         freeze_flag = freeze_flag \
                     and (self.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]) \
-                    and (self.module is not None) and (self.num_params is not None) 
+                    and (self.module is not None) and (self.num_params is not None)  
         if freeze_flag and len(self.paramwise_frozen_count) == 0:
             self.paramwise_frozen_count = {name: [0, 0] for name, _ in self.module.named_parameters()} # reset the paramwise frozen count
         self._freeze_flag = freeze_flag
 
     def freeze(self):
         '''Freeze the module.'''
-        if (not self.freeze_flag) or (self.actual_freeze_ratio <= 0): # only freeze when the freeze flag is set.
+        if not self.freeze_flag: # only freeze when the freeze flag is set.
             return
-        
+                    
         max_p = 0.995
         if self.freezing_list is None:
-            freezing_list = torch.bernoulli(torch.full((self.num_params,), min(max_p, self.actual_freeze_ratio))).bool().tolist()
+            if self.actual_freeze_ratio <= 0:
+                freezing_list = [False] * self.num_params
+            else:
+                freezing_list = torch.bernoulli(torch.full((self.num_params,), min(max_p, self.actual_freeze_ratio))).bool().tolist()
         else:
             freezing_list = self.freezing_list
 
+        # if self.type == ActionType.FORWARD:
+        #     # find backward action
+        #     for action in self.next_actions:
+        #         if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD] and (action.rank, action.microbatch, action.stage) == (self.rank, self.microbatch, self.stage):
+        #             action.freezing_list = freezing_list
+        #             break
+
         for idx, (name, param) in enumerate(self.module.named_parameters()):
+            self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
             param.requires_grad_(not freezing_list[idx]) # freeze the parameters by setting requires_grad to False
 
             self.paramwise_frozen_count[name][0] += int(param.requires_grad)
@@ -298,8 +316,8 @@ class ActionWithFreezing(ActionWithTime):
         if not self.freeze_flag:
             return
         
-        for param in self.module.parameters():
-            param.requires_grad_(True) # unfreeze all parameters
+        for name, param in self.module.named_parameters():
+            param.requires_grad_(self.freeze_cache[name]) # unfreeze all parameters
         return
     
     def to_tensor(self)-> torch.Tensor:

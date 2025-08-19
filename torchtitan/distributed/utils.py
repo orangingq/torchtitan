@@ -373,10 +373,12 @@ def clip_grad_norm_(
 
     if pp_mesh is not None:
         if math.isinf(norm_type):
-            dist.all_reduce(total_norm, op=dist.ReduceOp.MAX, group=pp_mesh.get_group())
+            # dist.all_reduce(total_norm, op=dist.ReduceOp.MAX, group=pp_mesh.get_group())
+            dist.all_reduce(total_norm.to(pp_mesh.device_type), op=dist.ReduceOp.MAX, group=pp_mesh.get_group()) # CSH
         else:
             total_norm **= norm_type
-            dist.all_reduce(total_norm, op=dist.ReduceOp.SUM, group=pp_mesh.get_group())
+            # dist.all_reduce(total_norm, op=dist.ReduceOp.SUM, group=pp_mesh.get_group())
+            dist.all_reduce(total_norm.to(pp_mesh.device_type), op=dist.ReduceOp.SUM, group=pp_mesh.get_group()) # CSH
             total_norm **= 1.0 / norm_type
 
     torch.nn.utils.clip_grads_with_norm_(parameters, max_norm, total_norm, foreach)
