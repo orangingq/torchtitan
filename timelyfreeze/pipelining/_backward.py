@@ -415,6 +415,7 @@ def stage_backward(
         Output gradient: {map_debug_info(output_grads)}
         Input: {map_debug_info(input_values)}
         """
+        logger.exception(exc_msg)
         raise RuntimeError(exc_msg) from e
 
     return tuple(grad_inputs)

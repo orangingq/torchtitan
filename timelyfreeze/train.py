@@ -8,8 +8,9 @@ import importlib
 import os
 import time
 from datetime import timedelta
-from typing import Any, Generator, Iterable, Optional
+from typing import Any, Generator, Iterable, List, Optional
 
+import numpy as np
 import torch
 from torch.distributed.elastic.multiprocessing.errors import record
 
@@ -32,10 +33,15 @@ from torchtitan.tools.profiling import (
     maybe_enable_profiling,
 )
 
+from timelyfreeze.core.freezer import _Freezer, get_freezer
+from timelyfreeze.core.config import TimelyFreezeConfig
+from timelyfreeze.core.action import ActionType, ActionWithTime
+from timelyfreeze.core.schedule import gather_pipeline_schedule, schedule_pipeline
+from timelyfreeze.core.util import draw_elementwise_histogram, draw_line_chart, draw_pipeline_schedule
 
-class Trainer(torch.distributed.checkpoint.stateful.Stateful):
+class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
     # core configs
-    job_config: JobConfig
+    job_config: TimelyFreezeConfig
     parallel_dims: ParallelDims
     train_spec: train_spec_module.TrainSpec
 
@@ -48,7 +54,7 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
     lr_schedulers: train_spec_module.LRSchedulersContainer
     validator: train_spec_module.BaseValidator
     metrics_processor: train_spec_module.MetricsProcessor
-    model_args: train_spec_module.BaseModelArgs
+    freezer: _Freezer | None # CSH: Freezer for timelyfreeze
 
     # non-swappable training components
     checkpointer: CheckpointManager
@@ -147,7 +153,6 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
         model_args = self.train_spec.model_args[job_config.model.flavor]
         # set the model args from training job configs
         model_args.update_from_config(job_config)
-        self.model_args = model_args
 
         logger.info(
             f"Building {self.train_spec.name} {job_config.model.flavor} with {model_args}"
@@ -244,7 +249,7 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
             # when PP is enabled, `model` obj is no longer used after this point,
             # model_parts is used instead
             del model
-
+            
             for m in self.model_parts:
                 m.to_empty(device=init_device)
                 with torch.no_grad():
@@ -270,7 +275,7 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
         device_memory_monitor = self.metrics_processor.device_memory_monitor
         gpu_peak_flops = utils.get_peak_flops(device_memory_monitor.device_name)
         logger.info(f"Peak FLOPS used for computing MFU: {gpu_peak_flops:.3e}")
-        device_mem_stats = device_memory_monitor.get_peak_stats()
+        device_mem_stats = device_memory_monitor.get_peak_stats ()
         logger.info(
             f"{device_type.upper()} memory usage for model: "
             f"{device_mem_stats.max_reserved_gib:.2f}GiB"
@@ -356,6 +361,10 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
                 pp_has_first_stage=pp_has_first_stage,
                 pp_has_last_stage=pp_has_last_stage,
             )
+            
+        # CSH - setting freezer-related configs
+        job_config.update_config(self)  # CSH - this code requires trainer.model_parts, trainer.pp_schedule and trainer.parallel_dims
+        self.freezer = get_freezer(self.model_parts, job_config)
 
         logger.info(
             "Trainer is initialized with "
@@ -480,11 +489,17 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
             pp_mesh=(
                 parallel_dims.world_mesh["pp"] if parallel_dims.pp_enabled else None
             ),
-            ep_enabled=parallel_dims.ep_enabled,
+            ep_dense_params_mesh_ndim=(
+                parallel_dims.dense_params_mesh_ndim
+                if parallel_dims.ep_enabled
+                else None
+            ),
         )
         self.checkpointer.maybe_wait_for_staging()
         self.optimizers.step()
         self.lr_schedulers.step()
+        self.freezer.freeze_update() # this should be called after optimizer.step()
+
 
         # Reduce the data collected over gradient accumulation steps.
         loss = torch.sum(torch.stack(accumulated_losses))
@@ -496,23 +511,15 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
         if parallel_dims.dp_cp_enabled:
             loss = loss.detach()
             ft_pg = self.ft_manager.loss_sync_pg
-            global_avg_loss, global_max_loss, global_ntokens_seen = (
+            global_avg_loss, global_max_loss = (
                 dist_utils.dist_mean(loss, parallel_dims.world_mesh["dp_cp"], ft_pg),
                 dist_utils.dist_max(loss, parallel_dims.world_mesh["dp_cp"], ft_pg),
-                dist_utils.dist_sum(
-                    torch.tensor(
-                        self.ntokens_seen, dtype=torch.int64, device=self.device
-                    ),
-                    parallel_dims.world_mesh["dp_cp"],
-                    ft_pg,
-                ),
             )
         else:
             global_avg_loss = global_max_loss = loss.detach().item()
-            global_ntokens_seen = self.ntokens_seen
 
         extra_metrics = {
-            "n_tokens_seen": global_ntokens_seen,
+            "n_tokens_seen": self.ntokens_seen,
             "lr": lr,
         }
         self.metrics_processor.log(
@@ -551,18 +558,8 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
             maybe_semi_sync_training(
                 job_config.fault_tolerance,
                 ft_manager=self.ft_manager,
-                model=self.model_parts[0],
-                n_layers=(
-                    self.model_args.n_layers
-                    if hasattr(self.model_args, "n_layers")
-                    else 0
-                ),
+                model_parts=self.model_parts,
                 optimizer=self.optimizers,
-                fragment_fn=(
-                    self.train_spec.fragment_fn
-                    if hasattr(self.train_spec, "fragment_fn")
-                    else None
-                ),
             ),
         ):
             data_iterator = self.batch_generator(self.dataloader)
@@ -575,10 +572,6 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
                     logger.warning("Ran out of data; last step was canceled.")
                     break
 
-                self.checkpointer.save(
-                    self.step, last_step=(self.step == job_config.training.steps)
-                )
-
                 # Run validation if validator is available
                 if (
                     self.job_config.validation.enabled
@@ -586,9 +579,14 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
                 ):
                     self.validator.validate(self.model_parts, self.step)
 
+                self.checkpointer.save(
+                    self.step, last_step=(self.step == job_config.training.steps)
+                )
+
                 # signal the profiler that the next profiling step has started
                 if torch_profiler:
                     torch_profiler.step()
+
                 if memory_profiler:
                     memory_profiler.step()
 
@@ -601,6 +599,9 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
                         ),
                         world_mesh=self.parallel_dims.world_mesh,
                     )
+                    
+                if self.step % job_config.metrics.log_freq == 0 and job_config.metrics.draw_graph:
+                    draw_charts(self.freezer, self.step, job_config)
 
         if torch.distributed.get_rank() == 0:
             logger.info("Sleeping 2 seconds for other ranks to complete")
@@ -622,14 +623,70 @@ class Trainer(torch.distributed.checkpoint.stateful.Stateful):
             self.metrics_processor.close()
 
 
+def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
+    if step == 1:
+        logger.warning("Nothing to draw in the first epoch.")
+        return
+    timestamp = time.strftime("%y%m%d_%H%M")
+    is_final = (step == config.training.steps)
+    is_warmupend = (step == freezer.warmup_phase)
+    filename_suffix = ('final' if is_final else 'warmupend' if is_warmupend else 'step') + str(step)
+
+    pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(freezer.logger.rank_schedule.schedule, config.comm))
+    if config.comm.is_last_stage:
+        # 1) Draw the realistic pipeline schedule
+        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}.svg',
+                            pipeline_schedule=pipeline_schedule,
+                            config=config,
+                            # title=f"Realistic Pipeline Schedule", 
+                            xlabel="Time (ms)", ylabel="Rank"
+                            )
+
+        if is_final:
+            # 2) Draw the theoretical pipeline schedule
+            fwd_mean = np.mean([action.duration for rank_list in pipeline_schedule for action in rank_list if action.type == ActionType.FORWARD])
+            pipeline_schedule = schedule_pipeline(pipeline_schedule, 
+                                                fwd_time=[fwd_mean] * config.parallelism.num_stages,
+                                                bwd_time=[2*fwd_mean] * config.parallelism.num_stages,
+                                                bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
+                                                bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
+            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_thry_{filename_suffix}.svg',
+                            pipeline_schedule=pipeline_schedule,
+                            config=config,
+                            # title=f"Theoretical Pipeline Schedule", 
+                            xlabel="Time (ms)", ylabel="Rank"
+                            )
+            
+        if config.freezing.freeze:
+            for s in config.parallelism.stages_list:
+                # 4) Draw the frozen ratio history
+                draw_line_chart([freezer.stability_check_freq * k for k in range(len(freezer.freeze_ratio_history[s]))], 
+                                    freezer.freeze_ratio_history[s], 
+                                    config=config,
+                                    save_file=f'{config.metrics.basename}/freeze_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
+                                    title=f"Frozen Ratio History of Rank {config.comm.global_rank} (Stage {s})", xlabel="Step", ylabel="Frozen Ratio")
+        
+                if is_final:
+                    # 5) Draw the frozen params histogram per stage
+                    draw_elementwise_histogram(data=list(freezer.paramwise_frozen_count[s].values()), stage=s,
+                                    save_file=f'{config.metrics.basename}/frozen_params_histogram/{timestamp}_rank{config.comm.global_rank}_stage{s}.svg', 
+                                    config=config,
+                                    title=f"Histogram of Frozen Parameters in Rank {config.comm.global_rank} (Stage {s})",
+                                    xlabel1="Total Freeze Counts Ratio",
+                                    xlabel2="Parameter Index")
+    return
+
 if __name__ == "__main__":
     init_logger()
-    config_manager = ConfigManager()
+    config_manager = ConfigManager(config_cls=TimelyFreezeConfig)
+    import timelyfreeze.core.config
     config = config_manager.parse_args()
-    trainer: Optional[Trainer] = None
+
+    trainer: Optional[TrainerWithFreezer] = None
 
     try:
-        trainer = Trainer(config)
+        trainer = TrainerWithFreezer(config)
+        timelyfreeze.core.config.global_config = config
 
         if config.checkpoint.create_seed_checkpoint:
             assert (
