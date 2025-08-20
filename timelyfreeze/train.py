@@ -5,6 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import importlib
+import logging
 import os
 import time
 from datetime import timedelta
@@ -676,11 +677,22 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
                                     xlabel2="Parameter Index")
     return
 
+
+
 if __name__ == "__main__":
     init_logger()
     config_manager = ConfigManager(config_cls=TimelyFreezeConfig)
     import timelyfreeze.core.config
     config = config_manager.parse_args()
+    
+    if config.metrics.log_file:
+        logger.handlers.clear()
+        # logging.basicConfig(filename=config.metrics.log_file, filemode="a")
+        fh = logging.FileHandler(filename=config.metrics.log_file, mode="a")
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(logging.Formatter("[titan] %(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        logger.addHandler(fh)
+        init_logger()
 
     trainer: Optional[TrainerWithFreezer] = None
 
