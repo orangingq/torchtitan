@@ -20,6 +20,9 @@ class Metrics(BaseMetrics):
     log_freq: int = 100
     """Frequency of logging during training (steps)"""
 
+    log_file: str | None = None
+    """Log file name to write training logs. Leave as None to disable logging to file."""
+
     wandb_name: str | None = None
     """Weights & Biases run name"""
 

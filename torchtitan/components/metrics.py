@@ -142,12 +142,13 @@ class WandBLogger(BaseLogger):
 
         # Create logging directory
         os.makedirs(log_dir, exist_ok=True)
-
+        wandb_tag = os.environ.get('WANDB_TAG', None)
         self.wandb.init(
             project=os.getenv("WANDB_PROJECT", "torchtitan"),
             name=job_config.metrics.wandb_name or job_config.metrics.basename,
             dir=log_dir,
             config=job_config.to_dict(),
+            tags=wandb_tag.split(",") if wandb_tag else None,
         )
         logger.info("WandB logging enabled")
 
@@ -407,14 +408,14 @@ class MetricsProcessor:
 
         color = self.color
         logger.info(
-            f"{color.red}step: {step:2}  "
-            f"{color.green}loss: {global_avg_loss:7.4f}  "
-            f"{color.orange}grad_norm: {grad_norm:7.4f}  "
-            f"{color.turquoise}memory: {device_mem_stats.max_reserved_gib:5.2f}GiB"
-            f"({device_mem_stats.max_reserved_pct:.2f}%)  "
-            f"{color.blue}tps: {round(tps):,}  "
-            f"{color.cyan}tflops: {tflops:,.2f}  "
-            f"{color.magenta}mfu: {mfu:.2f}%{color.reset}"
+            f"{color.red} step: {step:2} "
+            f"{color.green} loss: {global_avg_loss:7.4f} "
+            f"{color.orange} grad_norm: {grad_norm:7.4f} "
+            f"{color.turquoise} memory: {device_mem_stats.max_reserved_gib:5.2f}GiB"
+            f"({device_mem_stats.max_reserved_pct:.2f}%) "
+            f"{color.blue} tps: {round(tps):,} "
+            f"{color.cyan} tflops: {tflops:,.2f} "
+            f"{color.magenta} mfu: {mfu:.2f}%{color.reset}"
         )
 
         self.ntokens_since_last_log = 0
