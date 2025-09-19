@@ -684,15 +684,25 @@ if __name__ == "__main__":
     config_manager = ConfigManager(config_cls=TimelyFreezeConfig)
     import timelyfreeze.core.config
     config = config_manager.parse_args()
-    
+  
+    # Update folder names
+    if config.metrics.wandb_name is None:
+        config.metrics.wandb_name = config.metrics.basename
+    config.checkpoint.folder = os.path.join(config.checkpoint.folder, config.metrics.basename)
+    config.comm.save_traces_folder = os.path.join(config.comm.save_traces_folder, config.metrics.basename)
+    config.profiling.save_traces_folder = os.path.join(config.profiling.save_traces_folder, config.metrics.basename)
+    config.profiling.save_memory_snapshot_folder = os.path.join(config.profiling.save_memory_snapshot_folder, config.metrics.basename)
+    config.metrics.save_tb_folder = os.path.join(config.metrics.save_tb_folder, config.metrics.basename)
+
+    # Configure logging file
     if config.metrics.log_file:
         logger.handlers.clear()
-        # logging.basicConfig(filename=config.metrics.log_file, filemode="a")
         fh = logging.FileHandler(filename=config.metrics.log_file, mode="a")
         fh.setLevel(logging.INFO)
-        fh.setFormatter(logging.Formatter("[titan] %(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+        fh.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
         logger.addHandler(fh)
         init_logger()
+        logger.propagate = False
 
     trainer: Optional[TrainerWithFreezer] = None
 

@@ -283,22 +283,26 @@ class ActionWithFreezing(ActionWithTime):
         '''Freeze the module.'''
         if not self.freeze_flag: # only freeze when the freeze flag is set.
             return
-                    
-        max_p = 0.995
+        
+        max_p = 1 if self.stage == 0 else 0.995 # For the front layers, allow full parameter freezing
         if self.freezing_list is None:
             if self.actual_freeze_ratio <= 0:
                 freezing_list = [False] * self.num_params
             else:
-                freezing_list = torch.bernoulli(torch.full((self.num_params,), min(max_p, self.actual_freeze_ratio))).bool().tolist()
+                expected = self.num_params * min(max_p, self.actual_freeze_ratio)
+                lower = int(expected)
+                p = expected - lower  # fractional part
+                actual_num_freeze = lower + (1 if torch.rand(()) < p else 0)
+                if self.stage == 0: # front layers more likely to freeze
+                    weights = torch.linspace(1.0, 0.1, steps=self.num_params)
+                    idx = torch.multinomial(weights, actual_num_freeze, replacement=False)
+                else:
+                    idx = torch.randperm(self.num_params)[:actual_num_freeze]
+                freezing_list = torch.zeros(self.num_params, dtype=torch.bool)
+                freezing_list[idx] = True
+                freezing_list = freezing_list.tolist()
         else:
-            freezing_list = self.freezing_list
-
-        # if self.type == ActionType.FORWARD:
-        #     # find backward action
-        #     for action in self.next_actions:
-        #         if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD] and (action.rank, action.microbatch, action.stage) == (self.rank, self.microbatch, self.stage):
-        #             action.freezing_list = freezing_list
-        #             break
+            freezing_list = self.freezing_list  
 
         for idx, (name, param) in enumerate(self.module.named_parameters()):
             self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter

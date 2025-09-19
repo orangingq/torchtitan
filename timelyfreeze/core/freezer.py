@@ -26,7 +26,7 @@ class _Freezer:
         '''Stability Check Frequency: check the stability every 10 steps'''
         self.phase_unit = self.config.freezing.phase_unit
         '''Phase Unit. i.e., 100 steps'''
-        self.warmup_phase = self.phase_unit # max(self.phase_unit, config.lr_scheduler.warmup_steps - self.phase_unit) 
+        self.warmup_phase = self.phase_unit
         '''Warmup Phase: do nothing'''
         self.monitoring_phase = self.warmup_phase + self.phase_unit
         '''Monitoring Phase: do not freeze the model, only analyze the time. At least 1 phase unit for monitoring'''
@@ -91,11 +91,12 @@ class FullyRandomFreezer_v6(_Freezer):
         # Phases
         self.stability_check_freq = 10
         '''Stability Check Frequency: check the stability every 10 steps'''
-        # self.warmup_phase = self.phase_unit # max(self.phase_unit, config.lr_scheduler.warmup_steps - self.phase_unit) 
-        # '''Warmup Phase: do nothing'''
-        # self.monitoring_phase = self.warmup_phase + self.phase_unit
-        # '''Monitoring Phase: do not freeze the model, only analyze the time. At least 1 phase unit for monitoring'''
-        self.progressive_freezing_phase = self.monitoring_phase + 5 * self.phase_unit 
+        self.phase_unit = self.config.freezing.phase_unit
+        self.warmup_phase = self.phase_unit
+        '''Warmup Phase: do nothing'''
+        self.monitoring_phase = self.warmup_phase + self.phase_unit
+        '''Monitoring Phase: do not freeze the model, only analyze the time. At least 1 phase unit for monitoring'''
+        self.progressive_freezing_phase = self.monitoring_phase + self.config.lr_scheduler.warmup_steps 
         '''Progressive Freezing Phase: gradually increase the freezing_params_num to the expected number.'''
         self.freeze_adjust_freq = self.phase_unit
         '''Frequency of EFR adjustment. i.e., 10 steps'''
