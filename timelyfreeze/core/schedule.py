@@ -308,7 +308,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
                             xlabel="Time (ms)", ylabel="Rank"
                             )
-        logger.info(f"> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})", rank=False, timestamp='')
+        logger.info(f"> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})")
     return pipeline_schedule_freezing
 
 
@@ -393,7 +393,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
 
     # set the max_duration and min_duration of each action in the pipeline schedule
     for r, rank_schedule in enumerate(pipeline_schedule):
-        stages_order = {s:i for i,s in enumerate(config.parallelism.stages_list)} # map stage to its order
+        stages_order = {s:i for i,s in enumerate(sorted(set([action.stage for action in rank_schedule])))} # map stage to its order
         for action in rank_schedule:
             if action.type not in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
                 continue
@@ -413,7 +413,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
                             title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
                             xlabel="Time (ms)", ylabel="Rank"
                             )
-        logger.info(f"> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})", rank=False, timestamp='')
+        logger.info(f"> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     return pipeline_schedule
 
 

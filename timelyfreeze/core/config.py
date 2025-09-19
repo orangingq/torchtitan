@@ -178,20 +178,6 @@ class TimelyFreezeConfig(JobConfig):
         """ Update the TimelyFreezeConfig from a parallel_dim object.
         This is useful for integrating with existing Trainer configurations.
         """
-        # Update log file/folder names
-        if self.metrics.wandb_name is None:
-            self.metrics.wandb_name = self.metrics.basename
-        self.checkpoint.folder = os.path.join(self.checkpoint.folder, self.metrics.basename)
-        self.comm.save_traces_folder = os.path.join(self.comm.save_traces_folder, self.metrics.basename)
-        self.profiling.save_traces_folder = os.path.join(self.profiling.save_traces_folder, self.metrics.basename)
-        self.profiling.save_memory_snapshot_folder = os.path.join(self.profiling.save_memory_snapshot_folder, self.metrics.basename)
-        self.metrics.save_tb_folder = os.path.join(self.metrics.save_tb_folder, self.metrics.basename)
-
-        # Update Parallelism configs
-        self.parallelism.stages_per_rank = 1 if self.parallelism.pipeline_parallel_schedule.lower() in ["gpipe", "1f1b"] else 2
-        self.parallelism.num_stages = len(trainer.model_parts)
-        self.parallelism.microbatches = trainer.pp_schedule._n_microbatches # self.training.local_batch_size // self.parallelism.pipeline_parallel_microbatch_size
-        self.parallelism.stages_list = list(set(a.stage_index for a in trainer.pp_schedule.pipeline_order[self.comm.local_rank] if a is not None))
 
         self.comm.world_size = trainer.parallel_dims.world_size
         self.comm.global_rank = trainer.parallel_dims.world_mesh.get_local_rank() #TODO
@@ -211,6 +197,14 @@ class TimelyFreezeConfig(JobConfig):
             pp_mesh = trainer.parallel_dims.world_mesh["pp"]
             self.comm.pp, self.comm.pp_rank = pp_mesh.size(), pp_mesh.get_local_rank()
             self.comm.pp_group = pp_mesh.get_group("pp")
+            
+            # Update Parallelism configs
+            self.parallelism.stages_per_rank = 1 if self.parallelism.pipeline_parallel_schedule.lower() in ["gpipe", "1f1b"] else 2
+            self.parallelism.num_stages = len(trainer.model_parts)
+            self.parallelism.microbatches = trainer.pp_schedule._n_microbatches # self.training.local_batch_size // self.parallelism.pipeline_parallel_microbatch_size
+            self.parallelism.stages_list = list(
+                set([self.comm.pp_rank] + [a.stage_index for a in trainer.pp_schedule.pipeline_order[self.comm.local_rank] if a is not None])
+            )
         else:
             self.comm.pp, self.comm.pp_rank = 1, 0
             self.comm.pp_group = dist.group.WORLD
