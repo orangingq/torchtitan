@@ -1,11 +1,12 @@
 #!/usr/bin/bash
-# set -ex
 
 # Define common environment variables
-CREATE_DATE="0820"
 EXPLAIN="Main Table Experiment"
-export WANDB_TAG="${CREATE_DATE}_main"
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+EXPERIMENT_TAG="0921_main"
+TODAY="0921"
+
+export WANDB_TAG="${EXPERIMENT_TAG}"
+export CUDA_VISIBLE_DEVICES=4,5,6,7
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
 export OMP_NUM_THREADS=1
@@ -39,8 +40,8 @@ COMMON_ARGS=(
 for PP_SCHEDULER in gpipe 1f1b interleaved1f1b ; do # 1f1b gpipe interleaved1f1b  interleavedzb zbv 
     for METRIC_TYPE in fullrand6 apf nofreeze ; do 
 
-        OUTPUT_FILE="${LOG_DIR}/${CREATE_DATE}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
-        BASENAME="${CREATE_DATE}_${PP_SCHEDULER}_${METRIC_TYPE}_dm4"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm4"
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--metrics.basename=${BASENAME}"
@@ -54,22 +55,23 @@ for PP_SCHEDULER in gpipe 1f1b interleaved1f1b ; do # 1f1b gpipe interleaved1f1b
             FREEZE_ARGS=(
                 "--freezing.freeze"
                 "--freezing.metric_type=${METRIC_TYPE}"
+                "--freezing.stability_check_freq=50"
+                "--freezing.aggressiveness=0.05"
             )
         fi
 
         # Print the current timestamp and the server name
         {
-            printf "Current Timestamp: %s\n" "$(date)"
-            printf "SERVER: %s (%s),  GPUs: %s\n" "$(hostname)" "$(hostname -I | awk '{print $1}')" "${CUDA_VISIBLE_DEVICES}"
-            printf "Bash Script Start... %s\n" "${EXPLAIN}"
-            printf "  Running with %s x %s ...\n" "${METRIC_TYPE}" "${PP_SCHEDULER}"
-            printf "  Output -> %s\n" "${OUTPUT_FILE}"
-            printf "> torchrun"
-                for arg in "${COMMON_ARGS[@]}"; do printf " %s" "$arg"; done
-                for arg in "${ADDITIONAL_ARGS[@]}"; do printf " %s" "$arg"; done
-                for arg in "${FREEZE_ARGS[@]}"; do printf " %s" "$arg"; done
-            printf "\n"
-        } | tee -a "${OUTPUT_FILE}"
+            echo -e "\n🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
+            echo -e "✔️Current Timestamp: $(date)"
+            echo -e "✔️SERVER: $(hostname) ($(hostname -I | awk '{print $1}')),  GPUs: ${CUDA_VISIBLE_DEVICES}"
+            echo -e "✔️SCRIPT: ${THIS_FILE}"
+            echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
+            echo -e "✔️${EXPLAIN}"
+            echo -e "✔️Running with ${METRIC_TYPE} x ${PP_SCHEDULER} ... "
+            echo -e "☑️> torchrun ${COMMON_ARGS[@]} ${PP_ARGS[@]} ${FREEZE_ARGS[@]}"
+            echo -e "🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
+        } | tee -a ${OUTPUT_FILE}
 
         torchrun "${COMMON_ARGS[@]}" "${ADDITIONAL_ARGS[@]}" "${FREEZE_ARGS[@]}"  2>&1 | tee -a ${OUTPUT_FILE}
 

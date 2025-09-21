@@ -300,7 +300,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
 
     if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-        average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+        average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable])
         if config.metrics.draw_graph:
             draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_frozen_pipeline_schedule.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
@@ -405,7 +405,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
 
     if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule])
-        average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+        average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule for action in rank_actions if action.freezable])
         if config.metrics.draw_graph:
             draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule.svg',
                             pipeline_schedule=pipeline_schedule,
@@ -451,7 +451,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
 #     draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
 #     pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule, global_config)
 #     # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable])
 #     # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     
     
@@ -465,7 +465,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
 #     draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
 #     pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule, global_config)
 #     # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable])
 #     # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     
 #     # Example pipeline schedule 3 : zbv, 4 ranks, 8 microbatches, 2 stages per rank
@@ -479,6 +479,6 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
 #     draw_pipeline_schedule("pipeline_schedule.pdf", pipeline_schedule)
 #     pipeline_schedule_freezing = set_freeze_ratio(pipeline_schedule, global_config)
 #     # batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+#     # average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable])
 #     # draw_pipeline_schedule(f"pipeline_schedule_frozen.svg", pipeline_schedule_freezing, title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     

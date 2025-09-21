@@ -44,7 +44,7 @@ class PipelineParallelism(BaseParallelism):
     num_stages: int = 1 
     """Number of pipeline parallelism stages. It will be recalculated later as: pp * stages_per_rank."""
 
-    stages_list : list[int] = None
+    stages_list : list[int] | None = None
     """List of pipeline stages of this rank. It will be recalculated based on the pipeline schedule."""
 
     @property
@@ -71,6 +71,12 @@ class Freezing:
     
     phase_unit: int = 100
     """Number of steps per phase for freezing."""
+
+    stability_check_freq: int = 10
+    """Frequency of stability checks during training (steps)."""
+
+    aggressiveness: float = 0.1
+    """Aggressiveness of freezing. Higher values lead to more aggressive freezing."""
 
 
 @dataclass
