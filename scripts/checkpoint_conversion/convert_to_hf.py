@@ -18,7 +18,7 @@ from torchtitan.components.checkpoint import ModelWrapper
 def convert_to_hf(input_dir, output_dir, model_name, model_flavor):
     # load model and model args so that we can get the state dict shape
     train_spec = train_spec_module.get_train_spec(model_name)
-    print(train_spec)
+    # print(train_spec)
     model_args = train_spec.model_args[model_flavor]
 
     with torch.device("cpu"):
@@ -73,9 +73,14 @@ if __name__ == "__main__":
     parser.add_argument("--model_flavor", type=str, nargs="?", default="8B")
     args = parser.parse_args()
 
+    import torch.distributed as dist
+    dist.init_process_group(backend="nccl")
+
     convert_to_hf(
         args.input_dir,
         args.output_dir,
         args.model_name,
         args.model_flavor,
     )
+
+    dist.destroy_process_group()
