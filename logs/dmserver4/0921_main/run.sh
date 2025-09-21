@@ -33,7 +33,7 @@ COMMON_ARGS=(
     "--training.local_batch_size=8" 
     "--parallelism.pipeline_parallel_microbatch_size=1" # num_microbatches = local_batch_size // microbatch_size
     "--training.seq_len=1024"
-    "--training.steps=10000"
+    "--training.steps=500"
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 

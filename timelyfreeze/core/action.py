@@ -89,17 +89,17 @@ class ActionWithLog(Action):
             return self.type == other.type and self.rank == other.rank and self.microbatch == other.microbatch and self.stage == other.stage
         else:
             return False
-    def to_tensor(self, with_log_time:bool=False, with_median:bool=False, with_mean:bool=False)->torch.Tensor:
+    def to_tensor(self, with_log_time:bool=False, with_median:bool=False, with_mean:bool=False, log_window=None)->torch.Tensor:
         if not with_log_time and not with_median and not with_mean:
             return super().to_tensor()
         
         list_repr = super().to_tensor().tolist() # convert to list
         if with_log_time:
-            list_repr.extend(self.log_time)
+            list_repr.extend(self.log_time if log_window is None else self.log_time[-log_window:])
         if with_median:
-            list_repr.append(self.get_log_time_median)
+            list_repr.append(self.get_log_time_median if log_window is None else np.median(self.log_time[-log_window:]))
         if with_mean:
-            list_repr.append(self.get_log_time_mean)
+            list_repr.append(self.get_log_time_mean if log_window is None else np.mean(self.log_time[-log_window:]))
         # convert to tensor
         return torch.tensor(list_repr, dtype=torch.float16)
 

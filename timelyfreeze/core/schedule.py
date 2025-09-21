@@ -12,7 +12,7 @@ from .action import Action, ActionType, ActionWithTime, ActionWithLog, ActionWit
 from .util import draw_pipeline_schedule, get_abs_path
 from .config import TimelyFreezeConfig, Comm
 
-def gather_pipeline_schedule(log_schedule:List[ActionWithLog], CommConfig: Comm)-> List[List[ActionWithTime]]:
+def gather_pipeline_schedule(log_schedule:List[ActionWithLog], CommConfig: Comm, log_window: int|None = None)-> List[List[ActionWithTime]]:
     ''' 
     Gather the pipeline schedule from all ranks and create a pipeline schedule with freezing actions.
     If the rank is not the last stage, it will return an empty list.
@@ -27,7 +27,7 @@ def gather_pipeline_schedule(log_schedule:List[ActionWithLog], CommConfig: Comm)
     # create a tensor to send/gather from all ranks: (schedule info) x (num_actions)
     schedule_info = len(log_schedule[0].to_tensor(with_median=True)) # 5
     data_to_gather = torch.zeros(schedule_info, max(num_actions_all))
-    data_to_gather[:, :num_actions] = torch.stack([action.to_tensor(with_median=True) for action in log_schedule]).T
+    data_to_gather[:, :num_actions] = torch.stack([action.to_tensor(with_median=True, log_window=log_window) for action in log_schedule]).T
     data_gather_list = [torch.zeros_like(data_to_gather, device=f'cuda:{CommConfig.local_rank}') for _ in range(CommConfig.pp)]
     dist.all_gather(tensor_list=data_gather_list, tensor=data_to_gather.to(CommConfig.local_rank), group=CommConfig.pp_group)
     data_gather_list = torch.stack(data_gather_list).cpu() # [num_pipelines, schedule, num_actions]

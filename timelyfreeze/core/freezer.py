@@ -99,6 +99,7 @@ class FullyRandomFreezer_v6(_Freezer):
         self.freeze_adjust_freq = self.phase_unit
         self.rand_noise_possibility = 0.1
         self.progressive_freezing_start_step = None
+        self.pipeline_schedule:List[List[ActionWithFreezing]] = [] # the pipeline schedule, which is a list of list of ActionWithFreezing
         return
 
     def freeze_update(self):
@@ -158,10 +159,10 @@ class FullyRandomFreezer_v6(_Freezer):
                 self.rand_noise_possibility = 0
             # 2) Set min_duration of each action block
             elif not self.monitored_lb and self.monitoring_lb \
-                and len(self.logger.log_schedule[0].log_time) > self.monitoring_lb_start + 20 :
+                and len(self.logger.rank_schedule[0].log_time) > self.monitoring_lb_start + 20 :
                 # create lowerbound pipeline schedule
-                log_window = len(self.logger.log_schedule[-1].log_time) - self.monitoring_lb_start
-                pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(self.logger.log_schedule, log_window=log_window)
+                log_window = len(self.logger.rank_schedule[-1].log_time) - self.monitoring_lb_start
+                pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm, log_window=log_window)
 
                 # set the min_duration of each action block based on the lowerbound log time
                 for ar_lb, actions_per_rank in zip(pipeline_schedule_lb, self.pipeline_schedule):
@@ -181,8 +182,8 @@ class FullyRandomFreezer_v6(_Freezer):
                 return
             else:
                 return # Do nothing
-        # Stable Freezing Phase - periodically adjust the freeze ratio 
-        elif self.step_cnt % self.freeze_adjust_freq == 0: 
+        # Stable Freezing Phase - periodically adjust the freeze ratio
+        elif curr_step % self.freeze_adjust_freq == 0:
             monitored_values_dict = {}
             for a, la in zip(self.pipeline_schedule[self.pp_rank], self.logger.rank_schedule):
                 if not a.freezable:
@@ -319,17 +320,23 @@ class APFFreezerWithTimelyFreeze(_Freezer):
         '''
         super().__init__(model_parts, config)
 
-        # Freezing Phases
-        self.progressive_freezing_phase = self.monitoring_phase + 3 # (self.monitoring_phase + 3) if 'debug' in args.basename else (self.monitoring_phase + args.warmup_epochs)
+        self.progressive_freezing_phase = self.monitoring_phase + self.config.lr_scheduler.warmup_steps 
         '''Progressive Freezing Phase: gradually increase the freezing_params_num to the expected number.'''
-        self.monitored_ub = False # True if monitored the upperbound of batch time. set to True at the first stability check freq after monitoring phase. 
-        self.monitoring_lb = False # True if currently monitoring the lowerbound of batch time, i.e., freezing ratio = 1.0 for all actions.
-        self.monitored_lb = False # True if monitored the lowerbound of batch time, i.e., freezing ratio = 1.0 for all actions.
-        self.monitoring_lb_start = None # starting step of monitoring lowerbound which is used in second monitoring phase
+        self.monitored_ub = False
+        '''True if monitored the upperbound of batch time. set to True at the first stability check freq after monitoring phase.'''
+        self.monitoring_lb = False 
+        '''True if currently monitoring the lowerbound of batch time, i.e., freezing ratio = 1.0 for all actions.'''
+        self.monitored_lb = False
+        '''True if monitored the lowerbound of batch time, i.e., freezing ratio = 1.0 for all actions.'''
+        self.monitoring_lb_start = None
+        '''Starting step of monitoring lowerbound which is used in second monitoring phase.'''
+
+        # Freezing Phases
         self.freeze_adjust_freq = self.phase_unit
         self.aggressiveness = self.config.freezing.aggressiveness # 0~1, default: 0.1
         self.progressive_freezing_start_step = None
-
+        self.pipeline_schedule:List[List[ActionWithFreezing]] = [] # the pipeline schedule, which is a list of list of ActionWithFreezing
+        
         # freezing metrics
         self.alpha = 0.99 # parameter for exponential moving average (paper: 0.99)
         self.last_param = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()} # cumulative update
@@ -363,6 +370,7 @@ class APFFreezerWithTimelyFreeze(_Freezer):
     
     def _calculate_freezing_metric(self):
         '''Calculate the effective perturbation metric for parameters, and set the actual list of freezing params.'''
+        curr_step :int = self.logger.step_cnt
         for stage_idx, stage in self.stages.items():
             for i, (name, param) in enumerate(stage.named_parameters()):
                 if not param.grad is None:
@@ -384,22 +392,22 @@ class APFFreezerWithTimelyFreeze(_Freezer):
                         self.freezing_period[name] += self.stability_check_freq
                     else:
                         self.freezing_period[name] = ((self.freezing_period[name]/2)//self.stability_check_freq)*self.stability_check_freq
-                    self.frozen_due[name] = self.step_cnt + self.freezing_period[name] # update the freezing deadline
+                    self.frozen_due[name] = curr_step + self.freezing_period[name] # update the freezing deadline
 
                 # update the freezing status
-                self.freeze_cand[stage_idx][name] = self.step_cnt < self.frozen_due[name]
+                self.freeze_cand[stage_idx][name] = curr_step < self.frozen_due[name]
 
-        if self.epoch_cnt <= self.monitoring_phase:
+        if curr_step <= self.monitoring_phase:
             return # do not freeze until Progressive Freezing Phase
         elif self.monitoring_lb:
-            for action in pipeline_logger.pipeline_schedule[self.pp_rank]:
+            for action in self.pipeline_schedule[self.pp_rank]:
                 action.rand_noise = 0
                 action.freezing_list = [True] * action.num_params
                 if action.stage == 0:
                     action.freezing_list[0] = False # do not freeze the first layer to consistently compute the input gradient
             return
         else:
-            for action in pipeline_logger.pipeline_schedule[self.pp_rank]:
+            for action in self.pipeline_schedule[self.pp_rank]:
                 freezable_num = action.num_params # - len(never_freeze[action.stage])
                 freeze_cand_num = int(min(freezable_num, action.num_params*self.aggressiveness + sum([v for v in self.freeze_cand[action.stage].values()])))
                 actual_num_freeze = min(freeze_cand_num, int(np.round(action.num_params * action.actual_freeze_ratio)))
@@ -424,89 +432,91 @@ class APFFreezerWithTimelyFreeze(_Freezer):
 
     def _set_expected_freeze_ratio(self):
         '''Set the expected freeze ratio based on the backward time.'''
+        curr_step :int = self.logger.step_cnt
         # 0) Warmup + Monitoring Phase
-        if self.epoch_cnt <= self.monitoring_phase: 
+        if curr_step <= self.monitoring_phase: 
             # during the monitoring phase, do not freeze the model
-            # log_time(f"[Step {self.step_cnt}] Monitoring Upperbound", master_only=True)
+            # log_time(f"[Step {curr_step}] Monitoring Upperbound", master_only=True)
             self.monitored_ub = False
             return
         
         # 1) Monitor the upperbound of batch time
         elif not self.monitored_ub: # first stability check freq after monitoring phase
-            logger.info(f"[Step {self.step_cnt}] Setting Upperbound")
+            logger.info(f"[Step {curr_step}] Setting Upperbound")
 
             # Set the stage module for each action in the pipeline schedule
             pipeline_schedule :List[List[ActionWithFreezing]] = set_freeze_ratio(gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm), self.config)
             for a in pipeline_schedule[self.pp_rank]:
                 a.module = self.stages[a.stage]
                 a.freeze_flag = True
-            pipeline_logger.pipeline_schedule = pipeline_schedule
-            pipeline_logger.action_dict = {(action.type, action.rank, action.microbatch, action.stage): action \
+            self.pipeline_schedule = pipeline_schedule
+            self.logger.action_dict = {(action.type, action.rank, action.microbatch, action.stage): action \
                                                 for action in pipeline_schedule[self.pp_rank]}
 
             # Finish setting the upperbound of batch time
             self.monitored_ub = True
-            self.progressive_freezing_start_step = self.step_cnt
+            self.progressive_freezing_start_step = curr_step
 
         # 2) Monitor the lowerbound of batch time
         elif not self.monitored_lb and not self.monitoring_lb:
-            logger.info(f"[Step {self.step_cnt}] Monitoring Lowerbound")
-            for a in pipeline_logger.pipeline_schedule[self.pp_rank]:
+            logger.info(f"[Step {curr_step}] Monitoring Lowerbound")
+            for a in self.pipeline_schedule[self.pp_rank]:
                 a.progressive_freezing = 1.0
                 a.expected_freeze_ratio = 1.0 if a.stage > 0 else 1.0 - 1/a.num_params # don't freeze the first layer, to consistently maintain computing the input gradient
 
             self.monitoring_lb = True
-            self.monitoring_lb_start = pipeline_logger.step_cnt
+            self.monitoring_lb_start = self.logger.step_cnt
 
         # 3) Set min_duration of each action block
         elif not self.monitored_lb and self.monitoring_lb:
-            if pipeline_logger.step_cnt <= self.monitoring_lb_start + 30 :
+            if curr_step <= self.monitoring_lb_start + 30 :
                 return # wait for at least 30 steps
             else:
-                logger.info(f"[Step {self.step_cnt}] Setting Lowerbound")
+                logger.info(f"[Step {curr_step}] Setting Lowerbound")
                 # create lowerbound pipeline schedule
-                log_window = len(pipeline_logger.log_schedule[-1].log_time) - self.monitoring_lb_start
-                pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(pipeline_logger.log_schedule, log_window=log_window)
+                log_window = len(self.logger.rank_schedule[-1].log_time) - self.monitoring_lb_start
+                pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm, log_window=log_window)
 
                 # set the min_duration of each action block based on the lowerbound log time
-                for ar_lb, actions_per_rank in zip(pipeline_schedule_lb, pipeline_logger.pipeline_schedule):
+                for ar_lb, actions_per_rank in zip(pipeline_schedule_lb, self.pipeline_schedule):
                     for a_lb, a in zip(ar_lb, actions_per_rank):
                         if a.freezable:
                             a.min_duration = a_lb.duration
                 
                 # Set the expected freeze ratios
-                pipeline_logger.pipeline_schedule = set_freeze_ratio(pipeline_logger.pipeline_schedule, self.config)
+                self.pipeline_schedule = set_freeze_ratio(self.pipeline_schedule, self.config)
                 
                 self.monitored_lb = True
                 self.monitoring_lb = False
 
         # 4) Stable Freezing Phase - periodically adjust the freeze ratio 
-        elif self.step_cnt % self.freeze_adjust_freq == 0: 
-            monitored_values_dict = {a.stage: [] for a in pipeline_logger.pipeline_schedule[self.pp_rank] if a.freezable}
-            for a, la in zip(pipeline_logger.pipeline_schedule[self.pp_rank], pipeline_logger.log_schedule):
+        elif curr_step % self.freeze_adjust_freq == 0: 
+            monitored_values_dict = {a.stage: [] for a in self.pipeline_schedule[self.pp_rank] if a.freezable}
+            for a, la in zip(self.pipeline_schedule[self.pp_rank], self.logger.rank_schedule):
                 if not a.freezable:
                     continue
                 times = la.log_time[self.progressive_freezing_start_step:]
                 afrs = a.freeze_ratio_history[:len(times)]
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times)] 
-            pipeline_logger.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
-            logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in pipeline_logger.pipeline_schedule[self.pp_rank] if action.freezable])}")
+            self.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
+            logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.pp_rank] if action.freezable])}")
             self.freeze_adjust_freq = self.freeze_adjust_freq * 2 # stop adjusting the freeze ratio
             self.aggressiveness = min(self.aggressiveness * 2, 1.0)
             return
 
     def _log_freeze_ratio(self):
         '''Log the previous frozen ratio based on the freezing status.'''
-        if self.step_cnt % self.stability_check_freq != 0:
+        curr_step :int = self.logger.step_cnt
+        if curr_step % self.stability_check_freq != 0:
             return
 
         for stage_idx, stage in self.stages.items(): 
-            if self.monitoring_phase < self.epoch_cnt and not pipeline_logger.pipeline_schedule is None:
+            if self.monitoring_phase < curr_step and len(self.pipeline_schedule) > 0:
                 for name, _ in stage.named_parameters():
-                    self.paramwise_frozen_count[stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in pipeline_logger.pipeline_schedule[self.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
-                    self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in pipeline_logger.pipeline_schedule[self.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
 
-                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in pipeline_logger.pipeline_schedule[self.pp_rank] if a.stage == stage_idx and a.freezable]))
+                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.pp_rank] if a.stage == stage_idx and a.freezable]))
                 self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
             else:
                 self.freeze_ratio_history[stage_idx].append(0)
