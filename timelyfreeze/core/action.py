@@ -186,6 +186,11 @@ class ActionWithFreezing(ActionWithTime):
         return
     
     @property
+    def freezable(self):
+        '''Whether this action block type is freezable or not regardless of the freeze flag or freeze ratio.'''
+        return self.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]
+
+    @property
     def min_duration(self):
         '''Return the minimum duration of the action.'''
         return self._min_duration
@@ -194,7 +199,7 @@ class ActionWithFreezing(ActionWithTime):
     @min_duration.setter
     def min_duration(self, min_duration:float):
         '''Set the minimum duration of the action.'''
-        if self.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]:
+        if self.freezable:
             self._min_duration = min(max(0, min_duration), self.max_duration)
         return
 
@@ -238,7 +243,7 @@ class ActionWithFreezing(ActionWithTime):
     @expected_freeze_ratio.setter
     def expected_freeze_ratio(self, ratio:float):
         '''Set the expected freeze ratio.'''
-        if self.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]:
+        if self.freezable:
             self._expected_freeze_ratio = min(1, max(0, ratio)) # clamp the ratio between 0 and 1
         else:
             self._expected_freeze_ratio = 0.0
@@ -272,8 +277,7 @@ class ActionWithFreezing(ActionWithTime):
         Set the freeze flag.
         Freeze flag is set to True only if the action type is BACKWARD_WEIGHT or FULL_BACKWARD, and the module and num_params are set.
         '''
-        freeze_flag = freeze_flag \
-                    and (self.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]) \
+        freeze_flag = freeze_flag and self.freezable \
                     and (self.module is not None) and (self.num_params is not None)  
         if freeze_flag and len(self.paramwise_frozen_count) == 0:
             self.paramwise_frozen_count = {name: [0, 0] for name, _ in self.module.named_parameters()} # reset the paramwise frozen count
