@@ -566,7 +566,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             data_iterator = self.batch_generator(self.dataloader)
             while self.step < job_config.training.steps:
                 self.step += 1
-                logger.info(f"Step [{self.step}]")
+                # logger.info(f"Step [{self.step}]")
                 self.gc_handler.run(self.step)
                 try:
                     self.train_step(data_iterator)

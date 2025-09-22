@@ -186,8 +186,10 @@ class TimelyFreezeConfig(JobConfig):
         """
 
         self.comm.world_size = trainer.parallel_dims.world_size
-        self.comm.global_rank = trainer.parallel_dims.world_mesh.get_local_rank() #TODO
-        self.comm.local_rank = trainer.parallel_dims.world_mesh.get_local_rank()
+        mesh = trainer.parallel_dims.world_mesh
+        coord = mesh.get_coordinate()
+        self.comm.global_rank = mesh.mesh[*coord].item()
+        self.comm.local_rank = mesh.mesh[*coord].item() # TODO: Assume a single node 
         
         # Data Parallelism
         if trainer.parallel_dims.dp_enabled:
@@ -209,7 +211,7 @@ class TimelyFreezeConfig(JobConfig):
             self.parallelism.num_stages = len(trainer.model_parts)
             self.parallelism.microbatches = trainer.pp_schedule._n_microbatches # self.training.local_batch_size // self.parallelism.pipeline_parallel_microbatch_size
             self.parallelism.stages_list = list(
-                set([self.comm.pp_rank] + [a.stage_index for a in trainer.pp_schedule.pipeline_order[self.comm.local_rank] if a is not None])
+                set([self.comm.pp_rank] + [a.stage_index for a in trainer.pp_schedule.pipeline_order[self.comm.pp_rank] if a is not None])
             )
         else:
             self.comm.pp, self.comm.pp_rank = 1, 0
