@@ -13,6 +13,20 @@ scp -P 41112 -i ~/.ssh/id_ed25519 -r assets/tokenizer root@38.128.232.57:/worksp
 
 # debug하려면 vscode에서 debug extension 깔고 launch.json 설정
 
+# Llama 3.1 8B 모델 다운로드
+huggingface-cli login # 토큰은 server4/skipp에
+huggingface-cli download meta-llama/Llama-3.1-8B --include "original/*" --local-dir /workspace/torchtitan_data/base_model/Llama-3.1-8B
+
+# DCP 포맷으로 변환
+python ./scripts/checkpoint_conversion/convert_from_llama.py /workspace/torchtitan_data/base_model/Llama-3.1-8B/original /workspace/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
 
 # 실제 돌릴 때는
 nohup bash logs/runpod/0922_main/run.sh > logs/runpod/0922_main/nohup.out 2>&1 &
+
+# 학습 중 로그를 terminal에서 보고 싶을 때:
+tail -f logs/runpod/0922_main/nohup.out
+
+# 끌 때는
+ps -ef | grep runpod | grep .sh     # bash file 전체의 pid 확인
+ps -ef | grep timelyfreeze.train    # 해당 run의 pid 확인
+kill -9 <pid>
