@@ -1,14 +1,14 @@
+git clone https://github.com/orangingq/torchtitan # 비번은 카톡에
+cd torchtitan 
+
+# 온갖 설치
 pip install torchtitan
-
 pip3 install --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128 --force-reinstall
-
-git clone https://github.com/orangingq/torchtitan
-# 비번은 카톡에
-
-cd torchtitan
 pip install -r requirements.txt
+apt-get update # 무시 가능
+apt-get install -y pciutils # 무시 가능
 
-# server 4에서
+# server 4에서 tokenizer 보내기
 scp -P 41112 -i ~/.ssh/id_ed25519 -r assets/tokenizer root@38.128.232.57:/workspace/torchtitan/assets/
 
 # debug하려면 vscode에서 debug extension 깔고 launch.json 설정
@@ -21,10 +21,10 @@ huggingface-cli download meta-llama/Llama-3.1-8B --include "original/*" --local-
 python ./scripts/checkpoint_conversion/convert_from_llama.py /workspace/torchtitan_data/base_model/Llama-3.1-8B/original /workspace/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
 
 # 실제 돌릴 때는
-nohup bash logs/runpod/0922_main/run.sh > logs/runpod/0922_main/nohup.out 2>&1 &
+nohup bash logs/runpod/0922_main/run.sh > logs/runpod/0922_main/nohup.ans 2>&1 &
 
 # 학습 중 로그를 terminal에서 보고 싶을 때:
-tail -f logs/runpod/0922_main/nohup.out
+tail -f logs/runpod/0922_main/nohup.ans
 
 # 끌 때는
 ps -ef | grep runpod | grep .sh     # bash file 전체의 pid 확인

@@ -566,6 +566,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             data_iterator = self.batch_generator(self.dataloader)
             while self.step < job_config.training.steps:
                 self.step += 1
+                logger.info(f"Step [{self.step}]")
                 self.gc_handler.run(self.step)
                 try:
                     self.train_step(data_iterator)
@@ -694,15 +695,15 @@ if __name__ == "__main__":
     config.profiling.save_memory_snapshot_folder = os.path.join(config.profiling.save_memory_snapshot_folder, config.metrics.basename)
     config.metrics.save_tb_folder = os.path.join(config.metrics.save_tb_folder, config.metrics.basename)
 
-    # Configure logging file
-    if config.metrics.log_file:
-        logger.handlers.clear()
-        fh = logging.FileHandler(filename=config.metrics.log_file, mode="a")
-        fh.setLevel(logging.INFO)
-        fh.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
-        logger.addHandler(fh)
-        init_logger()
-        logger.propagate = False
+    # # Configure logging file
+    # if config.metrics.log_file:
+    #     logger.handlers.clear()
+    #     fh = logging.FileHandler(filename=config.metrics.log_file, mode="a")
+    #     fh.setLevel(logging.INFO)
+    #     fh.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
+    #     logger.addHandler(fh)
+    #     init_logger()
+    #     logger.propagate = False
 
     trainer: Optional[TrainerWithFreezer] = None
 
