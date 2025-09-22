@@ -8,8 +8,10 @@ TODAY="0922"
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
-# export NCCL_P2P_DISABLE=1 # Not using NVLink
-# export OMP_NUM_THREADS=1
+export NCCL_P2P_DISABLE=0 
+export NCCL_IB_DISABLE=1 # no NVLink
+export NCCL_LAUNCH_MODE=GROUP
+export OMP_NUM_THREADS=1
 export LOG_RANK=0,3
 export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 export TORCHFT_LIGHTHOUSE="http://localhost:29510"
@@ -40,7 +42,7 @@ COMMON_ARGS=(
 for PP_SCHEDULER in gpipe 1f1b interleaved1f1b ; do # 1f1b gpipe interleaved1f1b  interleavedzb zbv 
     for METRIC_TYPE in fullrand6 apf nofreeze timelyapf ; do 
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.ans" # to support ANSI color conversion
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm4"
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
