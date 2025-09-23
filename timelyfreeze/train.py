@@ -79,7 +79,6 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         torch._C._log_api_usage_once("torchtitan.train")
 
         self.job_config = job_config
-
         logger.info(f"Starting job: {job_config.job.description}")
 
         if job_config.experimental.custom_import:
@@ -155,9 +154,10 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         # set the model args from training job configs
         model_args.update_from_config(job_config)
 
-        logger.info(
-            f"Building {self.train_spec.name} {job_config.model.flavor} with {model_args}"
-        )
+        if torch.distributed.get_rank() == 0:
+            logger.info(
+                f"Building {self.train_spec.name} {job_config.model.flavor} with {model_args}"
+            )
         with torch.device("meta"):
             model = self.train_spec.model_cls(model_args)
 
@@ -182,10 +182,11 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             self.metrics_processor.num_flops_per_token,
         ) = model_args.get_nparams_and_flops(model, job_config.training.seq_len)
 
-        logger.info(
-            f"{color.blue}Model {self.train_spec.name} {job_config.model.flavor} "
-            f"{color.red}size: {model_param_count:,} total parameters{color.reset}"
-        )
+        if torch.distributed.get_rank() == 0:
+            logger.info(
+                f"{color.blue}Model {self.train_spec.name} {job_config.model.flavor} "
+                f"{color.red}size: {model_param_count:,} total parameters{color.reset}"
+            )
 
         # move sharded model to CPU/GPU and initialize weights via DTensor
         if job_config.checkpoint.create_seed_checkpoint:
@@ -367,15 +368,16 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         job_config.update_config(self)  # CSH - this code requires trainer.model_parts, trainer.pp_schedule and trainer.parallel_dims
         self.freezer = get_freezer(self.model_parts, job_config)
 
-        logger.info(
-            "Trainer is initialized with "
-            f"local batch size {job_config.training.local_batch_size}, "
-            f"global batch size {global_batch_size}, "
-            f"gradient accumulation steps {self.gradient_accumulation_steps}, "
-            f"sequence length {job_config.training.seq_len}, "
-            f"total steps {job_config.training.steps} "
-            f"(warmup {job_config.lr_scheduler.warmup_steps})"
-        )
+        if torch.distributed.get_rank() == 0:
+            logger.info(
+                "Trainer is initialized with "
+                f"local batch size {job_config.training.local_batch_size}, "
+                f"global batch size {global_batch_size}, "
+                f"gradient accumulation steps {self.gradient_accumulation_steps}, "
+                f"sequence length {job_config.training.seq_len}, "
+                f"total steps {job_config.training.steps} "
+                f"(warmup {job_config.lr_scheduler.warmup_steps})"
+            )
 
     def batch_generator(
         self, data_iterable: Iterable[tuple[dict[str, torch.Tensor], torch.Tensor]]
@@ -536,7 +538,8 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         job_config = self.job_config
 
         self.checkpointer.load(step=job_config.checkpoint.load_step)
-        logger.info(f"Training starts at step {self.step + 1}")
+        if torch.distributed.get_rank() == 0:
+            logger.info(f"Training starts at step {self.step + 1}")
 
         leaf_folder = (
             ""
@@ -566,7 +569,6 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             data_iterator = self.batch_generator(self.dataloader)
             while self.step < job_config.training.steps:
                 self.step += 1
-                # logger.info(f"Step [{self.step}]")
                 self.gc_handler.run(self.step)
                 try:
                     self.train_step(data_iterator)
@@ -609,7 +611,8 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             logger.info("Sleeping 2 seconds for other ranks to complete")
             time.sleep(2)
 
-        logger.info("Training completed")
+        if torch.distributed.get_rank() == 0:
+            logger.info("Training completed")
 
     def state_dict(self) -> dict[str, Any]:
         return {"step": self.step, "ntokens_seen": self.ntokens_seen}
@@ -637,7 +640,7 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
     pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(freezer.logger.rank_schedule.schedule, config.comm))
     if config.comm.is_last_stage:
         # 1) Draw the realistic pipeline schedule
-        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}.svg',
+        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
                             pipeline_schedule=pipeline_schedule,
                             config=config,
                             # title=f"Realistic Pipeline Schedule", 
@@ -652,7 +655,7 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
                                                 bwd_time=[2*fwd_mean] * config.parallelism.num_stages,
                                                 bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
                                                 bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
-            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_thry_{filename_suffix}.svg',
+            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
                             pipeline_schedule=pipeline_schedule,
                             config=config,
                             # title=f"Theoretical Pipeline Schedule", 
