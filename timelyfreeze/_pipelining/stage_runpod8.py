@@ -18,7 +18,7 @@ from torch.utils._pytree import tree_map_only
 from ._backward import stage_backward, stage_backward_input, stage_backward_weight
 from ._debug import map_debug_info
 from ._utils import flatten_args, PipeInfo, validate_tensors_metadata
-from timelyfreeze.core.log import pipeline_logger
+from timelyfreeze.core.logger import pipeline_logger
 
 
 __all__ = [
@@ -687,6 +687,7 @@ class _PipelineStageBase(ABC):
           through activation transmission.
         - `kwargs` can be passed to all stages via respective `step` calls.
         """
+        from timelyfreeze.core.logger import pipeline_logger # CSH - to log the forward GPU time
 
         if self.is_first:
             # First stage doesn't need to receive anything
@@ -762,6 +763,7 @@ class _PipelineStageBase(ABC):
         last_backward is controlled by the schedule and signals synchronization of gradients across DP groups
         after the last backward.
         """
+        from timelyfreeze.core.logger import pipeline_logger # CSH - to log the backward GPU time
         # skip backward computation if backward is not enabled
         if not self.has_backward:
             return
@@ -858,7 +860,8 @@ class _PipelineStageBase(ABC):
         # skip backward computation if backward is not enabled
         if not self.has_backward:
             return
-
+        
+        from timelyfreeze.core.logger import pipeline_logger # CSH - to log the backward GPU time
         assert bwd_chunk_id in self.dw_runner, (
             f"{self.log_prefix} Attempted to run backward_weight_one_chunk for chunk {bwd_chunk_id}"
             " without first calling `backward_one_chunk(full_backward=False)`"
