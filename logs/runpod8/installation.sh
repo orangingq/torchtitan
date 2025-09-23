@@ -8,6 +8,7 @@ pip install -r requirements.txt
 apt-get update # 무시 가능
 apt-get install -y pciutils # 무시 가능
 apt-get install rsync tmux 
+# pipelining/stage 에다가 pipeline_logger 넣기
 
 # wandb login
 wandb login # 키는 wandb 사이트에서

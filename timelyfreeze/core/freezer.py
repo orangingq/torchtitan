@@ -201,7 +201,7 @@ class FullyRandomFreezer_v6(_Freezer):
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times)] #  if (a.stage>0 or afr<=0.99)
             self.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
             logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{a.microbatch}] {a.actual_freeze_ratio:.2f}/{a.expected_freeze_ratio:.2f}' for a in self.pipeline_schedule[self.pp_rank] if a.freezable])}")
-            self.freeze_adjust_freq = self.freeze_adjust_freq * 2 # stop adjusting the freeze ratio
+            self.freeze_adjust_freq = 999999999 # self.freeze_adjust_freq * 2 # stop adjusting the freeze ratio
             self.rand_noise_possibility = self.rand_noise_possibility * 0.6
             return
 
