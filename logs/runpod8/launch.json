@@ -13,7 +13,7 @@
                 "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
                 "TORCHFT_LIGHTHOUSE": "http://localhost:29510",
                 "PYTHONPATH": "$(workspaceFolder):/workspace/torchtitan:$PYTHONPATH",
-                "LOG_RANK": "0,6,7"
+                "LOG_RANK": "0,1,2,3,4,5,6,7"
             },
             "program": "/usr/local/bin/torchrun",
             "cwd": "/workspace/torchtitan",
@@ -29,13 +29,13 @@
                 "--tee=3",
                 "-m",
                 "timelyfreeze.train",
-                "--job.config_file=./timelyfreeze/train_configs/pp4_llama3_1b_apf.toml",
+                "--job.config_file=./timelyfreeze/train_configs/dp2pp4_llama3_1b_apf.toml",
                 "--metrics.basename=llama3.2_1b_timelyapf_debug",
                 "--metrics.log_file=hello.log",
                 "--freezing.freeze",
                 "--freezing.metric_type=fullrand6",
-                "--parallelism.pipeline_parallel_size=4",
-                "--parallelism.data_parallel_shard_degree=2",
+                // "--parallelism.pipeline_parallel_size=4",
+                // "--parallelism.data_parallel_shard_degree=2",
             ],
             "console": "integratedTerminal"
         },
