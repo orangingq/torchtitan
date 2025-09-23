@@ -209,7 +209,8 @@ def maybe_enable_amp(
 ) -> Generator[None, None, None]:
     if parallel_dims.fsdp_enabled:
         # FSDP handles mixed precision internally
-        logger.info("Mixed precision training is handled by fully_shard")
+        if torch.distributed.get_rank() == 0:
+            logger.info("Mixed precision training is handled by fully_shard")
         return contextlib.nullcontext()
     else:
         if parallel_dims.tp_enabled or parallel_dims.pp_enabled:
