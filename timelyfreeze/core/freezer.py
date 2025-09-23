@@ -84,7 +84,7 @@ class FullyRandomFreezer_v6(_Freezer):
         '''
         super().__init__(model_parts, config)
 
-        self.progressive_freezing_phase = self.monitoring_phase + self.config.lr_scheduler.warmup_steps 
+        self.progressive_freezing_phase = self.monitoring_phase + max(self.config.lr_scheduler.warmup_steps, self.phase_unit, 3*self.stability_check_freq)
         '''Progressive Freezing Phase: gradually increase the freezing_params_num to the expected number.'''
 
         self.monitored_ub = False
@@ -127,6 +127,8 @@ class FullyRandomFreezer_v6(_Freezer):
             return
         elif curr_step < self.progressive_freezing_phase:
             if not self.monitored_ub: # first stability check freq after monitoring phase
+                if torch.distributed.get_rank() == 0:
+                    logger.info(f"[Step {curr_step}] Setting Upperbound")
                 pipeline_schedule :List[List[ActionWithFreezing]] = set_freeze_ratio(gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm), self.config)
 
                 # Set the stage module for each action in the pipeline schedule
@@ -148,6 +150,8 @@ class FullyRandomFreezer_v6(_Freezer):
         elif curr_step == self.progressive_freezing_phase: 
             # 1) Monitor the lowerbound of batch time
             if not self.monitoring_lb and not self.monitored_lb: # start lowerbound monitoring phase
+                if torch.distributed.get_rank() == 0:
+                    logger.info(f"[Step {curr_step}] Monitoring Lowerbound")
                 for a in self.pipeline_schedule[self.pp_rank]:
                     a.progressive_freezing = 1.0
                     if a.stage == self.config.parallelism.num_stages - 1: # last stage
@@ -160,6 +164,8 @@ class FullyRandomFreezer_v6(_Freezer):
             # 2) Set min_duration of each action block
             elif not self.monitored_lb and self.monitoring_lb \
                 and len(self.logger.rank_schedule[0].log_time) > self.monitoring_lb_start + 20 :
+                if torch.distributed.get_rank() == 0:
+                    logger.info(f"[Step {curr_step}] Setting Lowerbound")
                 # create lowerbound pipeline schedule
                 log_window = len(self.logger.rank_schedule[-1].log_time) - self.monitoring_lb_start
                 pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm, log_window=log_window)
@@ -442,7 +448,8 @@ class APFFreezerWithTimelyFreeze(_Freezer):
         
         # 1) Monitor the upperbound of batch time
         elif not self.monitored_ub: # first stability check freq after monitoring phase
-            logger.info(f"[Step {curr_step}] Setting Upperbound")
+            if torch.distributed.get_rank() == 0:
+                logger.info(f"[Step {curr_step}] Setting Upperbound")
 
             # Set the stage module for each action in the pipeline schedule
             pipeline_schedule :List[List[ActionWithFreezing]] = set_freeze_ratio(gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm), self.config)
@@ -459,7 +466,8 @@ class APFFreezerWithTimelyFreeze(_Freezer):
 
         # 2) Monitor the lowerbound of batch time
         elif not self.monitored_lb and not self.monitoring_lb:
-            logger.info(f"[Step {curr_step}] Monitoring Lowerbound")
+            if torch.distributed.get_rank() == 0:
+                logger.info(f"[Step {curr_step}] Monitoring Lowerbound")
             for a in self.pipeline_schedule[self.pp_rank]:
                 a.progressive_freezing = 1.0
                 a.expected_freeze_ratio = 1.0 if a.stage > 0 else 1.0 - 1/a.num_params # don't freeze the first layer, to consistently maintain computing the input gradient
@@ -472,7 +480,8 @@ class APFFreezerWithTimelyFreeze(_Freezer):
             if curr_step <= self.monitoring_lb_start + 30 :
                 return # wait for at least 30 steps
             else:
-                logger.info(f"[Step {curr_step}] Setting Lowerbound")
+                if torch.distributed.get_rank() == 0:
+                    logger.info(f"[Step {curr_step}] Setting Lowerbound")
                 # create lowerbound pipeline schedule
                 log_window = len(self.logger.rank_schedule[-1].log_time) - self.monitoring_lb_start
                 pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(self.logger.rank_schedule.schedule, self.config.comm, log_window=log_window)
