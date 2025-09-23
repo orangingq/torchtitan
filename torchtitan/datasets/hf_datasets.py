@@ -89,7 +89,8 @@ def _validate_dataset(
 
     config = DATASETS[dataset_name]
     path = dataset_path or config.path
-    logger.info(f"Preparing {dataset_name} dataset from {path}")
+    if torch.distributed.get_rank() == 0:
+        logger.info(f"Preparing {dataset_name} dataset from {path}")
     return path, config.loader, config.text_processor
 
 

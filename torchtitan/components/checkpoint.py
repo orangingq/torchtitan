@@ -305,10 +305,11 @@ class CheckpointManager:
             raise ValueError(
                 f"Unkown checkpoint async_mode {checkpoint_config.async_mode}"
             )
-
-        logger.info(
-            f"Checkpointing active. Checkpoints will be loaded from and saved to {self.folder}"
-        )
+        
+        if torch.distributed.get_rank() == 0:
+            logger.info(
+                f"Checkpointing active. Checkpoints will be loaded from and saved to {self.folder}"
+            )
 
     def __del__(self):
         self.close()
@@ -570,7 +571,8 @@ class CheckpointManager:
                     f"--checkpoint.load_step={step} but checkpoint {checkpoint_id} is not found."
                 )
 
-        logger.info(f"Loading the checkpoint from {checkpoint_id}.")
+        if torch.distributed.get_rank() == 0:
+            logger.info(f"Loading the checkpoint from {checkpoint_id}.")
         begin = time.monotonic()
         states = self._states_to_load(model_only)
         self.dcp_load(
@@ -579,9 +581,10 @@ class CheckpointManager:
             from_hf=from_hf,
         )
         GarbageCollection.collect("GC collection for checkpoint loading.")
-        logger.info(
-            f"Finished loading the checkpoint in {time.monotonic() - begin:.2f} seconds."
-        )
+        if torch.distributed.get_rank() == 0:
+            logger.info(
+                f"Finished loading the checkpoint in {time.monotonic() - begin:.2f} seconds."
+            )
         return True
 
     def maybe_wait_for_staging(self) -> None:

@@ -60,7 +60,8 @@ class GarbageCollection:
     def collect(reason: str, generation: int = 1):
         begin = time.monotonic()
         gc.collect(generation)
-        logger.info("[GC] %s %.2f seconds", reason, time.monotonic() - begin)
+        if torch.distributed.get_rank() == 0:
+            logger.info("[GC] %s %.2f seconds", reason, time.monotonic() - begin)
 
 
 # hardcoded BF16 type peak flops for NVIDIA A100, H100, H200, B200 GPU and AMD MI250, MI300X, AMD MI325X and Intel PVC

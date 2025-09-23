@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, Union
 
 from tokenizers import AddedToken, Tokenizer
+import torch
 from torchtitan.config import JobConfig
 from torchtitan.tools.logging import logger
 from typing_extensions import override
@@ -92,7 +93,8 @@ class HuggingFaceTokenizer(BaseTokenizer):
 
         # Strategy 1: Load from tokenizer.json (preferred for modern tokenizers)
         if os.path.exists(tokenizer_json_path):
-            logger.info("Loading tokenizer from tokenizer.json")
+            if torch.distributed.get_rank() == 0:
+                logger.info("Loading tokenizer from tokenizer.json")
             return Tokenizer.from_file(tokenizer_json_path)
         # Strategy 2: Load from vocab files (with or without merges.txt)
         elif os.path.exists(vocab_json_path) or os.path.exists(vocab_txt_path):
