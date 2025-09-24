@@ -18,7 +18,6 @@ from torch.utils._pytree import tree_map_only
 from ._backward import stage_backward, stage_backward_input, stage_backward_weight
 from ._debug import map_debug_info
 from ._utils import flatten_args, PipeInfo, validate_tensors_metadata
-from timelyfreeze.core.logger import pipeline_logger
 
 
 __all__ = [

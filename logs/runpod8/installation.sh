@@ -8,7 +8,7 @@ pip install -r requirements.txt
 apt-get update # 무시 가능
 apt-get install -y pciutils # 무시 가능
 apt-get install rsync tmux 
-# pipelining/stage 에다가 pipeline_logger 넣기
+#! pipelining/stage 에다가 pipeline_logger 넣기
 
 # wandb login
 wandb login # 키는 wandb 사이트에서
@@ -16,7 +16,7 @@ wandb login # 키는 wandb 사이트에서
 # debug하려면 vscode에서 debug extension 깔고 launch.json 설정 & ANSI code
 
 # server 4에서 tokenizer 보내기
-scp -P 49353 -i ~/.ssh/id_ed25519 -r assets/tokenizer root@38.80.122.20:/workspace/torchtitan/assets/
+scp -P 13957 -i ~/.ssh/id_ed25519 -r assets/tokenizer root@64.247.196.118:/workspace/torchtitan/assets/
 
 # Llama 3.1 8B 모델 다운로드
 huggingface-cli login # 토큰은 server4/skipp에
@@ -27,6 +27,8 @@ python ./scripts/checkpoint_conversion/convert_from_llama.py /workspace/torchtit
 
 # 실제 돌릴 때는
 nohup bash logs/runpod8/0922_main/run.sh > logs/runpod8/0922_main/nohup.ans 2>&1 &
+# tmux
+bash logs/runpod8/0922_main/run.sh
 
 # 학습 중 로그를 terminal에서 보고 싶을 때:
 tail -f logs/runpod8/0922_main/nohup.ans
@@ -38,19 +40,19 @@ kill -9 <pid>
 
 # server 4에서: checkpoint 받아오기
 # scp: 느린 버전
-# scp -P 49353 -i ~/.ssh/id_ed25519 -r root@38.80.122.20:/workspace/torchtitan_data/base_model/Llama* /data2/shcho/torchtitan/checkpoint # 느린 버전
-# scp -P 49353 -i ~/.ssh/id_ed25519 -r root@38.80.122.20:/workspace/torchtitan_data/checkpoint/* /data2/shcho/torchtitan/checkpoint # 느린 버전
+# scp -P 49353 -i ~/.ssh/id_ed25519 -r root@64.247.196.118:/workspace/torchtitan_data/base_model/Llama* /data2/shcho/torchtitan/checkpoint # 느린 버전
+# scp -P 49353 -i ~/.ssh/id_ed25519 -r root@64.247.196.118:/workspace/torchtitan_data/checkpoint/* /data2/shcho/torchtitan/checkpoint # 느린 버전
 # runpod에서 삭제하기
 rm -rf /workspace/torchtitan_data/checkpoint/*
 # # rsync: 빠른 버전
 # conda install -c conda-forge rsync
 rsync -avz --progress \
-   -e "ssh -P 49353 -i ~/.ssh/id_ed25519" \
-   root@38.80.122.20:/workspace/base_model/Llama*/ \
+   -e "ssh -P 13957 -i ~/.ssh/id_ed25519" \
+   root@64.247.196.118:/workspace/base_model/Llama*/ \
    /data2/shcho/torchtitan/checkpoint/
 rsync -avz --partial --progress \
-    -e "ssh -p 35143 -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
-    root@38.80.122.20:/workspace/torchtitan_data/checkpoint/* \
+    -e "ssh -p 13957 -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
+    root@64.247.196.118:/workspace/torchtitan_data/checkpoint/* \
     /data2/shcho/torchtitan/checkpoint/
 
 # convert DCP -> HF

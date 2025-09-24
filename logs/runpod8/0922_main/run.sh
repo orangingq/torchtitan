@@ -36,8 +36,8 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_microbatch_size=1" # num_microbatches = local_batch_size // microbatch_size
 )
 
-for PP_SCHEDULER in gpipe ; do # gpipe 1f1b interleaved1f1b  interleavedzb zbv 
-    for METRIC_TYPE in fullrand6 ; do  # fullrand6 apf nofreeze timelyapf
+for PP_SCHEDULER in gpipe 1f1b ; do # gpipe 1f1b interleaved1f1b  interleavedzb zbv 
+    for METRIC_TYPE in nofreeze ; do  # fullrand6 apf nofreeze timelyapf
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.ans" # to support ANSI color conversion
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_runpod"
