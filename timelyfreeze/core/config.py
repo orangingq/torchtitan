@@ -1,10 +1,12 @@
-import os
+import sys
 import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal, Optional
 from torch.distributed import ProcessGroup
 import torch.distributed as dist
+from setproctitle import setproctitle
 
+from timelyfreeze.core.util import get_abs_path
 from torchtitan.config.job_config import JobConfig, \
                     Job as BaseJob, \
                     Training as BaseTraining, \
@@ -31,9 +33,6 @@ class Metrics(BaseMetrics):
 
     wandb_name: str | None = None
     """Weights & Biases run name"""
-
-    basename: str = time.strftime('%y%m%d_%H%M')
-    """Base name for logs, image saving, etc. Initially, it will be set to the current time."""
     
     draw_graph: bool = False
     """Whether to draw graphs of the model and training process. Can lower throughput due to graph generation overhead."""
@@ -41,17 +40,36 @@ class Metrics(BaseMetrics):
 
 @dataclass
 class PipelineParallelism(BaseParallelism):
+    pp: int = 1
+    """Number of pipeline parallelism groups"""
+
     pp_scheduler: Literal["GPipe", "1FB", "Interleaved1F1B", "InterleavedZeroBubble", "ZBVZeroBubble"] | None = None
     """Pipeline parallelism scheduler. Options: 'gpipe', '1F1B', 'Interleaved1F1B', 'InterleavedZeroBubble' 'ZBVZeroBubble'."""
 
     stages_per_rank: int = 1 
     """Number of pipeline stages per rank. >1 for interleaved pipeline parallelism, 1 for non-interleaved pipeline parallelism."""
 
-    num_stages: int = 1 
-    """Number of pipeline parallelism stages. It will be recalculated later as: pp * stages_per_rank."""
-
     stages_list : list[int] | None = None
     """List of pipeline stages of this rank. It will be recalculated based on the pipeline schedule."""
+
+    @property
+    def num_stages(self) -> int:
+        """
+        Get the total number of pipeline stages.
+        This is calculated as pp * stages_per_rank.
+        """
+        if 'Interleaved' in self.pp_scheduler:
+            return self.pp * self.stages_per_rank
+        else:
+            return self.pp
+
+    @property
+    def vshape(self) -> bool:
+        """
+        Check if the pipeline parallelism is V-shaped.
+        Returns True if the pp_scheduler is 'ZBV'.
+        """
+        return self.pp_scheduler in ['ZBVZeroBubble']
 
     @property
     def bwd_separated(self) -> bool:
@@ -117,10 +135,7 @@ class Comm(BaseComm):
     
     dp_rank: int = 0  # data parallelism rank : local rank in the data parallelism group
     """dp_rank" is the local rank in the data parallelism group."""
-
-    # master_rank: int = dp * (pp - 1)
-    # """master_rank" is the global rank of the master process that manages the whole training processes."""
-
+    
     master_dp_rank: int = 0  
     """master_dp_rank" is the local rank in the data parallelism group of the master process."""
 
@@ -153,9 +168,14 @@ class Comm(BaseComm):
         return self.global_rank == self.get_last_stage_rank
 
     @property
+    def master_rank(self) -> int:
+        """master_rank" is the global rank of the master process that manages the whole training processes."""
+        return self.dp * (self.pp - 1)
+    
+    @property
     def is_master_rank(self) -> bool:
         '''check if this process is the master rank.'''
-        return self.global_rank == self.dp * (self.pp - 1) # self.master_rank
+        return self.global_rank == self.master_rank
 
 
 @dataclass
@@ -187,10 +207,25 @@ class TimelyFreezeConfig(JobConfig):
                 print(f"{key}: {value}")
         return
 
-    def update_config(self, trainer) -> None:
+    def initialize(self, trainer) -> None:
         """ Update the TimelyFreezeConfig from a parallel_dim object.
         This is useful for integrating with existing Trainer configurations.
         """
+        # change the process title to show local_rank in the node
+        title = f"[{self.comm.local_rank+1}/{self.comm.world_size}] TimelyFreeze⏰ - {self.job.basename}"
+        setproctitle(title)
+        self.job.basename = self.job.basename if self.job.basename is not None else f"{time.strftime('%y%m%d_%H%M')}_{self.model.name}_pp{self.comm.pp}"
+
+        # logging settings
+        if self.metrics.enable_logfile or (self.metrics.log_file is not None): # redirect stdout to log file
+            self.metrics.log_file = self.metrics.log_file if self.metrics.log_file is not None else f"{self.job.basename}.log"
+            sys.stdout = open(get_abs_path(self.metrics.log_file, "log"),"a")
+            sys.stderr = sys.stdout
+        self.metrics.run_name = self.metrics.run_name if self.metrics.run_name is not None else self.job.basename
+        self.checkpoint.enable_checkpoint = self.checkpoint.enable_checkpoint or (self.checkpoint.folder is not None)
+        self.checkpoint.folder = self.checkpoint.folder if self.checkpoint.folder is not None else self.job.basename
+        self.parallelism.pp_scheduler = self.parallelism.pp_scheduler.lower().replace('-', '_') if self.parallelism.pp > 1 and self.parallelism.pp_scheduler is not None else None
+        self.parallelism.pp = self.comm.pp = max(self.parallelism.pp, self.comm.pp)
 
         self.comm.world_size = trainer.parallel_dims.world_size
         mesh = trainer.parallel_dims.world_mesh
@@ -223,7 +258,5 @@ class TimelyFreezeConfig(JobConfig):
         else:
             self.comm.pp, self.comm.pp_rank = 1, 0
             self.comm.pp_group = dist.group.WORLD
-
         return
     
-global_config = TimelyFreezeConfig()

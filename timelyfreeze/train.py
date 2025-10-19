@@ -712,7 +712,6 @@ if __name__ == "__main__":
 
     try:
         trainer = TrainerWithFreezer(config)
-        timelyfreeze.core.config.global_config = config
 
         if config.checkpoint.create_seed_checkpoint:
             assert (

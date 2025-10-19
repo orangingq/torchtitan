@@ -686,7 +686,7 @@ class _PipelineStageBase(ABC):
           through activation transmission.
         - `kwargs` can be passed to all stages via respective `step` calls.
         """
-        from timelyfreeze.core.logger import pipeline_logger # CSH - to log the forward GPU time
+        from timelyfreeze.core.logger import pipeline_log # CSH - to log the forward GPU time
 
         if self.is_first:
             # First stage doesn't need to receive anything
@@ -702,7 +702,7 @@ class _PipelineStageBase(ABC):
 
         # Compute forward
         try:
-            with pipeline_logger.forward(microbatch=fwd_chunk_id, stage=self.stage_index, postfix="stage forward"): # CSH - to log the forward GPU time
+            with pipeline_log.forward(microbatch=fwd_chunk_id, stage=self.stage_index, postfix="stage forward"): # CSH - to log the forward GPU time
                 output = self.forward_maybe_with_nosync(*composite_args, **composite_kwargs)
 
         except Exception as e:
@@ -762,7 +762,7 @@ class _PipelineStageBase(ABC):
         last_backward is controlled by the schedule and signals synchronization of gradients across DP groups
         after the last backward.
         """
-        from timelyfreeze.core.logger import pipeline_logger # CSH - to log the backward GPU time
+        from timelyfreeze.core.logger import pipeline_log # CSH - to log the backward GPU time
         # skip backward computation if backward is not enabled
         if not self.has_backward:
             return
@@ -812,7 +812,7 @@ class _PipelineStageBase(ABC):
                 self.dw_runner[bwd_chunk_id] = self.dw_builder()
         else:
             if full_backward:
-                with pipeline_logger.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
                     grads_input, _ = self.backward_maybe_with_nosync(
                         "full", bwd_kwargs, last_backward=last_backward
                     )
@@ -826,7 +826,7 @@ class _PipelineStageBase(ABC):
 
                     # perform the partial backwards for the inputs with a custom backward function
                     # when the "stage_ouput" is a loss, then it is a tensor, otherwise it is a tuple of tensors
-                    with pipeline_logger.backward_input(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="input backward one chunk"): # CSH - to log the backward GPU time
+                    with pipeline_log.backward_input(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="input backward one chunk"): # CSH - to log the backward GPU time
                         grads_input, param_groups = self.backward_maybe_with_nosync(
                             "input", bwd_kwargs, last_backward=last_backward
                         )
@@ -860,7 +860,7 @@ class _PipelineStageBase(ABC):
         if not self.has_backward:
             return
         
-        from timelyfreeze.core.logger import pipeline_logger # CSH - to log the backward GPU time
+        from timelyfreeze.core.logger import pipeline_log # CSH - to log the backward GPU time
         assert bwd_chunk_id in self.dw_runner, (
             f"{self.log_prefix} Attempted to run backward_weight_one_chunk for chunk {bwd_chunk_id}"
             " without first calling `backward_one_chunk(full_backward=False)`"
@@ -881,7 +881,7 @@ class _PipelineStageBase(ABC):
                     "stage_output": stage_output,
                     "param_groups": param_groups,
                 }
-                with pipeline_logger.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="weight backward one chunk"): # CSH - to log the backward GPU time
+                with pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="weight backward one chunk"): # CSH - to log the backward GPU time
                     self.backward_maybe_with_nosync(
                         "weight", bwd_kwargs, last_backward=last_backward
                     )
@@ -896,7 +896,7 @@ class _PipelineStageBase(ABC):
                     "output_grads": output_grads,
                     "input_values": input_values,
                 }
-                with pipeline_logger.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
                     self.backward_maybe_with_nosync(
                         "full", bwd_kwargs, last_backward=last_backward
                     )
