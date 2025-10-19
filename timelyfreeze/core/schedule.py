@@ -277,7 +277,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
     pipeline_schedule_freezing = schedule_pipeline(set_expected_freeze_ratio(pipeline_schedule_freezing, ratio=0, last_block_ratio=0))
     max_batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing]) # get the maximum batch time
     if config.comm.is_last_stage and config.metrics.draw_graph:
-        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_max_batch_time_rank{config.comm.global_rank}.svg',
+        draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_max_batch_time_rank{config.comm.global_rank}.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
                             config=config,
                             title=f"Max Batch Time: {max_batch_time:.2f} ms",
@@ -288,7 +288,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
     pipeline_schedule_freezing = schedule_pipeline(set_expected_freeze_ratio(pipeline_schedule_freezing, ratio=1))
     min_batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing]) # get the minimum batch time
     if config.comm.is_last_stage and config.metrics.draw_graph:
-        draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_min_batch_time_rank{config.comm.global_rank}.svg',
+        draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_min_batch_time_rank{config.comm.global_rank}.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
                             config=config,
                             title=f"Min Batch Time: {min_batch_time:.2f} ms",
@@ -302,7 +302,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
         average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.freezable])
         if config.metrics.draw_graph:
-            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_frozen_pipeline_schedule_rank{config.comm.global_rank}.svg',
+            draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_frozen_pipeline_schedule_rank{config.comm.global_rank}.svg',
                             pipeline_schedule=pipeline_schedule_freezing,
                             config=config,
                             title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
@@ -380,7 +380,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
         title = 'Observed values (freeze ratio vs time) with Trend Line'
         # fig.suptitle(title, fontsize=12)
         plt.tight_layout()
-        save_file = get_abs_path(f'{config.metrics.basename}/pipeline_schedule_adjustment/{timestamp}_rank{config.comm.global_rank}_trend_line.svg', 'image', make=True)
+        save_file = get_abs_path(f'{config.job.basename}/pipeline_schedule_adjustment/{timestamp}_rank{config.comm.global_rank}_trend_line.svg', 'image', make=True)
         plt.savefig(save_file)
         plt.close()
         logger.info(f"{title} is saved as: {save_file}")
@@ -407,7 +407,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule])
         average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule for action in rank_actions if action.freezable]) / sum([1 for rank_actions in pipeline_schedule for action in rank_actions if action.freezable])
         if config.metrics.draw_graph:
-            draw_pipeline_schedule(save_file=f'{config.metrics.basename}/pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule_rank{config.comm.global_rank}.svg',
+            draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule_rank{config.comm.global_rank}.svg',
                             pipeline_schedule=pipeline_schedule,
                             config=config,
                             title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",

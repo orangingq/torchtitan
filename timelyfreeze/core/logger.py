@@ -58,30 +58,6 @@ class RankSchedule:
         '''iterate over the schedule'''
         return iter(self.schedule)
 
-# class PipelineLogger:
-#     '''Unified API for multiple pipeline loggers.'''
-#     def __init__(self):
-#         self.pipeline_loggers: Dict[int, _PipelineLogger] = {}
-#         self.global_config: TimelyFreezeConfig = None
-        
-#     def initialize(self, global_config: TimelyFreezeConfig, world_mesh: DeviceMesh) -> 'PipelineLogger':
-#         '''initialize the pipeline logger'''
-#         pipeline_loggers = [_PipelineLogger().initialize(global_config) for _ in range(global_config.parallelism.pipeline_parallel_degree)]
-
-        
-#     def __getitem__(self, idx: int) -> 'PipelineLogger':
-#         '''get the pipeline logger at the index'''
-#         return self.pipeline_loggers[idx]
-#     def __len__(self) -> int:
-#         '''get the number of pipeline loggers'''
-#         return len(self.pipeline_loggers)
-#     def __setattr__(self, name, value):
-#         if name in ['pipeline_loggers', 'global_config']:
-#             super().__setattr__(name, value)
-#         else:
-#                 mesh
-#                 pl = self.pipeline_loggers[self.global_config.comm.pp_rank]
-#                 setattr(pl, name, value)
 
 class PipelineLogger:
     '''logger for the pipeline step. for a single pipeline group.'''
