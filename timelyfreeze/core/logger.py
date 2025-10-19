@@ -1,119 +1,128 @@
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import numpy as np
-import torch
 from torchtitan.tools.logging import logger
+from torch.cuda import Event
 
 from .action import Action, ActionType, ActionWithLog, ActionWithFreezing
 from .config import TimelyFreezeConfig
 
-class Range(str, Enum):
-    START   = 'start'
-    END     = 'end'
-    NONE    = None
+__all__ = ['pipeline_log', 'PipelineLog']
 
-    @classmethod
-    def ALL(cls) -> List['Range']:
-        return [cls.START, cls.END, cls.NONE]
-
+class ActionStatus:
+    '''current action status. start of the action, end of the action, or (else) None.'''
+    START:str = 'start'
+    END:str = 'end'
+    NONE:None = None
+    ALL = [START, END, NONE]
 
 class ActionPhase:
-    START   : List[ActionType] = [ActionType.START]
-    FORWARD : List[ActionType] = [ActionType.FORWARD]
-    BACKWARD: List[ActionType] = [ActionType.FULL_BACKWARD]
-    END     : List[ActionType] = [ActionType.SYNC]
-    
-    @classmethod
-    def ALL(cls) -> List[ActionType]:
-        '''Return all action types grouped by phase'''
-        return cls.START + cls.FORWARD + cls.BACKWARD + cls.END
+    START = [ActionType.START]
+    FORWARD = [ActionType.RECV_F, ActionType.FORWARD, ActionType.SEND_F]
+    BACKWARD = [ActionType.RECV_B, ActionType.FULL_BACKWARD, ActionType.SEND_B]
+    END = [ActionType.SYNC, ActionType.FINISH]
 
-
-class RankSchedule:
-    '''Rank schedule for pipeline parallelism.'''
-    def __init__(self):
-        self.schedule: List[Action] = [] # the schedule of actions, which is a list of Action
-        self.action_dict: Dict[Tuple[ActionType, int, int], int] = {} # the action dict, which is a dict of index of the Action in self.schedule with key (step, pp_rank, microbatch, stage)
-
-    def schedule_idx(self, step: ActionType, microbatch: int, stage: int) -> int:
-        '''get the index of the action in the schedule'''
-        return self.action_dict.get((step, microbatch, stage), -1)
-    
-    def add_action(self, action: Action) -> int:
-        '''add an action to the schedule'''
-        if action not in self.schedule:
-            self.schedule.append(action)
-            self.action_dict[(action.type, action.microbatch, action.stage)] = len(self.schedule) - 1
-            return len(self.schedule) - 1
+class LogType(Enum):
+    '''log type. rank or batch'''
+    BATCH = 0
+    RANK = 1
+    def __str__(self):
+        return self.name
+    def __repr__(self):
+        return self.name
+    def __int__(self):
+        return self.value
+    def __eq__(self, other):
+        if isinstance(other, LogType):
+            return self.value == other.value
+        elif isinstance(other, int):
+            return self.value == other
+        elif isinstance(other, str):
+            return self.name.lower() == other.lower()
         else:
-            return self.action_dict[(action.type, action.microbatch, action.stage)]
+            return False
 
-    def __len__(self) -> int:
-        '''get the length of the schedule'''
-        return len(self.schedule)
-    def __getitem__(self, idx: int) -> Action:
-        '''get the action at the index'''
-        return self.schedule[idx]
-    def __iter__(self):
-        '''iterate over the schedule'''
-        return iter(self.schedule)
+class PipelineLog:
+    '''log the pipeline step.'''
+    def __init__(self, config: TimelyFreezeConfig, type:Union[LogType, str]=LogType.BATCH) -> None:
+        self.disabled :bool = False 
+        '''temporary disable flag. cannot call the __call__ function if set to True'''
+        self.config :TimelyFreezeConfig = config 
+        '''the config of the current process.'''
+        if config.parallelism.bwd_separated:
+            ActionPhase.BACKWARD = [ActionType.RECV_B, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT, ActionType.SEND_B]
+        self.pp_rank :int = config.comm.pp_rank 
+        '''the pp rank of the current process.'''
+
+        # status of current action
+        self.step_cnt :int = 0
+        '''the step count.'''
+        self.microbatch :int= -1
+        '''current microbatch index.'''
+        self.stage :int = config.comm.pp_rank 
+        '''current stage, or order of model partition. default to the pp_rank.'''
+        self.step :int = None
+        '''the current step. (count training steps only)'''
+        self.range :ActionStatus = None
+        '''current action status. start of the action, end of the action, or (else) None.'''
 
 
-class PipelineLogger:
-    '''logger for the pipeline step. for a single pipeline group.'''
-    def __init__(self) -> None:
-        self.disabled = False # temporary disable flag. stop logging if set to True
-        self.is_first_cycle = True
-        self.step_cnt = 0
-        self.log_freq = 20 # the frequency of logging cuda time, in steps
-        self.last_action :Tuple[ActionType, int, int, Range] = (ActionType.NONE, -1, -1, Range.NONE) # the last action cached (step, microbatch, stage, range) 
-
-        # log the schedule order
-        self.rank_schedule = RankSchedule() # the rank schedule, which is a list of Action
-        self.action_dict: Dict[Tuple[ActionType, int, int, int], ActionWithFreezing] = None # the action dict, which is a dict of ActionWithFreezing with key (step, pp_rank, microbatch, stage)
-
-        # log time
+        # cuda temporary timer
+        self.cuda_timer_batch :Dict[ActionStatus, List[Event]] = {ActionStatus.START: [], ActionStatus.END: []}
+        '''Temporarily log the time duration of each batch.'''
+        self.cuda_timer_schedule :Dict[ActionStatus, List[Event]] = {ActionStatus.START: [], ActionStatus.END: []}
+        '''Temporarily log the time duration of each action in the schedule.'''
+        # time logger
         self.log_batch_time = []
         self.actions_list = {
-            ActionType.FORWARD: {},
+            ActionType.FORWARD: {}, 
             ActionType.FULL_BACKWARD: {},
             ActionType.BACKWARD_INPUT: {},
             ActionType.BACKWARD_WEIGHT: {},
         }
-
-        # cuda timer
-        self.cuda_timer_batch = {Range.START: [], Range.END: []}
-        self.cuda_timer_schedule = {Range.START: [], Range.END: []}
-        self.timer_reset()
+        # log the schedule order
+        self.log_schedule_flag :bool= True
+        self.log_schedule:List[ActionWithLog] = []
+        self.action_dict: Dict[tuple, ActionWithFreezing] = None # the action dict, which is a dict of ActionWithFreezing with key (step, pp_rank, microbatch, stage)
         return
-
-    def initialize(self, global_config: TimelyFreezeConfig):
-        '''initialize the log'''
-        self.global_config = global_config # the global config
-        if global_config.parallelism.bwd_separated:
-            ActionPhase.BACKWARD = [ActionType.RECV_B, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT, ActionType.SEND_B]
-        self.step_cnt = 1
-        self.timer_reset()
-        return self
     
-    def timer_reset(self):
-        '''reset the timer'''
-        self.cuda_timer_batch = {Range.START: [], Range.END: []}
-        self.cuda_timer_schedule = {Range.START: [], Range.END: []}
-        return
+    def _tmp_timer_flush(self, flush_freq:int=10):
+        '''flush the temporary timer for the next logging'''
+        assert len(self.cuda_timer_batch[ActionStatus.START]) == flush_freq, f"the length of batch start should be {flush_freq}. start:{len(self.cuda_timer_batch[ActionStatus.START])}, end:{len(self.cuda_timer_batch[ActionStatus.END])}"
+        assert len(self.cuda_timer_schedule[ActionStatus.START]) == flush_freq * len(self.log_schedule), f"the length of fwd start should be {flush_freq} * {len(self.log_schedule)}(=len(self.log_schedule)). start:{len(self.cuda_timer_schedule[ActionStatus.START])}, end:{len(self.cuda_timer_schedule[ActionStatus.END])}"
+        assert self.step_cnt % flush_freq == 1, f"the step count should be a multiple of {flush_freq}. step_cnt: {self.step_cnt}"
 
+        # wait for the last event ends in GPU
+        self.cuda_timer_schedule[ActionStatus.END][-1].synchronize()
+        self.cuda_timer_batch[ActionStatus.END][-1].synchronize()
+            
+        assert len(self.cuda_timer_batch[ActionStatus.START]) == len(self.cuda_timer_batch[ActionStatus.END]), f"the length of batch start and end should be the same. start:{len(self.cuda_timer_batch[ActionStatus.START])} != end:{len(self.cuda_timer_batch[ActionStatus.END])}"
+        assert len(self.cuda_timer_schedule[ActionStatus.START]) == len(self.cuda_timer_schedule[ActionStatus.END]), f"the length of schedule start and end should be the same. start:{len(self.cuda_timer_schedule[ActionStatus.START])} != end:{len(self.cuda_timer_schedule[ActionStatus.END])}"
+            
+        # log the time duration
+        self.cuda_timer_schedule[ActionStatus.START] = np.array(self.cuda_timer_schedule[ActionStatus.START]).reshape(flush_freq, len(self.log_schedule))            
+        self.cuda_timer_schedule[ActionStatus.END] = np.array(self.cuda_timer_schedule[ActionStatus.END]).reshape(flush_freq, len(self.log_schedule))
+        for i, action in enumerate(self.log_schedule):
+            action.add_log_time([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
+        self.log_batch_time.extend([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_batch[ActionStatus.END])])
+    
+        # reset the tmp timers
+        self.cuda_timer_batch = {ActionStatus.START: [], ActionStatus.END: []}
+        self.cuda_timer_schedule = {ActionStatus.START: [], ActionStatus.END: []}
+        return
+    
     def disable(self):
-        '''disable the log (for validation)'''
+        '''disable the log'''
         self.disabled = True
         return
 
     def enable(self):
-        '''enable the log (for training)'''
+        '''enable the log'''
         self.disabled = False
         return
 
-    def __call__(self, microbatch:int, stage:int, step:ActionType, range:Range, postfix:str='', timestamp=None) -> 'PipelineLogger':
-        '''log the pipeline step.
+    def __call__(self, microbatch:int=-1, stage:int=None, step:ActionType='', range:ActionStatus=ActionStatus.NONE, postfix:str='', timestamp=None)->'PipelineLog':
+        '''log the time duration of the current pipeline action.
         Args:
             microbatch: int, the microbatch index
             step: Union[ActionType, str], the step name or ActionType number
@@ -123,134 +132,149 @@ class PipelineLogger:
         '''
         if self.disabled:
             return self
-        assert step in ActionPhase.ALL(), f"step {step} should be in {ActionPhase.ALL()}"
-        assert range in Range.ALL(), f"range should be one of {Range.ALL()}"
-        assert 0 <= microbatch < self.global_config.parallelism.microbatches, f"microbatch {microbatch} should be less than {self.global_config.parallelism.microbatches}"
-
-        self.last_action = (step, microbatch, stage, range) # update the last action
-        if range == Range.END:
-            assert self.last_action[:3] == (step, microbatch, stage), f"the last action should be the same as the current action. last_action: {self.last_action}, current action: {(step, microbatch, stage)}"
         
-        schedule_idx :int = self.rank_schedule.schedule_idx(step, microbatch, stage)
-        start_of_cycle :bool = (schedule_idx == 0 and range == Range.START) # check if it is the start of a new cycle
-        end_of_cycle :bool = (schedule_idx == len(self.rank_schedule)-1 and range == Range.END) # check if it is the end of a cycle
-        self.step_cnt += start_of_cycle # count the step if it is the first action in the schedule
+        assert step in ActionPhase.START + ActionPhase.FORWARD + ActionPhase.BACKWARD + ActionPhase.END, f"step {step} should be in {ActionPhase.START + ActionPhase.FORWARD + ActionPhase.BACKWARD + ActionPhase.END}"
+        assert range in ActionStatus.ALL, "range should be 'start', 'end' or 'None'"
+        
+        # update the current status
+        self.step_cnt += int(step in ActionPhase.START) # count the step
+        self.microbatch = microbatch if microbatch >=0 else self.microbatch
+        self.stage = stage if stage is not None else self.pp_rank
+        self.step = step
+        self.range = range
+        
+        if not self.step in [ActionType.FORWARD, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT] \
+            or not self.range in [ActionStatus.START, ActionStatus.END]:
+            return
 
         # Process to identify pipeline schedule cycle (for the first cycle)
-        if self.is_first_cycle and range == Range.START:
-            if schedule_idx == -1:
-                assert range == Range.START, f"the range should be 'start' for the first cycle. range: {range}"
-                new_action = ActionWithLog(step, self.global_config.comm.pp_rank, microbatch, stage)
-                schedule_idx = self.rank_schedule.add_action(new_action)
-            elif schedule_idx == 0: # start of a new cycle. set is_first_cycle to False
-                assert len(self.rank_schedule) <= self.global_config.parallelism.microbatches * self.global_config.parallelism.stages_per_rank * (4 if self.global_config.parallelism.bwd_separated else 2), f"the length of rank_schedule should be less than {self.global_config.parallelism.microbatches * self.global_config.parallelism.stages_per_rank * (4 if self.global_config.parallelism.bwd_separated else 2)}. rank_schedule: {len(self.rank_schedule)}"
-                self.is_first_cycle = False
-        
-        if self.is_first_cycle:
-            return self # do not log the first cycle
-        
-        assert schedule_idx != -1, f"the action {step} for microbatch {microbatch} and stage {stage} is not in the rank schedule. Please add it to the rank schedule first."
-
-        # record the time event 
-        new_event = torch.cuda.Event(enable_timing=True)
-        new_event.record()
-        self.cuda_timer_schedule[range].append(new_event)
-        if start_of_cycle: 
-            self.cuda_timer_batch[Range.START].append(new_event)
-        elif end_of_cycle: 
-            self.cuda_timer_batch[Range.END].append(new_event)
-
-        # log the time duration 
-        if end_of_cycle and self.step_cnt % self.log_freq == 0:
-            self.log_duration()
+        if self.log_schedule_flag:
+            self._create_actions_list()
+        else:
+            self.log_timer()
         return self
-    
-
-    def log_duration(self) -> None:
-        '''log the duration of the actions in the schedule, based on the monitored time events.'''
-        if self.is_first_cycle:
-            return
-        # wait for the last event ends in GPU
-        self.cuda_timer_schedule[Range.END][-1].synchronize()
-        self.cuda_timer_batch[Range.END][-1].synchronize()
-            
-        num_batches = len(self.cuda_timer_batch[Range.START])
-        assert len(self.cuda_timer_batch[Range.START]) == len(self.cuda_timer_batch[Range.END]), f"the length of batch start and end should be the same. start:{len(self.cuda_timer_batch[Range.START])} != end:{len(self.cuda_timer_batch[Range.END])}"
-        assert len(self.cuda_timer_schedule[Range.START]) == len(self.cuda_timer_schedule[Range.END]), f"the length of schedule start and end should be the same. start:{len(self.cuda_timer_schedule[Range.START])} != end:{len(self.cuda_timer_schedule[Range.END])}"
-        assert len(self.cuda_timer_schedule[Range.START]) == num_batches * len(self.rank_schedule), f"the length of schedule start should be equal to the number of batches ({num_batches}) times the number of actions ({len(self.rank_schedule)}). start: {len(self.cuda_timer_schedule[Range.START])} != {num_batches * len(self.rank_schedule)}"
-        
-        # log the time duration
-        self.cuda_timer_schedule[Range.START] = np.array(self.cuda_timer_schedule[Range.START]).reshape(num_batches, len(self.rank_schedule))            
-        self.cuda_timer_schedule[Range.END] = np.array(self.cuda_timer_schedule[Range.END]).reshape(num_batches, len(self.rank_schedule))
-        for i, action in enumerate(self.rank_schedule):
-            action.add_log_time([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[Range.START][:, i], self.cuda_timer_schedule[Range.END][:, i])])
-        self.log_batch_time.extend([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_batch[Range.START], self.cuda_timer_batch[Range.END])])
-
-        # reset the timer
-        self.timer_reset()
-
-        # print the average time for every {self.global_config.metrics.log_freq} steps (= {self.global_config.metrics.log_freq} batches)
-        if self.step_cnt % ((self.global_config.metrics.log_freq//self.log_freq)*self.log_freq) == 1:
-            emptiness = {type: len(stage_dict) == 0 for type, stage_dict in self.actions_list.items()}
-            avg_time = {type: np.mean([a.log_time for a_list in stage_dict.values() for a in a_list]) if not empty else 0 for ((type, stage_dict), empty) in zip(self.actions_list.items(), emptiness.values())}
-            avg_batch_time = np.mean(self.log_batch_time)
-            cnt_per_batch = {type: sum([a.get_log_time_len for a_list in stage_dict.values() for a in a_list]) // len(self.log_batch_time) for (type, stage_dict) in self.actions_list.items()}
-            gpu_bubble_ratio = 1 - (sum([avg_time[type]*cnt_per_batch[type] for type in avg_time.keys()]) / avg_batch_time)
-            log_str = f"Avg. fwd time: {avg_time[ActionType.FORWARD]:.4f} / "
-            if self.global_config.parallelism.bwd_separated:
-                if not emptiness[ActionType.FULL_BACKWARD]:
-                    log_str += f"Avg. full-bwd time: {avg_time[ActionType.FULL_BACKWARD]:.4f} (Avg. bwd-weight time: {avg_time[ActionType.BACKWARD_WEIGHT]:.4f} / Avg. bwd-input time: {avg_time[ActionType.BACKWARD_INPUT]:.4f}) / "
-                else:
-                    log_str += f"Avg. bwd-weight time: {avg_time[ActionType.BACKWARD_WEIGHT]:.4f} / Avg. bwd-input time: {avg_time[ActionType.BACKWARD_INPUT]:.4f} / "
-            else:
-                log_str += f"Avg. bwd time: {avg_time[ActionType.FULL_BACKWARD]:.4f} / "
-            log_str += f"Avg. batch time: {avg_batch_time:.4f} (ms) / GPU bubble ratio: {gpu_bubble_ratio*100:.2f}%"
-            logger.info(log_str)
-        return
     
     # context manager
     def __enter__(self):
         '''enter the context'''
-        assert self.disabled or self.last_action[3] == Range.START, "the range should be 'start'"
+        assert self.disabled or self.range == ActionStatus.START, "the range should be 'start'"
         return self
     
     def __exit__(self, exc_type, exc_value, traceback):
         '''exit the context'''
-        # torch.cuda.synchronize() # wait for the GPU to finish
-        step, microbatch, stage, range = self.last_action
-        if not self.disabled and self.action_dict is not None and (step, self.global_config.comm.pp_rank, microbatch, stage) in self.action_dict:
-            self.action_dict[(step, self.global_config.comm.pp_rank, microbatch, stage)].unfreeze()
-        self(microbatch, stage, step, Range.END)
+        self(self.microbatch, self.stage, self.step, ActionStatus.END)
         return
 
+    def fwd_recv(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+        return self(microbatch, stage, ActionType.RECV_F, ActionStatus.START, postfix=postfix) 
     def forward(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
-        # if not self.disabled and self.action_dict is not None:
-        #     if (ActionType.FULL_BACKWARD, self.global_config.comm.pp_rank, microbatch, stage) in self.action_dict:
-        #         self.action_dict[(ActionType.FULL_BACKWARD, self.global_config.comm.pp_rank, microbatch, stage)].freeze()
-        #     elif (ActionType.BACKWARD_WEIGHT, self.global_config.comm.pp_rank, microbatch, stage) in self.action_dict:
-        #         self.action_dict[(ActionType.BACKWARD_WEIGHT, self.global_config.comm.pp_rank, microbatch, stage)].freeze()
-        return self(microbatch, stage, ActionType.FORWARD, Range.START, postfix=postfix)
-
+        return self(microbatch, stage, ActionType.FORWARD, ActionStatus.START, postfix=postfix) 
+    def fwd_send(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+        return self(microbatch, stage, ActionType.SEND_F, ActionStatus.START, postfix=postfix) 
+    def bwd_recv(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+        return self(microbatch, stage, ActionType.RECV_B, ActionStatus.START, postfix=postfix) 
     def backward(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
-            if (ActionType.FULL_BACKWARD, self.global_config.comm.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.FULL_BACKWARD, self.global_config.comm.pp_rank, microbatch, stage)].freeze()
-        return self(microbatch, stage, ActionType.FULL_BACKWARD, Range.START, postfix=postfix) 
-    
+            if (ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage) in self.action_dict:
+                self.action_dict[(ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage)].freeze()
+        return self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix) 
     def backward_input(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
-            if (ActionType.BACKWARD_WEIGHT, self.global_config.comm.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.global_config.comm.pp_rank, microbatch, stage)].freeze()
-        return self(microbatch, stage, ActionType.BACKWARD_INPUT, Range.START, postfix=postfix) 
-    
+            if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
+                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze()
+        return self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.START, postfix=postfix) 
     def backward_weight(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
-            if (ActionType.BACKWARD_WEIGHT, self.global_config.comm.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.global_config.comm.pp_rank, microbatch, stage)].freeze()
-        return self(microbatch, stage, ActionType.BACKWARD_WEIGHT, Range.START, postfix=postfix) 
-    
+            if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
+                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze()
+        return self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.START, postfix=postfix) 
+    def bwd_send(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+        return self(microbatch, stage, ActionType.SEND_B, ActionStatus.START, postfix=postfix) 
     def sync(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
-        return self(microbatch, stage, ActionType.SYNC, Range.START, postfix=postfix) 
+        return self(microbatch, stage, ActionType.SYNC, ActionStatus.START, postfix=postfix) 
 
+    def log_timer(self):
+        '''log the timer'''
+        assert Action(self.step, self.config.comm.pp_rank, self.microbatch, self.stage) in self.log_schedule, f"the action ({self.step}, {self.config.comm.pp_rank}, {self.microbatch}, {self.stage}) should be in the log_schedule. log_schedule: {self.log_schedule}"
+        
+        # record the time for the start and end of each step
+        new_event = Event(enable_timing=True)
+        new_event.record()
 
-pipeline_logger : PipelineLogger = PipelineLogger()
+        # record the time for the start and end of each step
+        self.cuda_timer_schedule[self.range].append(new_event)
+
+        # record the time for the start of each batch
+        if self._is_start_of_batch or self._is_end_of_batch:
+            self.cuda_timer_batch[self.range].append(new_event)
+
+        # log the time duration of forward and backward, for every n=10 batches
+        flush_freq = 10
+        end_of_nth_batch = self._is_end_of_batch and self.step_cnt % flush_freq == 1 and self.step_cnt > 1
+        if end_of_nth_batch:
+            self._tmp_timer_flush(flush_freq=flush_freq)
+            
+        if self._is_end_of_batch and self.step_cnt % self.config.metrics.log_freq == 1:
+            self.timer_print()
+        return
+    
+    def timer_print(self):
+        '''print the time analysis (avg time per action type, avg batch time, gpu bubble ratio)'''
+        emptiness = {type: len(stage_dict) == 0 for type, stage_dict in self.actions_list.items()} 
+        avg_time = {type: np.mean([a.log_time for a_list in stage_dict.values() for a in a_list]) if not empty else 0 for ((type, stage_dict), empty) in zip(self.actions_list.items(), emptiness.values())}
+        avg_batch_time = np.mean(self.log_batch_time)
+        cnt_per_batch = {type: sum([a.get_log_time_len for a_list in stage_dict.values() for a in a_list]) // len(self.log_batch_time) for (type, stage_dict) in self.actions_list.items()}
+        gpu_bubble_ratio = 1 - (sum([avg_time[type]*cnt_per_batch[type] for type in avg_time.keys()]) / avg_batch_time)
+        log_str = f"Avg. fwd time: {avg_time[ActionType.FORWARD]:.4f} / "
+        if self.config.parallelism.bwd_separated:
+            if not emptiness[ActionType.FULL_BACKWARD]:
+                log_str += f"Avg. full-bwd time: {avg_time[ActionType.FULL_BACKWARD]:.4f} (Avg. bwd-weight time: {avg_time[ActionType.BACKWARD_WEIGHT]:.4f} / Avg. bwd-input time: {avg_time[ActionType.BACKWARD_INPUT]:.4f}) / "
+            else:
+                log_str += f"Avg. bwd-weight time: {avg_time[ActionType.BACKWARD_WEIGHT]:.4f} / Avg. bwd-input time: {avg_time[ActionType.BACKWARD_INPUT]:.4f} / "
+        else:
+            log_str += f"Avg. bwd time: {avg_time[ActionType.FULL_BACKWARD]:.4f} / "
+        log_str += f"Avg. batch time: {avg_batch_time:.4f} (ms) / GPU bubble ratio: {gpu_bubble_ratio*100:.2f}%"
+        logger.info(log_str)
+        return
+    
+    def _create_actions_list(self):
+        """Create the actions list and action dict for freezing."""
+        # Process to identify pipeline schedule cycle (for the first cycle)
+        assert self.log_schedule_flag, "This function should be called only once after the first cycle is recorded."
+        if not self.range == ActionStatus.END:
+            return
+        
+        new_action = ActionWithLog(self.step, self.pp_rank, self.microbatch, self.stage)
+        self.log_schedule.append(new_action)
+        if self.stage in self.actions_list[self.step].keys():
+            self.actions_list[self.step][self.stage].append(new_action)
+        else:
+            self.actions_list[self.step][self.stage] = [new_action]
+            
+        if self._is_end_of_batch:
+            assert len(self.log_schedule) <= self.config.parallelism.microbatches * self.config.parallelism.stages_per_rank * (4 if self.config.parallelism.bwd_separated else 2), \
+                f"the length of log_schedule should be less than {self.config.parallelism.microbatches * self.config.parallelism.stages_per_rank * (4 if self.config.parallelism.bwd_separated else 2)}. log_schedule: {len(self.log_schedule)}"
+            self.log_schedule_flag = False
+
+            return # pass the first cycle
+        return
+
+    @property
+    def _is_start_of_batch(self):
+        '''check if the current call is the first action of a batch within this device.'''
+        return self.step == ActionType.FORWARD and self.range == ActionStatus.START and self.microbatch == 0 and self.stage == self.pp_rank
+
+    @property
+    def _is_end_of_batch(self):
+        '''check if the current call is the last action of a batch within this device.'''
+        return self.step in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT] and self.range == ActionStatus.END and self.microbatch == self.config.parallelism.microbatches-1 and self.stage == self.pp_rank
+    
+    
+pipeline_log: PipelineLog | None = None
+
+def init_pipeline_log(config: TimelyFreezeConfig, type: Union[LogType, str] = LogType.RANK) -> PipelineLog:
+    """Initialize and return the global pipeline_log instance."""
+    global pipeline_log
+    if pipeline_log is None:
+        pipeline_log = PipelineLog(config, type=type)
+    return pipeline_log
