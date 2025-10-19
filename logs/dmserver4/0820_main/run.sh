@@ -43,7 +43,7 @@ for PP_SCHEDULER in gpipe 1f1b interleaved1f1b ; do # 1f1b gpipe interleaved1f1b
         BASENAME="${CREATE_DATE}_${PP_SCHEDULER}_${METRIC_TYPE}_dm4"
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
-            "--metrics.basename=${BASENAME}"
+            "--job.basename=${BASENAME}"
             "--metrics.log_file=${OUTPUT_FILE}"
         )
         if [[ "$METRIC_TYPE" == "nofreeze" ]]; then       

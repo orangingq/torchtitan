@@ -6,10 +6,16 @@ from torch.distributed import ProcessGroup
 import torch.distributed as dist
 
 from torchtitan.config.job_config import JobConfig, \
+                    Job as BaseJob, \
                     Training as BaseTraining, \
                     Metrics as BaseMetrics, \
                     Comm as BaseComm, \
                     Parallelism as BaseParallelism
+
+@dataclass
+class Job(BaseJob):
+    basename: str = time.strftime('%y%m%d_%H%M')
+    """Base name for logs, image saving, etc. Initially, it will be set to the current time."""
 
 @dataclass
 class Training(BaseTraining):
@@ -157,6 +163,7 @@ class TimelyFreezeConfig(JobConfig):
     """
     Default container for training configuration.
     """
+    job: Job = field(default_factory=Job)
     training: Training = field(default_factory=Training)
     metrics: Metrics = field(default_factory=Metrics)
     parallelism: PipelineParallelism = field(default_factory=PipelineParallelism)

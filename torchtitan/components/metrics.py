@@ -145,7 +145,7 @@ class WandBLogger(BaseLogger):
         wandb_tag = os.environ.get('WANDB_TAG', None)
         self.wandb.init(
             project=os.getenv("WANDB_PROJECT", "torchtitan"),
-            name=job_config.metrics.wandb_name or job_config.metrics.basename,
+            name=job_config.metrics.wandb_name or job_config.job.basename,
             dir=log_dir,
             config=job_config.to_dict(),
             tags=wandb_tag.split(",") if wandb_tag else None,
