@@ -1,12 +1,15 @@
+import logging
+import os
 import sys
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from typing import Any, Literal, Optional
+import torch
 from torch.distributed import ProcessGroup
 import torch.distributed as dist
 from setproctitle import setproctitle
+from torchtitan.tools.logging import init_logger, logger
 
-from timelyfreeze.core.util import get_abs_path
 from torchtitan.config.job_config import JobConfig, \
                     Job as BaseJob, \
                     Training as BaseTraining, \
@@ -191,39 +194,48 @@ class TimelyFreezeConfig(JobConfig):
     comm: Comm = field(default_factory=Comm)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
+        result = {}
+        for f in fields(self):
+            result[f.name] = {}
+            dataclass = getattr(self, f.name)
+            for key, value in dataclass.__dict__.items():
+                if isinstance(value, torch.distributed.ProcessGroup):
+                    continue
+                else:
+                    result[f.name][key] = value
+        return result
+    
     def print(self) -> None:
         """
         Print the configuration in a readable format.
         """
-        print("----- TimelyFreeze Configuration:")
+        sentence = "----- TimelyFreeze⏰ Configuration:\n"
         for key, value in self.to_dict().items():
             if isinstance(value, dict):
-                print(f"{key}:")
+                sentence += f"\t- {key}:\n"
                 for sub_key, sub_value in value.items():
-                    print(f"  {sub_key}: {sub_value}")
+                    sentence += f"\t\t- {sub_key}: {sub_value}\n"
             else:
-                print(f"{key}: {value}")
+                sentence += f"\t\t- {key}: {value}\n"
+        print(sentence)
         return
 
     def initialize(self, trainer) -> None:
         """ Update the TimelyFreezeConfig from a parallel_dim object.
         This is useful for integrating with existing Trainer configurations.
         """
-        # change the process title to show local_rank in the node
-        title = f"[{self.comm.local_rank+1}/{self.comm.world_size}] TimelyFreeze⏰ - {self.job.basename}"
-        setproctitle(title)
         self.job.basename = self.job.basename if self.job.basename is not None else f"{time.strftime('%y%m%d_%H%M')}_{self.model.name}_pp{self.comm.pp}"
 
-        # logging settings
-        if self.metrics.enable_logfile or (self.metrics.log_file is not None): # redirect stdout to log file
-            self.metrics.log_file = self.metrics.log_file if self.metrics.log_file is not None else f"{self.job.basename}.log"
-            sys.stdout = open(get_abs_path(self.metrics.log_file, "log"),"a")
-            sys.stderr = sys.stdout
-        self.metrics.run_name = self.metrics.run_name if self.metrics.run_name is not None else self.job.basename
+        # Update folder names
+        if self.metrics.wandb_name is None:
+            self.metrics.wandb_name = self.job.basename
+        self.checkpoint.folder = os.path.join(self.checkpoint.folder, self.job.basename)
+        self.comm.save_traces_folder = os.path.join(self.comm.save_traces_folder, self.job.basename)
+        self.profiling.save_traces_folder = os.path.join(self.profiling.save_traces_folder, self.job.basename)
+        self.profiling.save_memory_snapshot_folder = os.path.join(self.profiling.save_memory_snapshot_folder, self.job.basename)
+        self.metrics.save_tb_folder = os.path.join(self.metrics.save_tb_folder, self.job.basename)
+
         self.checkpoint.enable_checkpoint = self.checkpoint.enable_checkpoint or (self.checkpoint.folder is not None)
-        self.checkpoint.folder = self.checkpoint.folder if self.checkpoint.folder is not None else self.job.basename
         self.parallelism.pp_scheduler = self.parallelism.pp_scheduler.lower().replace('-', '_') if self.parallelism.pp > 1 and self.parallelism.pp_scheduler is not None else None
         self.parallelism.pp = self.comm.pp = max(self.parallelism.pp, self.comm.pp)
 
@@ -250,7 +262,6 @@ class TimelyFreezeConfig(JobConfig):
             
             # Update Parallelism configs
             self.parallelism.stages_per_rank = 1 if self.parallelism.pipeline_parallel_schedule.lower() in ["gpipe", "1f1b"] else 2
-            self.parallelism.num_stages = len(trainer.model_parts)
             self.parallelism.microbatches = trainer.pp_schedule._n_microbatches # self.training.local_batch_size // self.parallelism.pipeline_parallel_microbatch_size
             self.parallelism.stages_list = list(
                 set([self.comm.pp_rank] + [a.stage_index for a in trainer.pp_schedule.pipeline_order[self.comm.pp_rank] if a is not None])
@@ -258,5 +269,15 @@ class TimelyFreezeConfig(JobConfig):
         else:
             self.comm.pp, self.comm.pp_rank = 1, 0
             self.comm.pp_group = dist.group.WORLD
+
+        from .logger import init_pipeline_log
+        init_pipeline_log(self) # initialize the global pipeline_log instance
+
+        # change the process title to show local_rank in the node
+        title = f"[{self.comm.local_rank+1}/{self.comm.world_size}] TimelyFreeze⏰ - {self.job.basename}"
+        setproctitle(title)
+        
+        if self.comm.is_master_rank:
+            self.print() # Print Arguments
         return
     

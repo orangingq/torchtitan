@@ -365,7 +365,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             )
             
         # CSH - setting freezer-related configs
-        job_config.update_config(self)  # CSH - this code requires trainer.model_parts, trainer.pp_schedule and trainer.parallel_dims
+        job_config.initialize(self)  # CSH - this code requires trainer.model_parts, trainer.pp_schedule and trainer.parallel_dims
         self.freezer = get_freezer(self.model_parts, job_config)
 
         if torch.distributed.get_rank() == 0:
@@ -686,7 +686,6 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
 if __name__ == "__main__":
     init_logger()
     config_manager = ConfigManager(config_cls=TimelyFreezeConfig)
-    import timelyfreeze.core.config
     config = config_manager.parse_args()
   
     # Update folder names
@@ -698,15 +697,16 @@ if __name__ == "__main__":
     config.profiling.save_memory_snapshot_folder = os.path.join(config.profiling.save_memory_snapshot_folder, config.job.basename)
     config.metrics.save_tb_folder = os.path.join(config.metrics.save_tb_folder, config.job.basename)
 
-    # # Configure logging file
-    # if config.metrics.log_file:
-    #     logger.handlers.clear()
-    #     fh = logging.FileHandler(filename=config.metrics.log_file, mode="a")
-    #     fh.setLevel(logging.INFO)
-    #     fh.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
-    #     logger.addHandler(fh)
-    #     init_logger()
-    #     logger.propagate = False
+    # Configure logging file
+    from timelyfreeze.core.util import get_abs_path
+    if config.metrics.log_file: # redirect stdout to log file
+        logger.handlers.clear()
+        fh = logging.FileHandler(filename=get_abs_path(config.metrics.log_file, "log"), mode="a")
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
+        logger.addHandler(fh)
+        init_logger()
+        logger.propagate = False
 
     trainer: Optional[TrainerWithFreezer] = None
 

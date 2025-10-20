@@ -58,16 +58,3 @@ rsync -avz --partial --progress \
 # convert DCP -> HF
 torchrun --nproc_per_node=1 --nnodes=1 --standalone --role=rank --tee=3 -m scripts.checkpoint_conversion.convert_to_hf /workspace/torchtitan_data/checkpoint/0922_gpipe_apf_dm4/step-50 /workspace/torchtitan_data/checkpoint/0922_gpipe_apf_dm4/hf_step-50 --model_name=llama3 --model_flavor=8B
 
-# evaluation
-# huggingface의 safetensor format으로 변형해도, sharded 형태로 저장되어 있어서 index file을 따로 만들어야 함.
-# for example...
-nano /data2/shcho/torchtitan/checkpoint/1020_gpipe_nofreeze_dm4/step-500/sharded/model.safetensors.index.json
-{
-  "metadata": {
-    "total_size": 961583888
-  },
-  "weight_map": {
-    "model.layers.0.weight": "shard-00001-model-00001-of-00002.safetensors",
-    "model.layers.1.weight": "shard-00001-model-00002-of-00002.safetensors"
-  }
-}

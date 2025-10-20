@@ -5,32 +5,30 @@ import torch
 from torch.nn import Module
 from torch.distributed.tensor import DTensor
 from .action import ActionWithFreezing, ActionWithTime
-from .logger import pipeline_log as pplog
+from . import logger as pplog
 from .schedule import adjust_freeze_ratio, gather_pipeline_schedule, set_freeze_ratio
 from .config import TimelyFreezeConfig
-from torchtitan.tools.logging import logger as log_time
+from torchtitan.tools.logging import logger
 
 class _Freezer:
-    def __init__(self, model, config: TimelyFreezeConfig):
+    def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
         '''Version 2: Updated on July 14, 2025
         - Collaborate with ActionWithFreezing to freeze per microbatch block.
         '''
         self.config : TimelyFreezeConfig = config
-        self.model = model
+        self.stages : Dict[int, Module] = {stage: model_part for stage, model_part in zip(config.parallelism.stages_list, model_parts)}
         self.step_cnt = 0
 
         # Phases
         self.stability_check_freq = self.config.freezing.stability_check_freq
         '''Stability Check Frequency: check the stability every 10 steps (paper: 50)'''
-        self.phase_unit = self.config.training.num_batches
+        self.phase_unit = self.config.freezing.phase_unit
         '''Phase Unit. i.e., 1 epoch '''
-        self.warmup_phase = max(1, self.config.lr_scheduler.warmup_epochs-1) * self.phase_unit 
+        self.warmup_phase = max(self.phase_unit, self.config.lr_scheduler.warmup_steps - self.phase_unit)
         '''Warmup Phase: do nothing'''
-        self.monitoring_phase = self.warmup_phase + self.phase_unit
-        '''Monitoring Phase: do not freeze the model, only analyze the time. At least 1 phase unit for monitoring'''
 
-        self.freeze_ratio_history = {stage.stage_idx: [] for stage in model} # frozen ratio history per stage
-        self.paramwise_frozen_count = {stage.stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage in model} # [frozen, total] count for each layer in each stage
+        self.freeze_ratio_history = {stage_idx: [0] * (self.warmup_phase // self.stability_check_freq) if config.freezing.freeze else [] for stage_idx in self.stages.keys()} # frozen ratio history per stage
+        self.paramwise_frozen_count = {stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage_idx, stage in self.stages.items()} # [frozen, total] count for each layer in each stage
         return
 
     def _step_count(self):
@@ -38,8 +36,7 @@ class _Freezer:
         Call this function at the start of each forward pass.
         Starting from (epoch 1, step 1) for the first microbatch.
         '''
-        if self.model.training: # only count the steps during training
-            self.step_cnt += 1
+        self.step_cnt = pplog.pipeline_log.step_cnt
         return
     
     def freeze_update(self):
@@ -64,12 +61,12 @@ class _Freezer:
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage in self.model: 
+        for stage_idx, stage in self.stages.items():
             for name, _ in stage.named_parameters():
-                self.paramwise_frozen_count[stage.stage_idx][name][0] += 0
-                self.paramwise_frozen_count[stage.stage_idx][name][1] += 1
+                self.paramwise_frozen_count[stage_idx][name][0] += 0
+                self.paramwise_frozen_count[stage_idx][name][1] += 1
 
-            self.freeze_ratio_history[stage.stage_idx].append(0)
+            self.freeze_ratio_history[stage_idx].append(0)
         return
 
 def get_freezer_class_version(freezer:_Freezer)->int:
@@ -79,27 +76,27 @@ def get_freezer_class_version(freezer:_Freezer)->int:
     else:
         raise TypeError(f"Freezer should be an instance of _Freezer, but got {type(freezer)}.")
 
-def get_freezer(model, config:TimelyFreezeConfig)->_Freezer:
+def get_freezer(model_parts: List[Module], config:TimelyFreezeConfig)->_Freezer:
     '''Get the freezer based on the metric type.'''
     if config.freezing.metric_type == 'fullrand7': # freeze per microbatch block - updated on Oct 18, 2025
-        return FullyRandomFreezer_v7(model, config)
+        return FullyRandomFreezer_v7(model_parts, config)
     elif config.freezing.metric_type == 'apf': # APF (absolute perturbation freezing)
-        return APFFreezer(model, config)
+        return APFFreezer(model_parts, config)
     elif config.freezing.metric_type == 'timelyapf': # APF + Timely Freeze
-        return APFFreezerWithTimelyFreeze(model, config)
+        return APFFreezerWithTimelyFreeze(model_parts, config)
     elif config.freezing.metric_type == 'auto': # AutoFreeze
-        return AutoFreezer(model, config)
+        return AutoFreezer(model_parts, config)
     else:
         raise NotImplementedError(f"Metric Type [{config.freezing.metric_type}] is not supported.")
 
 
 
 class FullyRandomFreezer_v7(_Freezer):
-    def __init__(self, model, config):
+    def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
         ''' Updated on Oct 18, 2025
         Set different expected freeze ratio per microbatch block.
         '''
-        super().__init__(model, config)
+        super().__init__(model_parts, config)
 
         self.progressive_freezing_phase = self.warmup_phase + 3 * self.phase_unit # ) if 'debug' in config.job.basename else (self.warmup_phase + config.lr_scheduler.warmup_epochs)
         '''Last step of progressive freezing phase: gradually increase the freezing_params_num to the expected number.'''
@@ -107,7 +104,7 @@ class FullyRandomFreezer_v7(_Freezer):
         '''Starting step of progressive freezing phase.'''
         self.monitoring_steps :int = 30
         '''Number of steps for monitoring each of upperbound and lowerbound.'''
-        self.freeze_adjust_freq = self.stability_check_freq * (1 + config.training.num_batches//self.stability_check_freq)
+        self.freeze_adjust_freq = self.phase_unit
         '''Frequency of adjusting the freeze ratio during the stable freezing phase.'''
         
         # Phase Status
@@ -141,7 +138,7 @@ class FullyRandomFreezer_v7(_Freezer):
             if self.step_cnt % self.config.metrics.log_freq == 0 and \
                 self.warmup_phase < self.step_cnt <= self.progressive_freezing_phase + 2 * self.phase_unit and \
                     self.monitored_ub and self.monitored_lb:
-                log_time.info(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+                logger.info(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
         return
     
     def set_expected_freeze_ratio(self):
@@ -155,12 +152,12 @@ class FullyRandomFreezer_v7(_Freezer):
             self._start_monitoring_upperbound()
         
         elif self.monitoring_ub: # monitoring upperbound
-            if len(pplog.pipeline_log.log_schedule[0].log_time) > self.warmup_phase + self.monitoring_steps :
+            if len(pplog.pipeline_log.log_schedule[0].logger) > self.warmup_phase + self.monitoring_steps :
                 self._set_upperbound()
                 self._start_monitoring_lowerbound()
 
         elif self.monitoring_lb: # monitoring lowerbound
-            if len(pplog.pipeline_log.log_schedule[0].log_time) > self.monitoring_lb_start_step + self.monitoring_steps :
+            if len(pplog.pipeline_log.log_schedule[0].logger) > self.monitoring_lb_start_step + self.monitoring_steps :
                 self._set_lowerbound()
         
         # start progressive freezing phase
@@ -175,11 +172,11 @@ class FullyRandomFreezer_v7(_Freezer):
             for a, la in zip(self.pipeline_schedule[self.config.comm.pp_rank], pplog.pipeline_log.log_schedule):
                 if not a.freezable:
                     continue
-                times = la.log_time[self.progressive_freezing_start_step:]
+                times = la.logger[self.progressive_freezing_start_step:]
                 afrs = a.freeze_ratio_history[:len(times)]
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times)] #  if (a.stage>0 or afr<=0.99)
             self.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
-            log_time.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+            logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
             self.freeze_adjust_freq = self.freeze_adjust_freq * 2 # stop adjusting the freeze ratio
             # self.rand_noise_possibility = self.rand_noise_possibility * 0.6
         
@@ -214,16 +211,16 @@ class FullyRandomFreezer_v7(_Freezer):
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage in self.model:    
+        for stage_idx, stage in self.stages.items():
             if self.monitored_ub:
                 for name, _ in stage.named_parameters():
-                    self.paramwise_frozen_count[stage.stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
-                    self.paramwise_frozen_count[stage.stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
 
-                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage.stage_idx and a.freezable]))
-                self.freeze_ratio_history[stage.stage_idx].append(average_freeze_ratio)
+                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and a.freezable]))
+                self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
             else:
-                self.freeze_ratio_history[stage.stage_idx].append(0)
+                self.freeze_ratio_history[stage_idx].append(0)
 
         # self._add_random_noise_to_freeze_ratio()
         return
@@ -232,7 +229,7 @@ class FullyRandomFreezer_v7(_Freezer):
         '''Set freeze ratio = 0.0 for all actions and start monitoring the upperbound of batch time.'''
         assert not (self.monitored_ub or self.monitoring_ub), "Upperbound monitoring has already been started or finished."
         if torch.comm.is_master_rank:
-            log_time.info(f"[Step {self.step_cnt}] 〰️ Monitoring Upperbound", master_only=True)
+            logger.info(f"[Step {self.step_cnt}] 〰️ Monitoring Upperbound", master_only=True)
         self.monitored_ub = False
         self.monitoring_ub = True
         return
@@ -240,13 +237,13 @@ class FullyRandomFreezer_v7(_Freezer):
     def _set_upperbound(self):
         '''Create a pipeline schedule with freeze ratio = 0.0 for all actions.'''
         assert self.monitoring_ub and not self.monitored_ub, "Upperbound monitoring has not been started or has already been finished."
-        log_time.info(f"[Step {self.step_cnt}] ✔️  Setting Upperbound", master_only=True)
+        logger.info(f"[Step {self.step_cnt}] ✔️  Setting Upperbound", master_only=True)
         # create upperbound pipeline schedule
         pipeline_schedule_tmp :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, comm=self.config.comm, log_window=self.monitoring_steps)
         self.pipeline_schedule = [[ActionWithFreezing(action.type, action.rank, action.microbatch, action.stage, action.duration) \
                                                                 for action in rank_actions] for rank_actions in pipeline_schedule_tmp]
         # Set the stage module for each action in the pipeline schedule
-        stage_dict = {stage.stage_idx: stage for stage in self.model}
+        stage_dict = {stage_idx: stage for stage_idx, stage in self.stages.items()}
         for a in self.pipeline_schedule[self.config.comm.pp_rank]:
             a.module = stage_dict[a.stage]
             a.freeze_flag = True
@@ -260,7 +257,7 @@ class FullyRandomFreezer_v7(_Freezer):
     def _start_monitoring_lowerbound(self):
         '''Freeze all parameters and start monitoring the lowerbound of batch time.'''
         assert not (self.monitored_lb or self.monitoring_lb), "Lowerbound monitoring has already been started or finished."
-        log_time.info(f"[Step {self.step_cnt}] 〰️ Monitoring Lowerbound", master_only=True)
+        logger.info(f"[Step {self.step_cnt}] 〰️ Monitoring Lowerbound", master_only=True)
         for a in self.pipeline_schedule[self.config.comm.pp_rank]:
             a.progressive_freezing = 1.0
             if a.stage == self.config.parallelism.num_stages - 1: # last stage
@@ -278,9 +275,9 @@ class FullyRandomFreezer_v7(_Freezer):
         '''Set the min_duration of each action block based on the monitored lowerbound of batch time.'''
         assert self.monitoring_lb and not self.monitored_lb, "Lowerbound monitoring has not been started or has already been finished."
         assert self.monitoring_lb_start_step >= 0, "Lowerbound monitoring start step is not set."
-        log_time.info(f"[Step {self.step_cnt}] ✔️  Setting Lowerbound", master_only=True)
+        logger.info(f"[Step {self.step_cnt}] ✔️  Setting Lowerbound", master_only=True)
         # create lowerbound pipeline schedule
-        log_window = len(pplog.pipeline_log.log_schedule[-1].log_time) - self.monitoring_lb_start_step
+        log_window = len(pplog.pipeline_log.log_schedule[-1].logger) - self.monitoring_lb_start_step
         pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, comm=self.config.comm, log_window=log_window)
 
         # set the min_duration of each action block based on the lowerbound log time
@@ -322,21 +319,21 @@ class APFFreezer(_Freezer):
     - Threshold = 0.05 (default)
     - Freeze the layer if Metric < Threshold in TCP style.
     '''
-    def __init__(self, model, config):
-        super().__init__(model, config)
+    def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
+        super().__init__(model_parts, config)
 
         # freezing metrics
         self.alpha = 0.99 # parameter for exponential moving average (paper: 0.99)
-        self.last_param = {name: None for name, _ in model.named_parameters()} # cumulative update
-        self.ema = {name: 0.0 for name, _ in model.named_parameters()}
-        self.ema_abs = {name: 0.0 for name, _ in model.named_parameters()}
+        self.last_param = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()} # cumulative update
+        self.ema = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.ema_abs = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
 
         # freeze update
         self.threshold = 0.05 # threshold on effective perturbation. (paper: 0.05)
-        self.freezing_period = {name: 0 for name, _ in model.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
-        self.frozen_due = {name: 0 for name, _ in model.named_parameters()}
-        self.is_frozen = {name: False for name, _ in model.named_parameters()}
-        self.freeze_ratio = {stage.stage_idx: 0 for stage in model}
+        self.freezing_period = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
+        self.frozen_due = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.is_frozen = {name: False for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.freeze_ratio = {stage_idx: 0 for stage_idx in self.stages.keys()}
         return
 
     def freeze_update(self):
@@ -347,38 +344,40 @@ class APFFreezer(_Freezer):
         if self.step_cnt % self.stability_check_freq == 0:
             self.set_params_to_freeze()
             self.log_freeze_ratio()
-            log_time.info(f"Freezing Ratio: {', '.join([f'[Stage{stage.stage_idx}] {self.freeze_ratio[stage.stage_idx]:.2f}' for stage in self.model])}, Threshold: {self.threshold:.4e}")
+            logger.info(f"Freezing Ratio: {', '.join([f'[Stage{stage_idx}] {self.freeze_ratio[stage_idx]:.2f}' for stage_idx in self.stages])}, Threshold: {self.threshold:.4e}")
         return
     
     def set_params_to_freeze(self):
         '''Update the freezing status of the model parameters based on the threshold.'''
         freezing_metric :Dict[str, float] = self._calculate_params_metric()
 
-        for name, param in self.model.named_parameters():
-            if not self.is_frozen[name]:
-                # update the freezing period (update in TCP style)
-                if freezing_metric[name] <= self.threshold:
-                    self.freezing_period[name] += self.stability_check_freq
-                else:
-                    self.freezing_period[name] = self.freezing_period[name]/2
-                    if self.freezing_period[name] < self.stability_check_freq:
-                        self.freezing_period[name] = 0
+        for stage in self.stages.values():
+            for name, param in stage.named_parameters():
+                if not self.is_frozen[name]:
+                    # update the freezing period (update in TCP style)
+                    if freezing_metric[name] <= self.threshold:
+                        self.freezing_period[name] += self.stability_check_freq
+                    else:
+                        self.freezing_period[name] = self.freezing_period[name]/2
+                        if self.freezing_period[name] < self.stability_check_freq:
+                            self.freezing_period[name] = 0
 
-                # update the freezing deadline
-                self.frozen_due[name] = self.step_cnt + self.freezing_period[name]
+                    # update the freezing deadline
+                    self.frozen_due[name] = self.step_cnt + self.freezing_period[name]
 
-            # update the freezing status
-            self.is_frozen[name] = self.step_cnt < self.frozen_due[name]
-            param.requires_grad = not self.is_frozen[name]
+                # update the freezing status
+                self.is_frozen[name] = self.step_cnt < self.frozen_due[name]
+                param.requires_grad = not self.is_frozen[name]
         return 
 
     def _calculate_params_metric(self) -> Dict[str, float]:
         '''Calculate and return the effective perturbation metric for parameters.'''
-        freezing_metric = {name: 0.0 for name, _ in self.model.named_parameters()} # effective perturbation metric. -> 0: oscillation (stable), -> 1: directional (unstable)
+        freezing_metric = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()} # effective perturbation metric. -> 0: oscillation (stable), -> 1: directional (unstable)
 
-        for name, param in self.model.named_parameters():
-            if self.is_frozen[name] or param.grad is None:
-                continue
+        for stage in self.stages.values():
+            for name, param in stage.named_parameters():
+                if self.is_frozen[name] or param.grad is None:
+                    continue
 
             curr_param = param.detach().clone().cpu()  # current parameter value
             if self.last_param[name] is None:
@@ -400,7 +399,7 @@ class APFFreezer(_Freezer):
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage in self.model:
+        for stage in self.stages.values():
             cnt_0, cnt_1 = 0, 0
             for name, _ in stage.named_parameters():
                 cnt_0, cnt_1 = cnt_0 + self.is_frozen[name], cnt_1 + 1
@@ -422,18 +421,18 @@ class AutoFreezer(_Freezer):
     - Threshold = percentile(grad_changes, p)
     - Layers whose metric >= threshold are frozen.
     '''
-    def __init__(self, model, config):
-        super().__init__(model, config)
+    def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
+        super().__init__(model_parts, config)
 
         # freezing metrics
-        self.prev_grad_norm = {name: None for name, _ in model.named_parameters()}
+        self.prev_grad_norm = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()}
         self.percentile = getattr(config.freezing, "percentile", 50)
         self.threshold = 0.0
         self.start_layer = 0
 
         # freeze update
-        self.is_frozen = {name: False for name, _ in model.named_parameters()}
-        self.freeze_ratio = {stage.stage_idx: 0 for stage in model}
+        self.is_frozen = {name: False for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.freeze_ratio = {stage_idx: 0 for stage_idx in self.stages.keys()}
         return
 
     def freeze_update(self):
@@ -444,7 +443,7 @@ class AutoFreezer(_Freezer):
         if self.step_cnt % self.stability_check_freq == 0:
             self.set_params_to_freeze()
             self.log_freeze_ratio()
-            log_time.info(f"Freezing Ratio: {', '.join([f'[Stage{stage.stage_idx}] {self.freeze_ratio[stage.stage_idx]:.2f}' for stage in self.model])}, Threshold: {self.threshold:.4e}")
+            logger.info(f"Freezing Ratio: {', '.join([f'[Stage{stage.stage_idx}] {self.freeze_ratio[stage.stage_idx]:.2f}' for stage in self.stages.values()])}, Threshold: {self.threshold:.4e}")
         return
     
     
@@ -457,22 +456,24 @@ class AutoFreezer(_Freezer):
     
     def _calculate_params_metric(self) -> Dict[int, float]:
         """Accumulate gradient norms for each parameter."""
-        curr_grad_norm = {name: 0.0 for name, _ in self.model.named_parameters()}
-        for name, param in self.model.named_parameters():
-            if param.grad is not None:
-                curr_grad_norm[name] += torch.norm(param.grad.detach(), p=1).item()
+        curr_grad_norm = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        for stage in self.stages.values():
+            for name, param in stage.named_parameters():
+                if param.grad is not None:
+                    curr_grad_norm[name] += torch.norm(param.grad.detach(), p=1).item()
 
         layer_grad_change = {}
-        for name, _ in self.model.named_parameters():
-            layer_idx = self._get_layer_index(name)
-            if layer_idx is None:
-                continue
-            prev = self.prev_grad_norm.get(name, None)
-            curr = curr_grad_norm[name]
-            layer_grad_change.setdefault(layer_idx, 0)
-            if prev is not None and prev > 0:
-                change_ratio = abs(prev - curr) / prev
-                layer_grad_change[layer_idx] += change_ratio
+        for stage in self.stages.values():
+            for name, _ in stage.named_parameters():
+                layer_idx = self._get_layer_index(name)
+                if layer_idx is None:
+                    continue
+                prev = self.prev_grad_norm.get(name, None)
+                curr = curr_grad_norm[name]
+                layer_grad_change.setdefault(layer_idx, 0)
+                if prev is not None and prev > 0:
+                    change_ratio = abs(prev - curr) / prev
+                    layer_grad_change[layer_idx] += change_ratio
 
         # reset grad accumulation
         self.prev_grad_norm = curr_grad_norm
@@ -493,10 +494,11 @@ class AutoFreezer(_Freezer):
                 break
 
         # update freezing mask
-        for name, param in self.model.named_parameters():
-            layer_idx = self._get_layer_index(name)
-            self.is_frozen[name] = layer_idx is not None and layer_idx < self.start_layer
-            param.requires_grad = not self.is_frozen[name]
+        for stage in self.stages.values():
+            for name, param in stage.named_parameters():
+                layer_idx = self._get_layer_index(name)
+                self.is_frozen[name] = layer_idx is not None and layer_idx < self.start_layer
+                param.requires_grad = not self.is_frozen[name]
         return
     
     def log_freeze_ratio(self):
@@ -504,7 +506,7 @@ class AutoFreezer(_Freezer):
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage in self.model:
+        for stage in self.stages.values():
             cnt_0, cnt_1 = 0, 0
             for name, _ in stage.named_parameters():
                 cnt_0, cnt_1 = cnt_0 + self.is_frozen[name], cnt_1 + 1
@@ -517,22 +519,22 @@ class AutoFreezer(_Freezer):
     
 
 class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
-    def __init__(self, model, config):
+    def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
         ''' Updated on Oct 18, 2025
         TimelyFreeze + APF (follow the freeze ratio of timelyfreeze, but primarily use APF metric to select which params to freeze)
         '''
-        super().__init__(model, config)
+        super().__init__(model_parts, config)
 
         # freezing metrics
         self.alpha = 0.99 # parameter for exponential moving average (paper: 0.99)
-        self.last_param = {name: None for name, _ in model.named_parameters()} # cumulative update
-        self.ema = {name: 0.0 for name, _ in model.named_parameters()}
-        self.ema_abs = {name: 0.0 for name, _ in model.named_parameters()}
+        self.last_param = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()} # cumulative update
+        self.ema = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.ema_abs = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
 
         # freeze update
         self.threshold = 0.05 # threshold on effective perturbation. (paper: 0.05)
-        self.freezing_period = {name: 0 for name, _ in model.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
-        self.frozen_due = {name: 0 for name, _ in model.named_parameters()}
+        self.freezing_period = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
+        self.frozen_due = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
         return
     
     def freeze_update(self):
@@ -549,7 +551,7 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
             if self.step_cnt % self.config.metrics.log_freq == 0 and \
                 self.warmup_phase < self.step_cnt <= self.progressive_freezing_phase + 2 * self.phase_unit and \
                     self.monitored_ub and self.monitored_lb:
-                log_time.info(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+                logger.info(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
         return
 
     def set_expected_freeze_ratio(self):
@@ -561,8 +563,8 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
         '''Update the freezing status of the model parameters based on the threshold.'''
         freezing_metric :Dict[str, float] = self._calculate_params_metric()
         freeze_cand :Dict[int, List[bool]] = {} # whether the parameter's metric is candidate for freezing
-        for stage in self.model:
-            freeze_cand[stage.stage_idx] = []
+        for stage_idx, stage in self.stages.items():
+            freeze_cand[stage_idx] = []
             for name, param in stage.named_parameters():
                 # update the freezing period (update in TCP style)
                 if freezing_metric[name] <= self.threshold:
@@ -576,7 +578,7 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
                 self.frozen_due[name] = self.step_cnt + self.freezing_period[name]
 
                 # update the freezing candidates
-                freeze_cand[stage.stage_idx].append(self.step_cnt < self.frozen_due[name])
+                freeze_cand[stage_idx].append(self.step_cnt < self.frozen_due[name])
 
         if len(self.pipeline_schedule) == 0:
             return
@@ -599,25 +601,26 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage in self.model:    
-            if self.monitored_ub:
+        for stage_idx, stage in self.stages.items():
+            if self.monitored_units[stage_idx]:
                 for name, _ in stage.named_parameters():
-                    self.paramwise_frozen_count[stage.stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
-                    self.paramwise_frozen_count[stage.stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage.stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
 
-                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage.stage_idx and a.freezable]))
-                self.freeze_ratio_history[stage.stage_idx].append(average_freeze_ratio)
+                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and a.freezable]))
+                self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
             else:
-                self.freeze_ratio_history[stage.stage_idx].append(0)
+                self.freeze_ratio_history[stage_idx].append(0)
         return
     
     def _calculate_params_metric(self) -> Dict[str, float]:
         '''Calculate and return the effective perturbation metric for parameters.'''
-        freezing_metric = {name: 99999999999 for name, _ in self.model.named_parameters()} # effective perturbation metric. -> 0: oscillation (stable), -> 1: directional (unstable)
+        freezing_metric = {name: 99999999999 for stage in self.stages.values() for name, _ in stage.named_parameters()} # effective perturbation metric. -> 0: oscillation (stable), -> 1: directional (unstable)
 
-        for name, param in self.model.named_parameters():
-            if param.grad is None:
-                continue
+        for stage in self.stages.values():
+            for name, param in stage.named_parameters():
+                if param.grad is None:
+                    continue
 
             curr_param = param.detach().clone().cpu()  # current parameter value
             if self.last_param[name] is None:

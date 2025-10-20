@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Union
 import numpy as np
 from torchtitan.tools.logging import logger
 from torch.cuda import Event
