@@ -2,8 +2,8 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1020_main"
-TODAY="1020"
+EXPERIMENT_TAG="1021_4gpus"
+TODAY="1021"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=4,5,6,7
