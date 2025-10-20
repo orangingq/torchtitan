@@ -15,7 +15,7 @@ export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 export TORCHFT_LIGHTHOUSE="http://localhost:29510"
 NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
-LOG_DIR="/home/shcho/torchtitan/logs/dmserver1/${WANDB_TAG}"
+LOG_DIR="/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/${WANDB_TAG}"
 CONFIG_FILE="${LOG_DIR}/config.toml"
 
 COMMON_ARGS=(
