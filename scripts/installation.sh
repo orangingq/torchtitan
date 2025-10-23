@@ -17,13 +17,17 @@ wandb login # 키는 wandb 사이트에서
 
 # server 4에서 tokenizer 보내기
 scp -P 13957 -i ~/.ssh/id_ed25519 -r assets/tokenizer root@64.247.196.118:/workspace/torchtitan/assets/
+huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --include "original/*" "tokenizer*.json" "special_tokens_map.json" --local-dir /home/shcho/torchtitan/assets/tokenizer/Llama-3.2-1B-Instruct
 
 # Llama 3.1 8B 모델 다운로드
-huggingface-cli login # 토큰은 server4/skipp에
-huggingface-cli download meta-llama/Llama-3.1-8B --include "original/*" --local-dir /workspace/torchtitan_data/base_model/Llama-3.1-8B
+hf login # 토큰은 server4/skipp에
+hf download meta-llama/Llama-3.1-8B --include "original/*" --local-dir /workspace/torchtitan_data/base_model/Llama-3.1-8B
+hf download meta-llama/Llama-3.2-1B-Instruct --include "original/*" "model.safetensors" --local-dir /data2/shcho/torchtitan/base_model/Llama-3.2-1B-Instruct
+hf download meta-llama/Llama-3.2-3B-Instruct --include "original/*" "model.safetensors" --local-dir /data2/shcho/torchtitan/base_model/Llama-3.2-3B-Instruct
 
 # DCP 포맷으로 변환
 python ./scripts/checkpoint_conversion/convert_from_llama.py /workspace/torchtitan_data/base_model/Llama-3.1-8B/original /workspace/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
+python ./scripts/checkpoint_conversion/convert_from_llama.py /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp
 
 # 실제 돌릴 때는
 nohup bash logs/runpod8/0922_main/run.sh > logs/runpod8/0922_main/nohup.ans 2>&1 &
@@ -57,4 +61,5 @@ rsync -avz --partial --progress \
 
 # convert DCP -> HF
 torchrun --nproc_per_node=1 --nnodes=1 --standalone --role=rank --tee=3 -m scripts.checkpoint_conversion.convert_to_hf /workspace/torchtitan_data/checkpoint/0922_gpipe_apf_dm4/step-50 /workspace/torchtitan_data/checkpoint/0922_gpipe_apf_dm4/hf_step-50 --model_name=llama3 --model_flavor=8B
-
+# convert base model DCP -> HF
+torchrun --nproc_per_node=1 --nnodes=1 --standalone --local_addr=127.0.0.1 --role=rank --tee=3 -m scripts.checkpoint_conversion.convert_to_hf /data2/shcho/torchtitan/checkpoint/base_model/Llama-3.2-1B/original_dcp /data2/shcho/torchtitan/checkpoint/base_model/Llama-3.2-1B/original_dcp --model_name=llama3 --model_flavor=1B

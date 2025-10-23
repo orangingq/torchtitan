@@ -21,6 +21,8 @@ scp -P 13957 -i ~/.ssh/id_ed25519 -r assets/tokenizer root@64.247.196.118:/works
 # Llama 3.1 8B 모델 다운로드
 huggingface-cli login # 토큰은 server4/skipp에
 huggingface-cli download meta-llama/Llama-3.1-8B --include "original/*" --local-dir /workspace/torchtitan_data/base_model/Llama-3.1-8B
+huggingface-cli download meta-llama/Llama-3.2-1B --include "original/*" --local-dir /data2/shcho/torchtitan/base_model/Llama-3.2-1B
+
 
 # DCP 포맷으로 변환
 python ./scripts/checkpoint_conversion/convert_from_llama.py /workspace/torchtitan_data/base_model/Llama-3.1-8B/original /workspace/torchtitan_data/base_model/Llama-3.1-8B/original_dcp

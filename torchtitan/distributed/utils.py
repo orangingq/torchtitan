@@ -214,10 +214,11 @@ def maybe_enable_amp(
         return contextlib.nullcontext()
     else:
         if parallel_dims.tp_enabled or parallel_dims.pp_enabled:
-            logger.warning(
-                "Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled."
-            )
-            logger.info("Mixed precision training is disabled")
+            if torch.distributed.get_rank() == 0:
+                logger.warning(
+                    "Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled."
+                )
+                logger.info("Mixed precision training is disabled")
             return contextlib.nullcontext()
         else:
             # the following code will only be executed for DDP or single-device training

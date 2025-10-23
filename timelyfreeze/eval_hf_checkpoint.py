@@ -26,8 +26,8 @@ def parse_args():
                     help="Data type for model loading")
     ap.add_argument("--device_map", type=str, default="auto",
                     help="accelerate/transformers device_map (e.g. 'auto', 'cuda', 'cpu')")
-    ap.add_argument("--trust_remote_code", action="store_true",
-                    help="Trust remote code when loading custom model classes")
+    # ap.add_argument("--trust_remote_code", action="store_true",
+    #                 help="Trust remote code when loading custom model classes")
     ap.add_argument("--output_json", type=str, default=None,
                     help="Path to save results JSON (default: ./eval_results_<timestamp>.json)")
     ap.add_argument("--tokenizer_path", type=str, default='Llama-3.2-1B',
@@ -54,8 +54,8 @@ def main():
         f"device_map={args.device_map}", 
         f"tokenizer=assets/tokenizer/{args.model_type if args.tokenizer_path is None else args.tokenizer_path}" 
     ]
-    if args.trust_remote_code:
-        model_args.append("trust_remote_code=True")
+    # if args.trust_remote_code:
+    #     model_args.append("trust_remote_code=True")
 
     results = evaluator.simple_evaluate(
         model="hf",
@@ -89,7 +89,7 @@ def main():
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_path = args.output_json or os.path.abspath(f"./eval_results_{ts}.json")
     with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+        json.dump(results, f, ensure_ascii=False, indent=2, default=str)
     print(f"\nSaved full results to: {out_path}")
 
     print("\nTips:")

@@ -29,10 +29,13 @@ class Training(BaseTraining):
 @dataclass
 class Metrics(BaseMetrics):
     log_freq: int = 100
-    """Frequency of logging during training (steps)"""
+    """Frequency of logging during training (in global accumulation steps)"""
 
-    log_file: str | None = None
-    """Log file name to write training logs. Leave as None to disable logging to file."""
+    pplog_freq: int = 1600
+    """Frequency of logging pipeline traces (in local steps=batches)"""
+
+    draw_freq: int = 1000
+    """Frequency of drawing graphs of the model and training process (in global accumulation steps)"""
 
     wandb_name: str | None = None
     """Weights & Biases run name"""
@@ -46,7 +49,7 @@ class PipelineParallelism(BaseParallelism):
     pp: int = 1
     """Number of pipeline parallelism groups"""
 
-    pp_scheduler: Literal["GPipe", "1FB", "Interleaved1F1B", "InterleavedZeroBubble", "ZBVZeroBubble"] | None = None
+    pipeline_parallel_schedule: Literal["GPipe", "1FB", "Interleaved1F1B", "InterleavedZeroBubble", "ZBVZeroBubble"] = "1F1B"
     """Pipeline parallelism scheduler. Options: 'gpipe', '1F1B', 'Interleaved1F1B', 'InterleavedZeroBubble' 'ZBVZeroBubble'."""
 
     stages_per_rank: int = 1 
@@ -61,7 +64,7 @@ class PipelineParallelism(BaseParallelism):
         Get the total number of pipeline stages.
         This is calculated as pp * stages_per_rank.
         """
-        if 'Interleaved' in self.pp_scheduler:
+        if 'Interleaved' in self.pipeline_parallel_schedule:
             return self.pp * self.stages_per_rank
         else:
             return self.pp
@@ -70,17 +73,17 @@ class PipelineParallelism(BaseParallelism):
     def vshape(self) -> bool:
         """
         Check if the pipeline parallelism is V-shaped.
-        Returns True if the pp_scheduler is 'ZBV'.
+        Returns True if the pipeline_parallel_schedule is 'ZBV'.
         """
-        return self.pp_scheduler in ['ZBVZeroBubble']
+        return self.pipeline_parallel_schedule in ['ZBVZeroBubble']
 
     @property
     def bwd_separated(self) -> bool:
         """
         Check if the backward pass is separated into backward_weight and backward_input.
-        Returns True if the pp_scheduler is 'InterleavedZeroBubble', or 'ZBVZeroBubble'.
+        Returns True if the pipeline_parallel_schedule is 'InterleavedZeroBubble', or 'ZBVZeroBubble'.
         """
-        return self.pp_scheduler in ["InterleavedZeroBubble", "ZBVZeroBubble"]
+        return self.pipeline_parallel_schedule in ["InterleavedZeroBubble", "ZBVZeroBubble"]
 
     microbatches: int = 4 # number of microbatches for pipeline parallelism
     """Number of microbatches for pipeline parallelism."""
@@ -219,14 +222,12 @@ class TimelyFreezeConfig(JobConfig):
                 sentence += f"\t\t- {key}: {value}\n"
         print(sentence)
         return
-
-    def initialize(self, trainer) -> None:
-        """ Update the TimelyFreezeConfig from a parallel_dim object.
-        This is useful for integrating with existing Trainer configurations.
+    
+    def pre_initialize(self) -> None:
+        """
+        Set configuration before trainer initialization.
         """
         self.job.basename = self.job.basename if self.job.basename is not None else f"{time.strftime('%y%m%d_%H%M')}_{self.model.name}_pp{self.comm.pp}"
-
-        # Update folder names
         if self.metrics.wandb_name is None:
             self.metrics.wandb_name = self.job.basename
         self.checkpoint.folder = os.path.join(self.checkpoint.folder, self.job.basename)
@@ -234,10 +235,19 @@ class TimelyFreezeConfig(JobConfig):
         self.profiling.save_traces_folder = os.path.join(self.profiling.save_traces_folder, self.job.basename)
         self.profiling.save_memory_snapshot_folder = os.path.join(self.profiling.save_memory_snapshot_folder, self.job.basename)
         self.metrics.save_tb_folder = os.path.join(self.metrics.save_tb_folder, self.job.basename)
-
+        
         self.checkpoint.enable_checkpoint = self.checkpoint.enable_checkpoint or (self.checkpoint.folder is not None)
-        self.parallelism.pp_scheduler = self.parallelism.pp_scheduler.lower().replace('-', '_') if self.parallelism.pp > 1 and self.parallelism.pp_scheduler is not None else None
+        self.parallelism.pipeline_parallel_schedule = self.parallelism.pipeline_parallel_schedule.lower().replace('-', '_')
         self.parallelism.pp = self.comm.pp = max(self.parallelism.pp, self.comm.pp)
+        
+        return
+
+    def initialize(self, trainer) -> None:
+        """ Update the TimelyFreezeConfig from a parallel_dim object.
+        This is useful for integrating with existing Trainer configurations.
+        """
+        assert trainer.parallel_dims is not None, "Trainer.parallel_dims must be set before initializing TimelyFreezeConfig."
+        assert trainer.pp_schedule is not None, "Trainer.pp_schedule must be set before initializing TimelyFreezeConfig."
 
         self.comm.world_size = trainer.parallel_dims.world_size
         mesh = trainer.parallel_dims.world_mesh
