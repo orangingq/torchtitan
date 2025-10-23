@@ -12,7 +12,7 @@ default_path = {
     "dataset": "/data2/shcho/datasets",
     "wandb": "/data2/shcho/torchtitan/wandb", 
     "log": "/home/shcho/torchtitan/logs",
-    "image": "/workspace/torchtitan_data/images"
+    "image": "/data2/shcho/torchtitan/images"
 }
 
 def get_default_path(key:str)->str:

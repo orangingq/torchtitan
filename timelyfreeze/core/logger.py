@@ -137,12 +137,14 @@ class PipelineLog:
         assert range in ActionStatus.ALL, "range should be 'start', 'end' or 'None'"
         
         # update the current status
-        self.step_cnt += int(step in ActionPhase.START) # count the step
         self.microbatch = microbatch if microbatch >=0 else self.microbatch
         self.stage = stage if stage is not None else self.pp_rank
         self.step = step
         self.range = range
-        
+        self.step_cnt += int(self._is_start_of_batch) # int(step in ActionPhase.START) # count the step
+        if (self._is_start_of_batch):
+            logger.debug(f"🚦  Starting local step {self.step_cnt} (in the unit of a batch computation)")
+
         if not self.step in [ActionType.FORWARD, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT] \
             or not self.range in [ActionStatus.START, ActionStatus.END]:
             return
@@ -214,7 +216,7 @@ class PipelineLog:
         if end_of_nth_batch:
             self._tmp_timer_flush(flush_freq=flush_freq)
             
-        if self._is_end_of_batch and self.step_cnt % self.config.metrics.log_freq == 1:
+        if self._is_end_of_batch and self.step_cnt % self.config.metrics.pplog_freq == 1:
             self.timer_print()
         return
     

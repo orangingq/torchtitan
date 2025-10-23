@@ -39,6 +39,7 @@ from timelyfreeze.core.config import TimelyFreezeConfig
 from timelyfreeze.core.action import ActionType, ActionWithTime
 from timelyfreeze.core.schedule import gather_pipeline_schedule, schedule_pipeline
 from timelyfreeze.core.util import draw_elementwise_histogram, draw_line_chart, draw_pipeline_schedule
+from timelyfreeze.core import logger as pplog
 
 class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
     # core configs
@@ -273,6 +274,10 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
 
         self.ft_manager.maybe_set_all_reduce_hook(self.model_parts)
 
+        # CSH - setting freezer-related configs
+        job_config.initialize(self)  # CSH - this code requires trainer.model_parts, trainer.pp_schedule and trainer.parallel_dims
+        self.freezer = get_freezer(self.model_parts, job_config)
+
         # initialize device memory monitor and get peak flops for MFU calculation
         device_memory_monitor = self.metrics_processor.device_memory_monitor
         gpu_peak_flops = utils.get_peak_flops(device_memory_monitor.device_name)
@@ -364,10 +369,6 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                 pp_has_last_stage=pp_has_last_stage,
             )
             
-        # CSH - setting freezer-related configs
-        job_config.initialize(self)  # CSH - this code requires trainer.model_parts, trainer.pp_schedule and trainer.parallel_dims
-        self.freezer = get_freezer(self.model_parts, job_config)
-
         if torch.distributed.get_rank() == 0:
             logger.info(
                 "Trainer is initialized with "
@@ -437,6 +438,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                 targets, losses = (
                     (labels, []) if self.pp_has_last_stage else (None, None)
                 )
+
                 if self.pp_has_first_stage:
                     self.pp_schedule.step(
                         inputs, target=targets, losses=losses, input_batch=inputs
@@ -501,7 +503,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         self.checkpointer.maybe_wait_for_staging()
         self.optimizers.step()
         self.lr_schedulers.step()
-        self.freezer.freeze_update() # this should be called after optimizer.step()
+        self.freezer.freeze_update(self.step) # this should be called after optimizer.step()
 
 
         # Reduce the data collected over gradient accumulation steps.
@@ -569,6 +571,8 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             data_iterator = self.batch_generator(self.dataloader)
             while self.step < job_config.training.steps:
                 self.step += 1
+                if job_config.comm.is_master_rank:
+                    logger.debug(f"🚦  Starting global accumulation step {self.step} (in the unit of optimizer)")
                 self.gc_handler.run(self.step)
                 try:
                     self.train_step(data_iterator)
@@ -604,7 +608,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                         world_mesh=self.parallel_dims.world_mesh,
                     )
                     
-                if self.step % job_config.metrics.log_freq == 0 and job_config.metrics.draw_graph:
+                if self.step % job_config.metrics.draw_freq == 0 and job_config.metrics.draw_graph:
                     draw_charts(self.freezer, self.step, job_config)
 
         if torch.distributed.get_rank() == 0:
@@ -637,7 +641,7 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
     is_warmupend = (step == freezer.warmup_phase)
     filename_suffix = ('final' if is_final else 'warmupend' if is_warmupend else 'step') + str(step)
 
-    pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(freezer.logger.rank_schedule.schedule, config.comm))
+    pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm))
     if config.comm.is_last_stage:
         # 1) Draw the realistic pipeline schedule
         draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
@@ -686,28 +690,9 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
 if __name__ == "__main__":
     init_logger()
     config_manager = ConfigManager(config_cls=TimelyFreezeConfig)
-    config = config_manager.parse_args()
+    config :TimelyFreezeConfig = config_manager.parse_args()
+    config.pre_initialize()
   
-    # Update folder names
-    if config.metrics.wandb_name is None:
-        config.metrics.wandb_name = config.job.basename
-    config.checkpoint.folder = os.path.join(config.checkpoint.folder, config.job.basename)
-    config.comm.save_traces_folder = os.path.join(config.comm.save_traces_folder, config.job.basename)
-    config.profiling.save_traces_folder = os.path.join(config.profiling.save_traces_folder, config.job.basename)
-    config.profiling.save_memory_snapshot_folder = os.path.join(config.profiling.save_memory_snapshot_folder, config.job.basename)
-    config.metrics.save_tb_folder = os.path.join(config.metrics.save_tb_folder, config.job.basename)
-
-    # Configure logging file
-    from timelyfreeze.core.util import get_abs_path
-    if config.metrics.log_file: # redirect stdout to log file
-        logger.handlers.clear()
-        fh = logging.FileHandler(filename=get_abs_path(config.metrics.log_file, "log"), mode="a")
-        fh.setLevel(logging.INFO)
-        fh.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
-        logger.addHandler(fh)
-        init_logger()
-        logger.propagate = False
-
     trainer: Optional[TrainerWithFreezer] = None
 
     try:
