@@ -103,7 +103,7 @@ class PipelineLog:
         self.cuda_timer_schedule[ActionStatus.START] = np.array(self.cuda_timer_schedule[ActionStatus.START]).reshape(flush_freq, len(self.log_schedule))            
         self.cuda_timer_schedule[ActionStatus.END] = np.array(self.cuda_timer_schedule[ActionStatus.END]).reshape(flush_freq, len(self.log_schedule))
         for i, action in enumerate(self.log_schedule):
-            action.add_log_time([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
+            action.add_log_time(self.step_cnt-flush_freq, [start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
         self.log_batch_time.extend([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_batch[ActionStatus.END])])
     
         # reset the tmp timers
@@ -178,17 +178,17 @@ class PipelineLog:
     def backward(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
             if (ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage)].freeze()
+                self.action_dict[(ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
         return self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix) 
     def backward_input(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
             if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze()
+                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
         return self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.START, postfix=postfix) 
     def backward_weight(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
             if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze()
+                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
         return self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.START, postfix=postfix) 
     def bwd_send(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.SEND_B, ActionStatus.START, postfix=postfix) 
@@ -277,6 +277,6 @@ pipeline_log: PipelineLog | None = None
 def init_pipeline_log(config: TimelyFreezeConfig, type: Union[LogType, str] = LogType.RANK) -> PipelineLog:
     """Initialize and return the global pipeline_log instance."""
     global pipeline_log
-    if pipeline_log is None:
+    if pipeline_log is None and config.parallelism.pp > 1:
         pipeline_log = PipelineLog(config, type=type)
     return pipeline_log

@@ -44,6 +44,9 @@ def _process_slimorca_text(sample: dict[str, Any]) -> str:
         prompt = f"<|user|>\n{question}\n<|assistant|>\n{response}"
     return prompt
 
+def _process_alpaca_text(sample: dict[str, Any]) -> str:
+    """Process Alpaca dataset sample text."""
+    return sample["text"]
 
 @dataclass
 class DatasetConfig:
@@ -73,6 +76,11 @@ DATASETS = {
         path="Open-Orca/SlimOrca",
         loader=lambda path: load_dataset(path, split="train"),
         text_processor=_process_slimorca_text,
+    ),
+    "alpaca": DatasetConfig(
+        path="tatsu-lab/alpaca",
+        loader=lambda path: load_dataset(path, split="train"),
+        text_processor=_process_alpaca_text,
     ),
 }
 

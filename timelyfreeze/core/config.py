@@ -235,11 +235,9 @@ class TimelyFreezeConfig(JobConfig):
         self.profiling.save_traces_folder = os.path.join(self.profiling.save_traces_folder, self.job.basename)
         self.profiling.save_memory_snapshot_folder = os.path.join(self.profiling.save_memory_snapshot_folder, self.job.basename)
         self.metrics.save_tb_folder = os.path.join(self.metrics.save_tb_folder, self.job.basename)
-        
-        self.checkpoint.enable_checkpoint = self.checkpoint.enable_checkpoint or (self.checkpoint.folder is not None)
-        self.parallelism.pipeline_parallel_schedule = self.parallelism.pipeline_parallel_schedule.lower().replace('-', '_')
-        self.parallelism.pp = self.comm.pp = max(self.parallelism.pp, self.comm.pp)
-        
+
+        self.parallelism.pp = self.comm.pp = self.parallelism.pipeline_parallel_degree = max(self.parallelism.pp, self.comm.pp, self.parallelism.pipeline_parallel_degree)
+
         return
 
     def initialize(self, trainer) -> None:
@@ -279,9 +277,12 @@ class TimelyFreezeConfig(JobConfig):
         else:
             self.comm.pp, self.comm.pp_rank = 1, 0
             self.comm.pp_group = dist.group.WORLD
+        self.parallelism.pp = self.comm.pp
+        assert self.parallelism.pp == self.parallelism.pipeline_parallel_degree, "Mismatch between Trainer and TimelyFreezeConfig pipeline parallelism degree."
 
-        from .logger import init_pipeline_log
-        init_pipeline_log(self) # initialize the global pipeline_log instance
+        if trainer.parallel_dims.pp_enabled:
+            from .logger import init_pipeline_log
+            init_pipeline_log(self) # initialize the global pipeline_log instance
 
         # change the process title to show local_rank in the node
         title = f"[{self.comm.local_rank+1}/{self.comm.world_size}] TimelyFreeze⏰ - {self.job.basename}"
