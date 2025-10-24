@@ -5,7 +5,7 @@ from datetime import datetime
 from lm_eval import evaluator
 from transformers import AutoConfig
 
-DEFAULT_TASKS = ["mmlu", "hellaswag", "arc_easy", "arc_challenge", "hendrycks_math"]
+DEFAULT_TASKS = ["mmlu", "hellaswag", "arc_challenge", "truthfulqa_mc1"] # "hendrycks_math" "arc_easy", 
 
 def parse_args():
     ap = argparse.ArgumentParser(description="Evaluate a local Hugging Face checkpoint (sharded safetensors) with lm-eval-harness")
