@@ -12,16 +12,17 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1023_gpipe_fullrand7_dm1" 
-  "1023_gpipe_apf_dm1"
-  "1023_gpipe_auto_dm1"
+  # "1023_GPipe_nofreeze_dm1"
+  "1023_GPipe_fullrand7_dm1" 
+  # "1023_gpipe_apf_dm1"
+  # "1023_gpipe_auto_dm1"
 ) 
 MODEL_TYPE="Llama-3.2-1B-Instruct"
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
     OUTPUT_FILE="${LOG_DIR}/eval_${BASENAME}.log"
-    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-1000"
+    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-2000"
     RESULT_FILE="${MODEL_PATH}/eval_${BASENAME}.json"
 
     # Check if the model path exists

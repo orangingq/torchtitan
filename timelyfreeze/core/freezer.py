@@ -175,7 +175,7 @@ class FullyRandomFreezer_v7(_Freezer):
                 if not a.freezable:
                     continue
                 times = la.log_time[self.progressive_freezing_start_step:]
-                afrs = a.freeze_ratio_history[:len(times)]
+                afrs = a.freeze_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times)] #  if (a.stage>0 or afr<=0.99)
             self.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
             logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")

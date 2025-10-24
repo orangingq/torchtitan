@@ -31,12 +31,11 @@ COMMON_ARGS=(
     "timelyfreeze.train" 
     "--job.config_file=${CONFIG_FILE}"
     "--job.description=\"${EXPLAIN}\""
-    "--training.steps=1000"
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-for PP_SCHEDULER in gpipe 1f1b interleaved1f1b ; do # 1f1b gpipe interleaved1f1b  interleavedzb zbv 
-    for METRIC_TYPE in fullrand7 apf auto timelyapf ; do 
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in nofreeze fullrand7 apf auto timelyapf ; do 
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"

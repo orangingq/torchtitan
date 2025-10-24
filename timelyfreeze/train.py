@@ -76,7 +76,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
 
     # Enable debug tracing on failure: https://pytorch.org/docs/stable/elastic/errors.html
     @record
-    def __init__(self, job_config: JobConfig):
+    def __init__(self, job_config: TimelyFreezeConfig):
         torch._C._log_api_usage_once("torchtitan.train")
 
         self.job_config = job_config
@@ -471,6 +471,9 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
     def train_step(
         self, data_iterator: Iterable[tuple[dict[str, torch.Tensor], torch.Tensor]]
     ):
+        if self.job_config.parallelism.pp > 1:
+            pplog.pipeline_log.enable()  # CSH: enable PP logging for each train step
+
         self.optimizers.zero_grad()
         # Save the current step learning rate for logging
         lr = self.lr_schedulers.schedulers[0].get_last_lr()[0]
@@ -505,7 +508,9 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         self.lr_schedulers.step()
         self.freezer.freeze_update(self.step) # this should be called after optimizer.step()
 
-
+        if self.job_config.parallelism.pp > 1:
+            pplog.pipeline_log.disable()  # CSH: disable PP logging after each train step
+            
         # Reduce the data collected over gradient accumulation steps.
         loss = torch.sum(torch.stack(accumulated_losses))
 
@@ -533,6 +538,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             global_max_loss,
             grad_norm.item(),
             extra_metrics=extra_metrics,
+            last_step=(self.step == self.job_config.training.steps)
         )
 
     @record
@@ -608,7 +614,8 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                         world_mesh=self.parallel_dims.world_mesh,
                     )
                     
-                if self.step % job_config.metrics.draw_freq == 0 and job_config.metrics.draw_graph:
+                if job_config.metrics.draw_graph and \
+                    (self.step % job_config.metrics.draw_freq == 0 or self.step == job_config.training.steps or self.step == self.freezer.warmup_phase):
                     draw_charts(self.freezer, self.step, job_config)
 
         if torch.distributed.get_rank() == 0:
@@ -632,7 +639,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             self.metrics_processor.close()
 
 
-def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
+def draw_charts(freezer: _Freezer, step: int, config: TimelyFreezeConfig):
     if step == 1:
         logger.warning("Nothing to draw in the first epoch.")
         return
@@ -666,6 +673,8 @@ def draw_charts(freezer, step: int, config: TimelyFreezeConfig):
                             xlabel="Time (ms)", ylabel="Rank"
                             )
             
+
+    if (not is_warmupend) or is_final: # only draw the pipeline schedule after warmup
         if config.freezing.freeze:
             for s in config.parallelism.stages_list:
                 # 4) Draw the frozen ratio history

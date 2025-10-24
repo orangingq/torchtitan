@@ -1,7 +1,9 @@
 
 from enum import Enum
+from typing import List
 import numpy as np
 import torch
+from torchtitan.tools.logging import logger
 
 
 class ActionType(Enum):
@@ -61,13 +63,21 @@ class ActionWithLog(Action):
     def __init__(self, type:ActionType, rank:int, microbatch:int=None, stage:int=None, log_time:list=[]):
         super().__init__(type, rank, microbatch, stage)
         self.log_time = log_time.copy()
-    def add_log_time(self, time):
-        '''add the log time'''
+
+    def add_log_time(self, start_batch_idx:int, time:float|List[float]):
+        '''add the log time starting from the given batch index'''
+        if len(self.log_time) < start_batch_idx:
+            logger.warning(f"Batch index {start_batch_idx} is larger than log time length {len(self.log_time)}. Filling with zeros.")
+            self.log_time.extend([0.0] * (start_batch_idx - len(self.log_time)))
+        elif len(self.log_time) > start_batch_idx:
+            raise ValueError(f"Already have log time for batch index {start_batch_idx}.")
+        
         if isinstance(time, list):
             self.log_time.extend(time.copy())
         else:
             self.log_time.append(time)
         return
+    
     @property
     def get_log_time_len(self):
         '''get the log time length'''
@@ -94,8 +104,6 @@ class ActionWithLog(Action):
             return super().to_tensor()
         
         list_repr = super().to_tensor().tolist() # convert to list
-        if with_log_time:
-            list_repr.extend(self.log_time if log_window is None else self.log_time[-log_window:])
         if with_median:
             list_repr.append(self.get_log_time_median if log_window is None else np.median(self.log_time[-log_window:]))
         if with_mean:
@@ -283,8 +291,8 @@ class ActionWithFreezing(ActionWithTime):
             self.paramwise_frozen_count = {name: [0, 0] for name, _ in self.module.named_parameters()} # reset the paramwise frozen count
         self._freeze_flag = freeze_flag
 
-    def freeze(self):
-        '''Freeze the module.'''
+    def freeze(self, start_batch_idx:int=None):
+        '''Freeze the module. will be called before the backward pass.'''
         if not self.freeze_flag: # only freeze when the freeze flag is set.
             return
         
@@ -316,6 +324,12 @@ class ActionWithFreezing(ActionWithTime):
             self.paramwise_frozen_count[name][1] += 1
     
         # append the actual frozen ratio to the freeze ratio history
+        if start_batch_idx is not None:
+            if len(self.freeze_ratio_history) < start_batch_idx:
+                logger.warning(f"Batch index {start_batch_idx} is larger than freeze ratio history length {len(self.freeze_ratio_history)}. Filling with zeros.")
+                self.freeze_ratio_history.extend([0.0] * (start_batch_idx - len(self.freeze_ratio_history)))
+            elif len(self.freeze_ratio_history) > start_batch_idx:
+                raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
         self.freeze_ratio_history.append(float(np.mean(freezing_list)))
         return
     

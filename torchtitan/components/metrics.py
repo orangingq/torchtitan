@@ -322,6 +322,11 @@ class MetricsProcessor:
     optimizers: OptimizersContainer | None
     lr_schedulers: LRSchedulersContainer | None
 
+    time_delta_logs: list[float]
+    '''Log of time deltas between logs for final logging.'''
+    mfu_logs: list[float]
+    '''Log of MFU values between logs for final logging.'''
+
     def __init__(
         self,
         job_config: JobConfig,
@@ -352,8 +357,12 @@ class MetricsProcessor:
         self.optimizers = None
         self.lr_schedulers = None
 
+        # logs
+        self.time_delta_logs: list[float] = []
+        self.mfu_logs: list[float] = []
+
     def should_log(self, step: int) -> bool:
-        return step == 1 or step % self.job_config.metrics.log_freq == 0
+        return step == 1 or step % self.job_config.metrics.log_freq == 0 or step == self.job_config.training.steps
 
     def log(
         self,
@@ -362,10 +371,12 @@ class MetricsProcessor:
         global_max_loss: float,
         grad_norm: float,
         extra_metrics: dict[str, Any] | None = None,
+        last_step: bool = False,
     ):
         assert self.num_flops_per_token > 0, "num_flops_per_token must be set"
 
         time_delta = time.perf_counter() - self.time_last_log
+        self.time_delta_logs.append(time_delta) # csh: for final logging
 
         # tokens per second per device, abbreviated as tps
         tps = self.ntokens_since_last_log / (
@@ -376,8 +387,16 @@ class MetricsProcessor:
         # https://arxiv.org/abs/2204.02311
         mfu = 100 * self.num_flops_per_token * tps / self.gpu_peak_flops
         tflops = self.num_flops_per_token * tps / 1e12
+        self.mfu_logs.append(mfu)  # csh: for final logging
 
-        time_end_to_end = time_delta / self.job_config.metrics.log_freq
+        if last_step:
+            # Adjust time_delta for the last step if it is not aligned with log_freq
+            steps_since_last_log = step % self.job_config.metrics.log_freq
+            if steps_since_last_log == 0:
+                steps_since_last_log = self.job_config.metrics.log_freq
+        else:
+            steps_since_last_log = self.job_config.metrics.log_freq
+        time_end_to_end = time_delta / steps_since_last_log
         time_data_loading = sum(self.data_loading_times) / len(self.data_loading_times)
         time_data_loading_pct = 100 * sum(self.data_loading_times) / time_delta
 
@@ -418,6 +437,15 @@ class MetricsProcessor:
             f"{color.magenta} mfu: {mfu:.2f}%{color.reset}"
         )
 
+        if last_step:
+            self.log_final(
+                step,
+                global_avg_loss,
+                global_max_loss,
+                grad_norm,
+                extra_metrics=metrics
+            )
+
         self.ntokens_since_last_log = 0
         self.data_loading_times.clear()
         self.time_last_log = time.perf_counter()
@@ -455,6 +483,49 @@ class MetricsProcessor:
         self.ntokens_since_last_log = 0
         self.time_last_log = time.perf_counter()
         self.device_memory_monitor.reset_peak_stats()
+
+
+    def log_final(
+        self,
+        step: int,
+        global_avg_loss: float,
+        global_max_loss: float,
+        grad_norm: float,
+        extra_metrics: dict[str, Any] | None = None,
+    ):
+        assert self.num_flops_per_token > 0, "num_flops_per_token must be set"
+
+        avg_time_delta = sum(self.time_delta_logs) / len(self.time_delta_logs)
+        avg_tps = self.ntokens_since_last_log / (
+            avg_time_delta * self.parallel_dims.non_data_parallel_size
+        )
+        avg_mfu = sum(self.mfu_logs) / len(self.mfu_logs)
+        avg_tflops = self.num_flops_per_token * avg_tps / 1e12
+
+        avg_time_end_to_end = avg_time_delta / self.job_config.metrics.log_freq
+
+        metrics = {
+            "final/avg_loss": global_avg_loss,
+            "final/max_loss": global_max_loss,
+            "final/grad_norm": grad_norm,
+            "final/avg_throughput(tps)": avg_tps,
+            "final/avg_tflops": avg_tflops,
+            "final/avg_mfu(%)": avg_mfu,
+            "final/avg_end_to_end(s)": avg_time_end_to_end
+        }
+        self.logger.log(metrics, step)
+
+        color = self.color
+        logger.info(
+            f"{color.red} final step: {step:2} "
+            f"{color.green} loss: {global_avg_loss:7.4f} "
+            f"{color.orange} grad_norm: {grad_norm:7.4f} "
+            f"{color.blue} tps: {round(avg_tps):,} "
+            f"{color.cyan} tflops: {avg_tflops:,.2f} "
+            f"{color.magenta} mfu: {avg_mfu:.2f}%{color.reset}"
+        )
+
+        return
 
     def close(self):
         self.logger.close()
