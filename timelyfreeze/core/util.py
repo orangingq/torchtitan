@@ -8,11 +8,11 @@ from .action import ActionType, ActionWithTime
 from .config import TimelyFreezeConfig
 
 default_path = {
-    "checkpoint": "/data2/shcho/torchtitan/checkpoints",
+    "checkpoint": "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoints",
     "dataset": "/data2/shcho/datasets",
-    "wandb": "/data2/shcho/torchtitan/wandb", 
+    "wandb": "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/wandb", 
     "log": "/home/shcho/torchtitan/logs",
-    "image": "/data2/shcho/torchtitan/images"
+    "image": "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images"
 }
 
 def get_default_path(key:str)->str:
