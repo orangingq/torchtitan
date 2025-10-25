@@ -230,12 +230,13 @@ class TimelyFreezeConfig(JobConfig):
         self.job.basename = self.job.basename if self.job.basename is not None else f"{time.strftime('%y%m%d_%H%M')}_{self.model.name}_pp{self.comm.pp}"
         if self.metrics.wandb_name is None:
             self.metrics.wandb_name = self.job.basename
-        self.checkpoint.checkpoint_folder = os.path.join(self.checkpoint.checkpoint_folder, self.job.basename)
-        self.comm.save_traces_folder = os.path.join(self.comm.save_traces_folder, self.job.basename)
-        self.profiling.save_traces_folder = os.path.join(self.profiling.save_traces_folder, self.job.basename)
-        self.profiling.save_memory_snapshot_folder = os.path.join(self.profiling.save_memory_snapshot_folder, self.job.basename)
-        self.metrics.save_tb_folder = os.path.join(self.metrics.save_tb_folder, self.job.basename)
-        self.metrics.image_folder = os.path.join(self.metrics.image_folder, self.job.basename)
+        self.job.dump_folder = os.path.abspath(self.job.dump_folder)
+        self.checkpoint.checkpoint_folder = os.path.join(self.job.dump_folder, self.checkpoint.checkpoint_folder, self.job.basename)
+        self.comm.save_traces_folder = os.path.join(self.job.dump_folder, self.comm.save_traces_folder, self.job.basename)
+        self.profiling.save_traces_folder = os.path.join(self.job.dump_folder, self.profiling.save_traces_folder, self.job.basename)
+        self.profiling.save_memory_snapshot_folder = os.path.join(self.job.dump_folder, self.profiling.save_memory_snapshot_folder, self.job.basename)
+        self.metrics.save_tb_folder = os.path.join(self.job.dump_folder, self.metrics.save_tb_folder, self.job.basename)
+        self.metrics.image_folder = os.path.join(self.job.dump_folder, self.metrics.image_folder, self.job.basename)
 
         self.parallelism.pp = self.comm.pp = self.parallelism.pipeline_parallel_degree = max(self.parallelism.pp, self.comm.pp, self.parallelism.pipeline_parallel_degree)
 
