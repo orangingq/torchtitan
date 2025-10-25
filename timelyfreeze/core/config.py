@@ -49,7 +49,7 @@ class PipelineParallelism(BaseParallelism):
     pp: int = 1
     """Number of pipeline parallelism groups"""
 
-    pipeline_parallel_schedule: Literal["GPipe", "1FB", "Interleaved1F1B", "InterleavedZeroBubble", "ZBVZeroBubble"] = "1F1B"
+    pipeline_parallel_schedule: Literal["GPipe", "1F1B", "Interleaved1F1B", "InterleavedZeroBubble", "ZBVZeroBubble"] = "1F1B"
     """Pipeline parallelism scheduler. Options: 'gpipe', '1F1B', 'Interleaved1F1B', 'InterleavedZeroBubble' 'ZBVZeroBubble'."""
 
     stages_per_rank: int = 1 
