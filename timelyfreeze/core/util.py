@@ -7,36 +7,17 @@ from torchtitan.tools.logging import logger
 from .action import ActionType, ActionWithTime
 from .config import TimelyFreezeConfig
 
-default_path = {
-    "checkpoint": "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoints",
-    "dataset": "/data2/shcho/datasets",
-    "wandb": "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/wandb", 
-    "log": "/home/shcho/torchtitan/logs",
-    "image": "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images"
-}
-
-def get_default_path(key:str)->str:
-    '''Get the default path of the specified key. 
-    Args:
-        key (str): the key of the default path. 
-    '''
-    assert key in default_path.keys(), f"key must be one of {default_path.keys()}"
-    return default_path[key]
-
-def get_abs_path(path:str, key:str, make=False)->str:
+def get_abs_path(path:str, base_dir:str)->str:
     '''Get the absolute path of the specified path. 
     Args:
         path (str): the path to be joined with the default path.
-        key (str): the key of the default path. 
+        base_dir (str): base directory name to join if path is relative. (E.g. "/home/user/dump_folder" -> "/home/user/dump_folder/{path}")
+    Returns:
+        str: the absolute path.
     '''
-    assert key in default_path.keys(), f"key must be one of {default_path.keys()}"
-    
-    if path is None:
-        return get_default_path(key)
     if not os.path.isabs(path):
-        path = os.path.abspath(os.path.join(default_path[key], path))
-    if make:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        path = os.path.abspath(os.path.join(base_dir, path))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 
 
@@ -62,7 +43,7 @@ def draw_line_chart(data_x, data_y, save_file, config: TimelyFreezeConfig, title
         ax.set_xlabel(xlabel)
     if ylabel:
         ax.set_ylabel(ylabel)
-    save_file = get_abs_path(save_file, 'image', make=True)
+    save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
     plt.savefig(save_file)
     plt.close()
     logger.info(f"{title if title is not None else 'Line Chart'}  is saved as: {save_file}")
@@ -126,7 +107,7 @@ def draw_elementwise_histogram(data, stage, save_file, config: TimelyFreezeConfi
     fig.suptitle(title if title is not None else f"Elementwise Histogram of Rank {config.comm.global_rank} (Stage {stage})", fontsize=13)
     plt.subplots_adjust(bottom=0.2)
 
-    save_file = get_abs_path(save_file, 'image', make=True)
+    save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
     plt.savefig(save_file)
     plt.close()
     logger.info(f"Elementwise Histogram is saved as: {save_file}\n\t> Counts Sum: {int(past_counts)}, Total Sum: {int(total_sum)} ({past_counts/total_sum*100:.2f}%), " \
@@ -223,7 +204,7 @@ def draw_pipeline_schedule(save_file:str,
                         color=stage_color_map[action.rank].get(action.stage, 'black')
                     )
     
-    save_file = get_abs_path(save_file, 'image', make=True)
+    save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
     plt.savefig(save_file, bbox_inches='tight', pad_inches=0)
     plt.close()
 

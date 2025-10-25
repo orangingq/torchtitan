@@ -248,7 +248,7 @@ class CheckpointManager:
         self.cpu_offload_state_dict = None
         self.stager = None
 
-        self.folder = os.path.join(base_folder, checkpoint_config.folder)
+        self.folder = os.path.join(base_folder, checkpoint_config.checkpoint_folder)
 
         # Checkpoint policy related fields.
         self.initial_load_model_only = checkpoint_config.initial_load_model_only

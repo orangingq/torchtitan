@@ -655,7 +655,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
         pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm))
         if config.comm.is_last_stage:
             # 1) Draw the realistic pipeline schedule
-            draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
+            draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Realistic Pipeline Schedule", 
@@ -670,7 +670,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                                 bwd_time=[2*fwd_mean] * config.parallelism.num_stages,
                                                 bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
                                                 bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
-                draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
+                draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Theoretical Pipeline Schedule", 
@@ -685,13 +685,13 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                 draw_line_chart([freezer.stability_check_freq * k for k in range(len(freezer.freeze_ratio_history[s]))], 
                                     freezer.freeze_ratio_history[s], 
                                     config=config,
-                                    save_file=f'{config.job.basename}/freeze_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
+                                    save_file=f'freeze_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
                                     title=f"Frozen Ratio History of Rank {config.comm.global_rank} (Stage {s})", xlabel="Step", ylabel="Frozen Ratio")
         
                 if is_final:
                     # 5) Draw the frozen params histogram per stage
                     draw_elementwise_histogram(data=list(freezer.paramwise_frozen_count[s].values()), stage=s,
-                                    save_file=f'{config.job.basename}/frozen_params_histogram/{timestamp}_rank{config.comm.global_rank}_stage{s}.svg', 
+                                    save_file=f'frozen_params_histogram/{timestamp}_rank{config.comm.global_rank}_stage{s}.svg', 
                                     config=config,
                                     title=f"Histogram of Frozen Parameters in Rank {config.comm.global_rank} (Stage {s})",
                                     xlabel1="Total Freeze Counts Ratio",
