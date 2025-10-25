@@ -615,7 +615,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                     )
                     
                 if job_config.metrics.draw_graph and \
-                    (self.step % job_config.metrics.draw_freq == 0 or self.step == job_config.training.steps or self.step == self.freezer.warmup_phase):
+                    (self.step % job_config.metrics.draw_freq == 0 or self.step == job_config.training.steps):
                     draw_charts(self.freezer, self.step, job_config)
 
         if torch.distributed.get_rank() == 0:
@@ -639,39 +639,43 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
             self.metrics_processor.close()
 
 
-def draw_charts(freezer: _Freezer, step: int, config: TimelyFreezeConfig):
+def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
     if step == 1:
         logger.warning("Nothing to draw in the first epoch.")
         return
+    if config.freezing.freeze and step < freezer.warmup_phase:
+        logger.warning("Nothing to draw before the end of warmup.")
+        return
     timestamp = time.strftime("%y%m%d_%H%M")
     is_final = (step == config.training.steps)
-    is_warmupend = (step == freezer.warmup_phase)
+    is_warmupend = (config.freezing.freeze and step == freezer.warmup_phase)
     filename_suffix = ('final' if is_final else 'warmupend' if is_warmupend else 'step') + str(step)
 
-    pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm))
-    if config.comm.is_last_stage:
-        # 1) Draw the realistic pipeline schedule
-        draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
-                            pipeline_schedule=pipeline_schedule,
-                            config=config,
-                            # title=f"Realistic Pipeline Schedule", 
-                            xlabel="Time (ms)", ylabel="Rank"
-                            )
+    if pplog.pipeline_log is not None and len(pplog.pipeline_log.log_schedule) > 0:
+        pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline(gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm))
+        if config.comm.is_last_stage:
+            # 1) Draw the realistic pipeline schedule
+            draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
+                                pipeline_schedule=pipeline_schedule,
+                                config=config,
+                                # title=f"Realistic Pipeline Schedule", 
+                                xlabel="Time (ms)", ylabel="Rank"
+                                )
 
-        if is_final:
-            # 2) Draw the theoretical pipeline schedule
-            fwd_mean = np.mean([action.duration for rank_list in pipeline_schedule for action in rank_list if action.type == ActionType.FORWARD])
-            pipeline_schedule = schedule_pipeline(pipeline_schedule, 
+            if is_final:
+                # 2) Draw the theoretical pipeline schedule
+                fwd_mean = np.mean([action.duration for rank_list in pipeline_schedule for action in rank_list if action.type == ActionType.FORWARD])
+                pipeline_schedule = schedule_pipeline(pipeline_schedule, 
                                                 fwd_time=[fwd_mean] * config.parallelism.num_stages,
                                                 bwd_time=[2*fwd_mean] * config.parallelism.num_stages,
                                                 bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
                                                 bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
-            draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
-                            pipeline_schedule=pipeline_schedule,
-                            config=config,
-                            # title=f"Theoretical Pipeline Schedule", 
-                            xlabel="Time (ms)", ylabel="Rank"
-                            )
+                draw_pipeline_schedule(save_file=f'{config.job.basename}/pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
+                                pipeline_schedule=pipeline_schedule,
+                                config=config,
+                                # title=f"Theoretical Pipeline Schedule", 
+                                xlabel="Time (ms)", ylabel="Rank"
+                                )
             
 
     if (not is_warmupend) or is_final: # only draw the pipeline schedule after warmup
