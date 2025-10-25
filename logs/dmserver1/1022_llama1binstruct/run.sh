@@ -15,9 +15,9 @@ export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 export TORCHFT_LIGHTHOUSE="http://localhost:29510"
 NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
-LOG_DIR="/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/dmserver1/${WANDB_TAG}"
-CONFIG_FILE="${LOG_DIR}/config.toml"
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
+LOG_DIR="$(dirname "${THIS_FILE}")"
+CONFIG_FILE="${LOG_DIR}/config.toml"
 
 COMMON_ARGS=(
     "--standalone"
@@ -34,7 +34,7 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in nofreeze fullrand7 apf auto timelyapf ; do 
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"

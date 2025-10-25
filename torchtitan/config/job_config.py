@@ -69,6 +69,9 @@ class Metrics:
     enable_wandb: bool = False
     """Whether to log metrics to Weights & Biases"""
 
+    image_folder: str = "images"
+    """Folder to dump generated images"""
+
 
 @dataclass
 class Model:
@@ -378,10 +381,10 @@ class Checkpoint:
     enable_checkpoint: bool = False
     """Whether to enable checkpoint"""
 
-    folder: str = "checkpoint"
+    checkpoint_folder: str = "checkpoint"
     """
     The folder to store the checkpoints.
-    When enable_checkpoint is set to true, checkpoints will be in {--job.dump_folder}/{--checkpoint.folder}.
+    When enable_checkpoint is set to true, checkpoints will be in {--job.dump_folder}/{--checkpoint.checkpoint_folder}.
     """
 
     interval: int = 500
@@ -393,7 +396,7 @@ class Checkpoint:
     particularly useful for resuming training from a previous run with a
     different output path or when loading a checkpoint from a pre-trained model.
     If the checkpoint folder for the current run is not empty,
-    located at {--job.dump_folder}/{--checkpoint.folder}, this option will be ignored.
+    located at {--job.dump_folder}/{--checkpoint.checkpoint_folder}, this option will be ignored.
     This feature allows users to load an initial checkpoint from a different folder and
     continue training, saving new checkpoints to the specified folder without affecting
     the existing ones.

@@ -85,7 +85,7 @@ class DummyJobConfig:
         self.checkpoint = CheckpointConfig(
             enable_checkpoint=True,
             async_mode="disabled",
-            folder="",
+            checkpoint_folder="",
             interval=1,
             keep_latest_k=0,
             last_save_model_only=False,
@@ -116,7 +116,7 @@ class TestCheckpointManager(unittest.TestCase):
         ckpt_cfg = CheckpointConfig(
             enable_checkpoint=True,
             async_mode="DISABLED",
-            folder="",
+            checkpoint_folder="",
             interval=1,
             keep_latest_k=2,
             last_save_model_only=False,
