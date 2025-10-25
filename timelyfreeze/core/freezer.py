@@ -157,6 +157,8 @@ class FullyRandomFreezer_v7(_Freezer):
             if pplog.pipeline_log.step_cnt > self.monitoring_ub_start_step + self.monitoring_steps :
                 self._set_upperbound()
                 self._start_monitoring_lowerbound()
+            else:
+                logger.warning(f"[Step {self.step_cnt}] ⏳ Monitoring Upperbound... ({pplog.pipeline_log.step_cnt}/{self.monitoring_ub_start_step + self.monitoring_steps})")
 
         elif self.monitoring_lb: # monitoring lowerbound
             if len(pplog.pipeline_log.log_schedule[0].log_time) > self.monitoring_lb_start_step + self.monitoring_steps :

@@ -48,7 +48,7 @@ COMMON_ARGS=(
 )
 
 for PP_SCHEDULER in GPipe ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in nofreeze fullrand7 apf ; do  # auto timelyapf 
+    for METRIC_TYPE in fullrand7 apf nofreeze auto timelyapf ; do  # 
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_h200"
