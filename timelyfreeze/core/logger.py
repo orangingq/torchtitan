@@ -143,7 +143,7 @@ class PipelineLog:
         self.range = range
         self.step_cnt += int(self._is_start_of_batch) # int(step in ActionPhase.START) # count the step
         if (self._is_start_of_batch):
-            logger.info(f"🚦  Starting local step {self.step_cnt} (in the unit of a batch computation)")
+            logger.debug(f"🚦  Starting local step {self.step_cnt} (in the unit of a batch computation)")
 
         if not self.step in [ActionType.FORWARD, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT] \
             or not self.range in [ActionStatus.START, ActionStatus.END]:
