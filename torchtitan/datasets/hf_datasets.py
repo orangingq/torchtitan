@@ -26,7 +26,6 @@ def _load_c4_dataset(dataset_path: str, split: str):
     """Load C4 dataset with default configuration."""
     return load_dataset(dataset_path, name="en", split=split, streaming=True)
 
-
 def _process_c4_text(sample: dict[str, Any]) -> str:
     """Process C4 dataset sample text."""
     return sample["text"]
@@ -79,7 +78,7 @@ DATASETS = {
     ),
     "alpaca": DatasetConfig(
         path="tatsu-lab/alpaca",
-        loader=lambda path: load_dataset(path, split="train"),
+        loader=lambda path: load_dataset(path, split="train", streaming=True),
         text_processor=_process_alpaca_text,
     ),
 }
