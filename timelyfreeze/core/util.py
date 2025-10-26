@@ -147,6 +147,8 @@ def draw_pipeline_schedule(save_file:str,
                         for s, stage in enumerate(stages_per_rank[rank])} for rank in range(num_ranks)]
     if max_time >= 2000:
         tick_unit = 500
+    elif max_time >= 1000:
+        tick_unit = 200
     elif max_time >= 400:
         tick_unit = 100
     else:

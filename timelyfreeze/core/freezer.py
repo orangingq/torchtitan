@@ -86,6 +86,8 @@ def get_freezer(model_parts: List[Module], config:TimelyFreezeConfig)->_Freezer:
         return APFFreezerWithTimelyFreeze(model_parts, config)
     elif config.freezing.metric_type == 'auto': # AutoFreeze
         return AutoFreezer(model_parts, config)
+    elif config.freezing.metric_type == 'timelyauto': # AutoFreeze + Timely Freeze
+        return AutoFreezerWithTimelyFreeze(model_parts, config)
     else:
         raise NotImplementedError(f"Metric Type [{config.freezing.metric_type}] is not supported.")
 
@@ -524,10 +526,141 @@ class AutoFreezer(_Freezer):
         return
     
 
+class AutoFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
+    def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
+        ''' Updated on Oct 26, 2025
+        TimelyFreeze + APF (follow the freeze ratio of timelyfreeze, but primarily use APF metric to select which params to freeze)
+        '''
+        super().__init__(model_parts, config)
+
+        # freezing metrics
+        self.prev_grad_norm = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.percentile = getattr(config.freezing, "percentile", 50)
+        self.threshold = 0.0
+        self.start_layer = 0
+
+        # freeze update
+        self.is_frozen = {name: False for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        self.freeze_ratio = {stage_idx: 0 for stage_idx in self.stages.keys()}
+        return
+
+    def freeze_update(self, step:int):
+        self._step_count(step)
+        if not self.config.freezing.freeze or self.step_cnt <= self.warmup_phase:
+            return
+
+        if self.step_cnt % self.stability_check_freq == 0:
+            self.set_expected_freeze_ratio()
+            self.set_params_to_freeze() # calculate freezing metric -> set actual list of freezing params
+            self.log_freeze_ratio()
+
+            # log the current and expected freeze ratio per microbatch block
+            if self.step_cnt % self.config.metrics.log_freq == 0 and \
+                self.warmup_phase < self.step_cnt <= self.progressive_freezing_phase + 2 * self.phase_unit and \
+                    self.monitored_ub and self.monitored_lb:
+                logger.info(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+        return
+    
+    
+    def set_expected_freeze_ratio(self):
+        '''Set the expected freeze ratio based on the backward time.'''
+        super().set_expected_freeze_ratio()
+        return
+    
+    def set_params_to_freeze(self):
+        """Decide which layers to freeze based on gradient variation."""
+        metric_per_layer :Dict[int, float] = self._calculate_params_metric()
+        freeze_cand :Dict[int, List[bool]] = {} # whether the parameter's metric is candidate for freezing
+        # percentile-based threshold
+        if not metric_per_layer:
+            return
+        self.threshold = np.percentile([v for k, v in metric_per_layer.items() if k >= self.start_layer], self.percentile)
+
+        # choose the first layer that exceeds the threshold
+        for layer_idx, ratio in metric_per_layer.items():
+            if ratio >= self.threshold:
+                self.start_layer = layer_idx
+                break
+
+        # update the freezing candidates
+        for stage_idx, stage in self.stages.items():
+            freeze_cand[stage_idx] = []
+            for name, param in stage.named_parameters():
+                layer_idx = self._get_layer_index(name)
+                freeze_cand[stage_idx].append(layer_idx is not None and layer_idx < self.start_layer)
+
+        if len(self.pipeline_schedule) == 0:
+            return
+        
+        for action in self.pipeline_schedule[self.config.comm.pp_rank]:
+            actual_num_freeze = min(action.num_params, int(np.round(action.num_params * action.actual_freeze_ratio)))
+            if actual_num_freeze > 0:
+                weights = [1 if val else 0.01 for val in freeze_cand[action.stage]]
+                assert len(weights) == action.num_params, f"Length Mismatch: {len(weights)} vs {action.num_params}"
+                idx = torch.multinomial(torch.tensor(weights, dtype=torch.float16), actual_num_freeze, replacement=False)
+                freezing_list = torch.zeros(action.num_params, dtype=torch.bool)
+                freezing_list[idx] = True
+                action.freezing_list = freezing_list.tolist()
+            else:
+                action.freezing_list = [False] * action.num_params
+        return 
+    
+    def log_freeze_ratio(self):
+        '''Update the frozen ratio based on the current freezing status.'''
+        if self.step_cnt % self.stability_check_freq != 0:
+            return
+
+        for stage_idx, stage in self.stages.items():
+            if self.monitored_ub:
+                for name, _ in stage.named_parameters():
+                    self.paramwise_frozen_count[stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+                    self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+
+                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and a.freezable]))
+                self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
+            else:
+                self.freeze_ratio_history[stage_idx].append(0)
+        return
+    
+    def _get_layer_index(self, name: str):
+        """Extract layer number from parameter name, e.g., 'encoder.layer.5.attention...' → 5."""
+        for part in name.replace('_', '.').split('.'):
+            if part.isdigit():
+                return int(part)
+        return None
+    
+    def _calculate_params_metric(self) -> Dict[int, float]:
+        """Accumulate gradient norms for each parameter."""
+        curr_grad_norm = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
+        for stage in self.stages.values():
+            for name, param in stage.named_parameters():
+                if param.grad is not None:
+                    curr_grad_norm[name] += torch.norm(param.grad.detach(), p=1).item()
+
+        layer_grad_change = {}
+        for stage in self.stages.values():
+            for name, _ in stage.named_parameters():
+                layer_idx = self._get_layer_index(name)
+                if layer_idx is None:
+                    continue
+                prev = self.prev_grad_norm.get(name, None)
+                curr = curr_grad_norm[name]
+                layer_grad_change.setdefault(layer_idx, 0)
+                if prev is not None and prev > 0:
+                    change_ratio = abs(prev - curr) / prev
+                    layer_grad_change[layer_idx] += change_ratio
+
+        # reset grad accumulation
+        self.prev_grad_norm = curr_grad_norm
+        return layer_grad_change
+    
+
+
+
 class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
     def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
         ''' Updated on Oct 18, 2025
-        TimelyFreeze + APF (follow the freeze ratio of timelyfreeze, but primarily use APF metric to select which params to freeze)
+        TimelyFreeze + AutoFreeze (follow the freeze ratio of timelyfreeze, but primarily use AutoFreeze metric to select which params to freeze)
         '''
         super().__init__(model_parts, config)
 
@@ -542,6 +675,8 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
         self.freezing_period = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
         self.frozen_due = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
         return
+    
+    
     
     def freeze_update(self, step:int):
         self._step_count(step)

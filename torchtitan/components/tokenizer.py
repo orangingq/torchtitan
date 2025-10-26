@@ -322,6 +322,43 @@ class HuggingFaceTokenizer(BaseTokenizer):
             if config_add_eos is not None:
                 self.default_add_eos = bool(config_add_eos)
 
+    # def encode(self, *args, **kwargs) -> list[int]:
+    #     """
+    #     Encode text into token IDs with BOS/EOS handling.
+
+    #     Args:
+    #         text (str): The text to encode
+    #         add_bos (bool): Whether to add BOS token (if not already added by tokenizer)
+    #         add_eos (bool): Whether to add EOS token (if not already added by tokenizer)
+
+    #     Returns:
+    #         list[int]: List of token IDs
+    #     """
+    #     # Extract arguments
+    #     if len(args) >= 1:
+    #         text = args[0]
+    #     else:
+    #         text = kwargs.get("text", "")
+
+    #     add_bos = kwargs.get("add_bos", self.default_add_bos)
+    #     add_eos = kwargs.get("add_eos", self.default_add_eos)
+
+    #     # Get base token IDs from the underlying tokenizer
+    #     token_ids = self.tokenizer.encode(text).ids
+
+    #     # Add BOS token if requested and not already added by tokenizer
+    #     if not self.hf_adds_bos and add_bos:
+    #         if self.bos_id is not None:
+    #             token_ids.insert(0, self.bos_id)
+
+    #     # Add EOS token if requested and not already added by tokenizer
+    #     if not self.hf_adds_eos and add_eos:
+    #         if self.eos_id is not None:
+    #             token_ids.append(self.eos_id)
+
+    #     return token_ids
+
+    
     def encode(self, *args, **kwargs) -> list[int]:
         """
         Encode text into token IDs with BOS/EOS handling.
@@ -330,7 +367,9 @@ class HuggingFaceTokenizer(BaseTokenizer):
             text (str): The text to encode
             add_bos (bool): Whether to add BOS token (if not already added by tokenizer)
             add_eos (bool): Whether to add EOS token (if not already added by tokenizer)
-
+            max_length (int): Max sequence length for truncation/padding
+            padding (str): "max_length" to pad to max_length, "longest" for batch max, "do_not_pad"
+            truncation (bool): Whether to truncate if longer than max_length
         Returns:
             list[int]: List of token IDs
         """
@@ -342,6 +381,9 @@ class HuggingFaceTokenizer(BaseTokenizer):
 
         add_bos = kwargs.get("add_bos", self.default_add_bos)
         add_eos = kwargs.get("add_eos", self.default_add_eos)
+        max_length = kwargs.get("max_length", None)
+        padding = kwargs.get("padding", "do_not_pad")
+        truncation = kwargs.get("truncation", False)
 
         # Get base token IDs from the underlying tokenizer
         token_ids = self.tokenizer.encode(text).ids
@@ -355,6 +397,17 @@ class HuggingFaceTokenizer(BaseTokenizer):
         if not self.hf_adds_eos and add_eos:
             if self.eos_id is not None:
                 token_ids.append(self.eos_id)
+
+        # CSH: Truncation
+        if max_length is not None and truncation:
+            token_ids = token_ids[:max_length]
+
+        # CSH: Padding
+        if max_length is not None and padding == "max_length":
+            pad_len = max_length - len(token_ids)
+            if pad_len > 0:
+                pad_id = self.tokenizer.token_to_id("[PAD]") or 0
+                token_ids = token_ids + [pad_id] * pad_len
 
         return token_ids
 

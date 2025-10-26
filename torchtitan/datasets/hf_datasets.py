@@ -142,7 +142,7 @@ class HuggingFaceDataset(IterableDataset, Stateful):
 
         return iter(self._data)
 
-    def __iter__(self):
+    def __iter__(self): # for pretraining
         max_buffer_token_len = 1 + self.seq_len
 
         while True:
@@ -150,7 +150,8 @@ class HuggingFaceDataset(IterableDataset, Stateful):
                 # Use the dataset-specific text processor
                 sample_text = self._text_processor(sample)
                 sample_tokens = self._tokenizer.encode(
-                    sample_text, add_bos=True, add_eos=True
+                    # sample_text, add_bos=True, add_eos=True # : streaming mode without truncation
+                    sample_text, add_bos=True, add_eos=True, truncation=True, max_length=self.seq_len, padding='max_length' # : sample-level with truncation
                 )
                 self._token_buffer.extend(sample_tokens)
                 self._sample_idx += 1
@@ -176,7 +177,7 @@ class HuggingFaceDataset(IterableDataset, Stateful):
                         self._data, "epoch"
                     ):
                         self._data.set_epoch(self._data.epoch + 1)
-
+    
     def load_state_dict(self, state_dict):
         self._token_buffer = state_dict["token_buffer"]
 

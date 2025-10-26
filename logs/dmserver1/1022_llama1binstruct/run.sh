@@ -34,42 +34,56 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in nofreeze fullrand7 apf auto timelyapf ; do 
+EXPERIMENT_LIST=( # You can expand this list as needed
+  "GPipe nofreeze"
+  "GPipe timelyauto"
+  "1F1B timelyauto"
+  "1F1B timelyapf"
+  "Interleaved1F1B timelyauto"
+  "Interleaved1F1B timelyapf"
+  "Interleaved1F1B auto"
+)
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"
-        ADDITIONAL_ARGS=(
-            "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
-            "--job.basename=${BASENAME}"
+# for PP_SCHEDULER in GPipe ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+#     for METRIC_TYPE in nofreeze ; do 
+for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
+    IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
+    PP_SCHEDULER="${EXP_ARRAY[0]}"
+    METRIC_TYPE="${EXP_ARRAY[1]}"
+
+    OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
+    BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"
+    ADDITIONAL_ARGS=(
+        "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
+        "--job.basename=${BASENAME}"
+    )
+    if [[ "$METRIC_TYPE" == "nofreeze" ]]; then       
+        FREEZE_ARGS=(
+            "--freezing.no-freeze"
         )
-        if [[ "$METRIC_TYPE" == "nofreeze" ]]; then       
-            FREEZE_ARGS=(
-                "--freezing.no-freeze"
-            )
-        else
-            FREEZE_ARGS=(
-                "--freezing.freeze"
-                "--freezing.metric_type=${METRIC_TYPE}"
-            )
-        fi
+    else
+        FREEZE_ARGS=(
+            "--freezing.freeze"
+            "--freezing.metric_type=${METRIC_TYPE}"
+        )
+    fi
 
-        # Print the current timestamp and the server name
-        {
-            echo -e "\n🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
-            echo -e "✔️Current Timestamp: $(date)"
-            echo -e "✔️SERVER: $(hostname) ($(hostname -I | awk '{print $1}')),  GPUs: ${CUDA_VISIBLE_DEVICES}"
-            echo -e "✔️SCRIPT: ${THIS_FILE}"
-            echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
-            echo -e "✔️${EXPLAIN}"
-            echo -e "✔️Running with ${METRIC_TYPE} x ${PP_SCHEDULER} ... "
-            echo -e "☑️> torchrun ${COMMON_ARGS[@]} ${PP_ARGS[@]} ${FREEZE_ARGS[@]}"
-            echo -e "🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
-        } | tee -a ${OUTPUT_FILE}
+    # Print the current timestamp and the server name
+    {
+        echo -e "\n🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
+        echo -e "✔️Current Timestamp: $(date)"
+        echo -e "✔️SERVER: $(hostname) ($(hostname -I | awk '{print $1}')),  GPUs: ${CUDA_VISIBLE_DEVICES}"
+        echo -e "✔️SCRIPT: ${THIS_FILE}"
+        echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
+        echo -e "✔️${EXPLAIN}"
+        echo -e "✔️Running with ${METRIC_TYPE} x ${PP_SCHEDULER} ... "
+        echo -e "☑️> torchrun ${COMMON_ARGS[@]} ${PP_ARGS[@]} ${FREEZE_ARGS[@]}"
+        echo -e "🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
+    } | tee -a ${OUTPUT_FILE}
 
-        torchrun "${COMMON_ARGS[@]}" "${ADDITIONAL_ARGS[@]}" "${FREEZE_ARGS[@]}"  2>&1 | tee -a ${OUTPUT_FILE}
+    torchrun "${COMMON_ARGS[@]}" "${ADDITIONAL_ARGS[@]}" "${FREEZE_ARGS[@]}"  2>&1 | tee -a ${OUTPUT_FILE}
 
-    done
+    # done
 done
 
 echo "✅ All runs completed. Logs saved in ${LOG_DIR}."
