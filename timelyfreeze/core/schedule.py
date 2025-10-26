@@ -163,14 +163,14 @@ def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]])-> List[List[A
     res = linprog(c, A_ub=np.array(A), b_ub=np.array(b), bounds=bounds, method="highs")
 
     if res.success:
-        start_times = res.x[:n]
+        # start_times = res.x[:n]
         durations = res.x[n:2*n]
         for i, action in enumerate(actions):
-            action.start_time = start_times[i]
+            # action.start_time = start_times[i]
             action.duration = durations[i]
     else:
         raise RuntimeError("Linear programming failed.")
-    return pipeline_schedule
+    return schedule_pipeline(pipeline_schedule)
 
 
 
