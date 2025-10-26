@@ -591,6 +591,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                     self.job_config.validation.enabled
                     and self.validator.should_validate(self.step)
                 ):
+                    logger.info(f"🔎  Running validation at step {self.step}")
                     self.validator.validate(self.model_parts, self.step)
 
                 self.checkpointer.save(
