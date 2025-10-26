@@ -21,8 +21,19 @@ def get_abs_path(path:str, base_dir:str)->str:
     return path
 
 
-def draw_line_chart(data_x, data_y, save_file, config: TimelyFreezeConfig, title=None, xlabel=None, ylabel=None):
-    '''Draw the line chart of the data.'''
+def draw_line_chart(data_x, data_y, save_file, config: TimelyFreezeConfig, title=None, xlabel=None, ylabel=None, window_size=5):
+    '''
+    Draw the line chart of the data.
+    Args:
+        data_x: list of x-axis data.
+        data_y: list of y-axis data.
+        save_file: path to save the image.
+        config: TimelyFreezeConfig object.
+        title: title of the chart.
+        xlabel: label of the x-axis.
+        ylabel: label of the y-axis.
+        window_size: window size for moving average trend line.
+    '''
     if len(data_x) == 0 or len(data_y) == 0:
         logger.warning("Data is empty. Skip drawing the line chart.")
         return None
@@ -33,16 +44,16 @@ def draw_line_chart(data_x, data_y, save_file, config: TimelyFreezeConfig, title
     fig, ax = plt.subplots()
     # Fit and plot trend line
     if len(data_y) > 30:
-        window_size = 5
         moving_avg = np.convolve(data_y, np.ones(window_size)/window_size, mode='valid')
-        ax.plot(data_x[window_size-1:], moving_avg, linestyle='-', color='#EDE8DF', linewidth=10)
-    ax.plot(data_x, data_y, marker='o', linestyle='-', color='#988456', markersize=2 if len(data_y) > 50 else 3, linewidth=1)
+        ax.plot(data_x[window_size-1:], moving_avg, linestyle='-', color="#DCD2C0", linewidth=8, alpha=0.5, zorder=1)
+    ax.scatter(data_x, data_y, marker='o', color='#988456', s=6 if len(data_y) > 50 else 12, zorder=2)
+
     ax.set_title(title if title is not None else f"Line Chart of Rank {config.comm.global_rank} (Stage {config.comm.pp_rank})", 
-                    fontdict={'fontsize': 11})
+                    fontdict={'fontsize': 13})
     if xlabel:
-        ax.set_xlabel(xlabel)
+        ax.set_xlabel(xlabel, fontdict={'fontsize': 13})
     if ylabel:
-        ax.set_ylabel(ylabel)
+        ax.set_ylabel(ylabel, fontdict={'fontsize': 13})
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
     plt.savefig(save_file)
     plt.close()
@@ -87,9 +98,9 @@ def draw_elementwise_histogram(data, stage, save_file, config: TimelyFreezeConfi
         past_counts += count
     
     total_count_text = f'Counts Sum\n{int(past_counts)}\n({past_counts/total_sum*100:.2f}%)'
-    ax1.text(max(min(80, past_ratio-5),5), 0, total_count_text, ha='center', va='center', fontsize=10, color='black')
+    ax1.text(max(min(80, past_ratio-5),5), 0, total_count_text, ha='center', va='center', fontsize=11, color='black')
     total_elem_text = f'Total Sum\n{int(total_sum)}\n(100%)'
-    ax1.text(95, 0, total_elem_text, ha='center', va='center', fontsize=10, color='black')
+    ax1.text(95, 0, total_elem_text, ha='center', va='center', fontsize=11, color='black')
     ax1.set_xlim(0, 100)
     ax1.set_xticks(np.arange(0, 101, 10))
     ax1.set_yticks([])
@@ -100,11 +111,11 @@ def draw_elementwise_histogram(data, stage, save_file, config: TimelyFreezeConfi
     ax2.set_ylim(0, 1)
     xticks = range(len(data)) if len(data) < 20 else range(0, len(data), len(data)//20)
     ax2.set_xticks(xticks)
-    ax2.set_xticklabels([f'{i}' for i in xticks], rotation=45, fontsize=8)
+    ax2.set_xticklabels([f'{i}' for i in xticks], rotation=45, fontsize=9)
     ax2.set_ylabel('Count/Total Ratio')
     ax2.set_xlabel(f'{xlabel2 if xlabel2 else "Element Index"} (#)')
 
-    fig.suptitle(title if title is not None else f"Elementwise Histogram of Rank {config.comm.global_rank} (Stage {stage})", fontsize=13)
+    fig.suptitle(title if title is not None else f"Elementwise Histogram of Rank {config.comm.global_rank} (Stage {stage})", fontsize=15)
     plt.subplots_adjust(bottom=0.2)
 
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
@@ -144,6 +155,7 @@ def draw_pipeline_schedule(save_file:str,
     fig, ax = plt.subplots(figsize=(max(1, round(max_time/tick_unit*3)), 3), dpi=100)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     plt.margins(0)
+
     if not (xlabel or ylabel): 
         ax.axis('off')
     ax.spines['bottom'].set_position(('outward', 0))
@@ -155,15 +167,17 @@ def draw_pipeline_schedule(save_file:str,
     ax.invert_yaxis() # invert y-axis to have rank 0 at the top
     ax.set_xticks(np.append(np.arange(0, max_time if (max_time%tick_unit >= tick_unit*30) else max_time-tick_unit, tick_unit), max_time))
     ax.set_yticks(range(num_ranks))
-    ax.set_yticklabels([f'Rank {i}' for i in range(num_ranks)])
-    
+    ax.set_yticklabels([f'Rank {i}' for i in range(num_ranks)], fontsize=20)
+    ax.tick_params(axis='x', labelsize=20)
+    ax.tick_params(axis='y', labelsize=20)
+
     if xlabel:
-        ax.set_xlabel(xlabel) # "Time"
+        ax.set_xlabel(xlabel, fontsize=20) # "Time"
     if ylabel:
-        ax.set_ylabel(ylabel) # "Rank"
+        ax.set_ylabel(ylabel, fontsize=20) # "Rank"
     if title is not None:
-        ax.set_title(title) # "Pipeline Schedule TimeBlock Sequence" if title is None else title
-    
+        ax.set_title(title, fontsize=18) # "Pipeline Schedule TimeBlock Sequence" if title is None else title
+
     # Add vertical construction lines for better visualization
     for time in plt.xticks()[0]: 
         ax.axvline(x=time, color='gray', linestyle='--', linewidth=0.5, alpha=0.7, zorder=0)
@@ -189,12 +203,12 @@ def draw_pipeline_schedule(save_file:str,
                 if action.duration > 1: # only write the microbatch index if the duration is greater than 1 ms
                     ax.text(
                         x=action._start_time + w_i/2, y=action.rank, s=str(action.microbatch+1), # +1 for 1-based index
-                        ha='center', va='center', fontsize=15,
+                        ha='center', va='center', fontsize=18,
                         color=stage_color_map[action.rank].get(action.stage, 'black')
                     )
                     ax.text(
                         x=action._start_time + (action.duration + w_i)/2, y=action.rank, s=str(action.microbatch+1), # +1 for 1-based index
-                        ha='center', va='center', fontsize=15,
+                        ha='center', va='center', fontsize=18,
                         color=stage_color_map[action.rank].get(action.stage, 'black')
                     )
             else:
@@ -205,7 +219,7 @@ def draw_pipeline_schedule(save_file:str,
                 if action.duration > 1: # only write the microbatch index if the duration is greater than 1 ms
                     ax.text(
                         x=action._start_time + action.duration/2, y=action.rank, s=str(action.microbatch+1), # +1 for 1-based index
-                        ha='center', va='center', fontsize=15,
+                        ha='center', va='center', fontsize=18,
                         color=stage_color_map[action.rank].get(action.stage, 'black')
                     )
     

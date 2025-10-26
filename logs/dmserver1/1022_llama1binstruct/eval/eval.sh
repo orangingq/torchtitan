@@ -12,8 +12,11 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1023_GPipe_nofreeze_dm1"
-  "1023_GPipe_fullrand7_dm1" 
+  "1023_1F1B_nofreeze_dm1"
+  "1023_1F1B_fullrand7_dm1"
+  "1023_1F1B_apf_dm1"
+  "1023_1F1B_auto_dm1"
+  "1023_Interleaved1F1B_fullrand7_dm1" 
   # "1023_gpipe_apf_dm1"
   # "1023_gpipe_auto_dm1"
 ) 
