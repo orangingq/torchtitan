@@ -134,9 +134,14 @@ def draw_pipeline_schedule(save_file:str,
     }
     stage_color_map = [{stage: f'#{int(255-s/(num_stages_per_rank-0.999)*255):02X}{int(255-s/(num_stages_per_rank-0.999)*255):02X}{int(255-s/(num_stages_per_rank-0.999)*255):02X}' 
                         for s, stage in enumerate(stages_per_rank[rank])} for rank in range(num_ranks)]
-
+    if max_time >= 2000:
+        tick_unit = 500
+    elif max_time >= 400:
+        tick_unit = 100
+    else:
+        tick_unit = 50
     # set the figure size and axes
-    fig, ax = plt.subplots(figsize=(max(1, round(max_time/(50 if max_time < 400 else 100)*3)), 3), dpi=100)
+    fig, ax = plt.subplots(figsize=(max(1, round(max_time/tick_unit*3)), 3), dpi=100)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     plt.margins(0)
     if not (xlabel or ylabel): 
@@ -148,7 +153,7 @@ def draw_pipeline_schedule(save_file:str,
     ax.yaxis.set_ticks_position('left')
     ax.set_xlim(-space, max_time + space) # set x-axis limit
     ax.invert_yaxis() # invert y-axis to have rank 0 at the top
-    ax.set_xticks(np.append(np.arange(0, max_time if (max_time%100>=30) else max_time-100, 100), max_time))
+    ax.set_xticks(np.append(np.arange(0, max_time if (max_time%tick_unit >= tick_unit*30) else max_time-tick_unit, tick_unit), max_time))
     ax.set_yticks(range(num_ranks))
     ax.set_yticklabels([f'Rank {i}' for i in range(num_ranks)])
     

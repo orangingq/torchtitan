@@ -6,7 +6,7 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1022_llama1binstruct"
+EXPERIMENT_TAG="1024_llama8b"
 
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
@@ -22,10 +22,12 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1023_GPipe_nofreeze_dm1"
-  "1023_GPipe_fullrand7_dm1" 
-  # "1023_gpipe_apf_dm1"
-  # "1023_gpipe_auto_dm1"
+  "1024_GPipe_nofreeze_dm1"
+  "1024_GPipe_fullrand7_dm1" 
+  "1024_GPipe_apf_dm1"
+  "1024_1F1B_nofreeze_dm1"
+  "1024_1F1B_fullrand7_dm1"
+  "1024_1F1B_apf_dm1"
 ) 
 MODEL_TYPE="Llama-3.2-1B-Instruct"
 
