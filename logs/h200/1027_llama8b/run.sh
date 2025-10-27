@@ -49,7 +49,7 @@ COMMON_ARGS=(
 # )
 
 for PP_SCHEDULER in GPipe ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in apf auto fullrand7 timelyapf timelyauto nofreeze ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
+    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"
