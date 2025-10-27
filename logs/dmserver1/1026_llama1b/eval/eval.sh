@@ -10,22 +10,21 @@ echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
 LOG_DIR="$(dirname "${THIS_FILE}")"
 
-CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
+CHECKPOINT_ROOT="/data3/shcho/torchtitan/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1023_1F1B_nofreeze_dm1"
-  "1023_1F1B_fullrand7_dm1"
-  "1023_1F1B_apf_dm1"
-  "1023_1F1B_auto_dm1"
-  "1023_Interleaved1F1B_fullrand7_dm1" 
-  # "1023_gpipe_apf_dm1"
-  # "1023_gpipe_auto_dm1"
+  "1026_GPipe_nofreeze_dm1"
+  "1026_GPipe_fullrand7_dm1"
+  "1026_GPipe_apf_dm1"
+  "1026_GPipe_auto_dm1"
+  "1026_GPipe_timelyapf_dm1"
+  # "1026_GPipe_timelyauto_dm1"
 ) 
 MODEL_TYPE="Llama-3.2-1B-Instruct"
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
     OUTPUT_FILE="${LOG_DIR}/eval_${BASENAME}.log"
-    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-2000"
+    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-1000"
     RESULT_FILE="${MODEL_PATH}/eval_${BASENAME}.json"
 
     # Check if the model path exists
