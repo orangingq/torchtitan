@@ -3,7 +3,7 @@
 # Define common environment variables
 EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation"
 EXPERIMENT_TAG="1026_llama1b"
-TODAY="1026"
+TODAY="1027"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=3,4,5,6

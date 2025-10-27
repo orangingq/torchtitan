@@ -58,8 +58,10 @@ class HuggingFaceTokenizer(BaseTokenizer):
         # Initialize BOS/EOS token attributes (frequently used)
         self.bos_id = None
         self.eos_id = None
+        self.pad_id = None
         self.bos_token = None
         self.eos_token = None
+        self.pad_token = None
 
         # Load the underlying tokenizer
         self.tokenizer = self._load_tokenizer_from_path(tokenizer_path)
@@ -406,7 +408,10 @@ class HuggingFaceTokenizer(BaseTokenizer):
         if max_length is not None and padding == "max_length":
             pad_len = max_length - len(token_ids)
             if pad_len > 0:
-                pad_id = self.tokenizer.token_to_id("[PAD]") or 0
+                pad_id = self.tokenizer.token_to_id("<|finetune_right_pad_id|>") \
+                        or self.tokenizer.token_to_id("[PAD]") \
+                        or self.tokenizer.token_to_id("<pad>") \
+                        or 0
                 token_ids = token_ids + [pad_id] * pad_len
 
         return token_ids
