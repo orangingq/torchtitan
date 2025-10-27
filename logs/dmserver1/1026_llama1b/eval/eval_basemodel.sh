@@ -2,7 +2,7 @@
 
 # Define common environment variables
 EXPLAIN="Llama 3.2 1B Instruct Base Model Evaluation"
-TODAY="1026"
+TODAY="1028"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"
@@ -14,6 +14,7 @@ CHECKPOINT_ROOT="/data2/shcho/torchtitan/base_model"
 BASENAME_LIST=( # You can expand this list as needed
   "Llama-3.2-1B-Instruct"
 ) 
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1,gsm8k,bbh"
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
@@ -36,13 +37,13 @@ for BASENAME in "${BASENAME_LIST[@]}"; do
         echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
         echo -e "✔️RESULT: ${RESULT_FILE}"
         echo -e "✔️${EXPLAIN}"
-        echo -e "☑️> python3 -m timelyfreeze.eval_hf_checkpoint --model_path=${MODEL_PATH} --dtype=float16 --model_type=Llama-3.2-1B-Instruct --batch_size=16 --device_map=cuda --output_json=${RESULT_FILE}"
+        echo -e "☑️> python3 -m timelyfreeze.eval_hf_checkpoint --model_path=${MODEL_PATH} --dtype=float16 --model_type=Llama-3.2-1B-Instruct --batch_size=16 --device_map=cuda --tasks=${TASKS} --output_json=${RESULT_FILE}"
         echo -e "❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️"
     } | tee -a ${OUTPUT_FILE}
 
     python3 -m timelyfreeze.eval_hf_checkpoint \
         --model_path=${MODEL_PATH} --output_json=${RESULT_FILE} \
-        --dtype=float16 --model_type=Llama-3.2-1B-Instruct --batch_size=16 --device_map=cuda \
+        --dtype=float16 --model_type=Llama-3.2-1B-Instruct --batch_size=16 --device_map=cuda --tasks=${TASKS} \
         2>&1 | tee -a ${OUTPUT_FILE}
 
 done
