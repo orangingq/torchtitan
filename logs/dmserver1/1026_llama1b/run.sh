@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation"
+EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs"
 EXPERIMENT_TAG="1026_llama1b"
-TODAY="1027"
+TODAY="1028"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=3,4,5,6

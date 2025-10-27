@@ -12,19 +12,20 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/data3/shcho/torchtitan/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1026_GPipe_nofreeze_dm1"
-  "1026_GPipe_fullrand7_dm1"
-  "1026_GPipe_apf_dm1"
-  "1026_GPipe_auto_dm1"
-  "1026_GPipe_timelyapf_dm1"
+  "1028_GPipe_nofreeze_dm1"
+  # "1027_GPipe_fullrand7_dm1"
+  # "1027_GPipe_apf_dm1"
+  # "1027_GPipe_auto_dm1"
+  # "1027_GPipe_timelyapf_dm1"
   # "1026_GPipe_timelyauto_dm1"
 ) 
 MODEL_TYPE="Llama-3.2-1B-Instruct"
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1,gsm8k,bbh"
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
     OUTPUT_FILE="${LOG_DIR}/eval_${BASENAME}.log"
-    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-1000"
+    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-1600"
     RESULT_FILE="${MODEL_PATH}/eval_${BASENAME}.json"
 
     # Check if the model path exists
@@ -68,13 +69,13 @@ JSON
         echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
         echo -e "✔️RESULT: ${RESULT_FILE}"
         echo -e "✔️${EXPLAIN}"
-        echo -e "☑️> python3 -m timelyfreeze.eval_hf_checkpoint --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --output_json=${RESULT_FILE}"
+        echo -e "☑️> python3 -m timelyfreeze.eval_hf_checkpoint --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} --output_json=${RESULT_FILE}"
         echo -e "❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️"
     } | tee -a ${OUTPUT_FILE}
 
     python3 -m timelyfreeze.eval_hf_checkpoint \
       --model_path=${MODEL_PATH} --output_json=${RESULT_FILE} \
-      --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda \
+      --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} \
       2>&1 | tee -a ${OUTPUT_FILE}
 
 done
