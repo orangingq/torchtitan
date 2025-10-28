@@ -47,14 +47,13 @@ def _process_alpaca_text(sample: dict[str, Any]) -> str:
     """Process Alpaca dataset sample text."""
     return sample["text"]
 
-def _process_self_instruct_text(sample: dict[str, Any]) -> str:
+def _process_medical_text(sample: dict[str, Any]) -> str:
     """Process Self-Instruct dataset sample into a single prompt+response text."""
-    prompt = sample.get("prompt", "").strip()
-    completion = sample.get("completion", "").strip()
-
-    # Combine prompt and completion into a single string for tokenization
-    full_text = f"{prompt} {completion}"
-    return full_text
+    question = sample["Question"].strip()
+    cot = sample["Complex_CoT"].strip()
+    response = sample["Response"].strip()
+    prompt = f"<|user|>\n{question}\n<|assistant|>## Thinking\n\n{cot}\n\n## Final Response\n\n{response}"
+    return prompt
 
 @dataclass
 class DatasetConfig:
@@ -90,10 +89,10 @@ DATASETS = {
         loader=lambda path: load_dataset(path, split="train"),
         text_processor=_process_alpaca_text,
     ),
-    "self-instruct": DatasetConfig(
-        path="yizhongw/self-instruct",
-        loader=lambda path: load_dataset(path, split="train"),
-        text_processor=_process_self_instruct_text,
+    "medical": DatasetConfig(
+        path="FreedomIntelligence/medical-o1-reasoning-SFT",
+        loader=lambda path: load_dataset(path, "en_mix", split="train"), # 24.9k samples for en_mix
+        text_processor=_process_medical_text,
     ),
 }
 
@@ -213,6 +212,96 @@ class HuggingFaceDataset(IterableDataset, Stateful):
 
         return _state_dict
 
+class HuggingFaceMultiDataset(IterableDataset, Stateful):
+    def __init__(
+        self,
+        dataset_names: list[str],
+        dataset_paths: list[str] | None,
+        tokenizer: BaseTokenizer,
+        seq_len: int = 2048,
+        dp_rank: int = 0,
+        dp_world_size: int = 1,
+        infinite: bool = False,
+    ) -> None:
+        assert dataset_paths is None or len(dataset_names) == len(dataset_paths)
+
+        self.datasets = []
+        self.dataset_names = dataset_names
+        self._tokenizer = tokenizer
+        self.seq_len = seq_len
+        self.infinite = infinite
+        self.dp_rank = dp_rank
+        self.dp_world_size = dp_world_size
+
+        self._sample_idx = [0] * len(dataset_names)
+        self._token_buffer: list[int] = []
+
+        for i, ds_name in enumerate(dataset_names):
+            ds_path = dataset_paths[i] if dataset_paths else None
+            path, dataset_loader, text_processor = _validate_dataset(ds_name, ds_path)
+            ds = dataset_loader(path)
+            ds_split = split_dataset_by_node(ds, dp_rank, dp_world_size)
+
+            self.datasets.append({
+                "name": ds_name,
+                "data": ds_split,
+                "text_processor": text_processor,
+            })
+
+
+            
+
+    def _get_data_iter(self, i):
+        ds = self.datasets[i]["data"]
+        idx = self._sample_idx[i]
+
+        if isinstance(ds, Dataset):
+            if idx == len(ds):
+                return iter([])
+            else:
+                return iter(ds.skip(idx))
+        return iter(ds)
+
+    def __iter__(self):
+        max_buffer_token_len = 1 + self.seq_len
+
+        while True:
+            for i, ds_dict in enumerate(self.datasets):
+                for sample in self._get_data_iter(i):
+                    sample_text = ds_dict["text_processor"](sample)
+                    sample_tokens = self._tokenizer.encode(
+                        sample_text,
+                        add_bos=True,
+                        add_eos=True,
+                        truncation=True,
+                        max_length=self.seq_len,
+                        padding="max_length",
+                    )
+                    self._token_buffer.extend(sample_tokens)
+                    self._sample_idx[i] += 1
+
+                    while len(self._token_buffer) >= max_buffer_token_len:
+                        x = torch.LongTensor(self._token_buffer[:max_buffer_token_len])
+                        self._token_buffer = self._token_buffer[max_buffer_token_len:]
+                        input = x[:-1]
+                        label = x[1:]
+                        yield {"input": input}, label
+
+            if not self.infinite:
+                logger.warning(f"Datasets {self.dataset_names} have run out of data")
+                break
+            else:
+                self._sample_idx = [0] * len(self.datasets)
+                logger.warning(f"Datasets {self.dataset_names} are being re-looped")
+
+    def load_state_dict(self, state_dict):
+        self._token_buffer = state_dict["token_buffer"]
+        self._sample_idx = state_dict["sample_idx"]
+
+    def state_dict(self):
+        return {"token_buffer": self._token_buffer, "sample_idx": self._sample_idx}
+
+
 
 def build_hf_dataloader(
     dp_world_size: int,
@@ -227,14 +316,25 @@ def build_hf_dataloader(
     batch_size = job_config.training.local_batch_size
     seq_len = job_config.training.seq_len
 
-    hf_ds = HuggingFaceDataset(
-        dataset_name=dataset_name,
-        dataset_path=dataset_path,
-        tokenizer=tokenizer,
-        seq_len=seq_len,
-        dp_rank=dp_rank,
-        dp_world_size=dp_world_size,
-        infinite=infinite,
+    if ',' in dataset_name:
+        hf_ds = HuggingFaceMultiDataset(
+            dataset_names=dataset_name.split(','),
+            dataset_paths=dataset_path.split(',') if dataset_path else None,
+            tokenizer=tokenizer,
+            seq_len=seq_len,
+            dp_rank=dp_rank,
+            dp_world_size=dp_world_size,
+            infinite=infinite,
+        )
+    else:
+        hf_ds = HuggingFaceDataset(
+            dataset_name=dataset_name,
+            dataset_path=dataset_path,
+            tokenizer=tokenizer,
+            seq_len=seq_len,
+            dp_rank=dp_rank,
+            dp_world_size=dp_world_size,
+            infinite=infinite,
     )
 
     return ParallelAwareDataloader(
