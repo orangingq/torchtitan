@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs"
-EXPERIMENT_TAG="1026_llama1b"
+EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16 autocast"
+EXPERIMENT_TAG="1028_llama1b"
 TODAY="1028"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
@@ -44,7 +44,7 @@ COMMON_ARGS=(
 #   "Interleaved1F1B auto"
 # )
 
-for PP_SCHEDULER in Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do 
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"

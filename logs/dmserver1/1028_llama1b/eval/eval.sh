@@ -2,7 +2,7 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1026_llama1b"
+EXPERIMENT_TAG="1028_llama1b"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"

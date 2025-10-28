@@ -438,15 +438,15 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
                 targets, losses = (
                     (labels, []) if self.pp_has_last_stage else (None, None)
                 )
-
-                if self.pp_has_first_stage:
-                    self.pp_schedule.step(
-                        inputs, target=targets, losses=losses, input_batch=inputs
-                    )
-                else:
-                    self.pp_schedule.step(
-                        target=targets, losses=losses, input_batch=inputs
-                    )
+                with self.maybe_enable_amp:
+                    if self.pp_has_first_stage:
+                        self.pp_schedule.step(
+                            inputs, target=targets, losses=losses, input_batch=inputs
+                        )
+                    else:
+                        self.pp_schedule.step(
+                            target=targets, losses=losses, input_batch=inputs
+                        )
 
             # accumulate losses across pipeline microbatches
             # TODO: PP+FSDP unexpectedly puts the loss back to the CPU
