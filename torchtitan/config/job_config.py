@@ -199,7 +199,7 @@ class Training:
     Whether to apply CPU offloading of parameters, gradients, and optimizer states in FSDP
     """
 
-    mixed_precision_param: Literal["bfloat16", "float32"] = "bfloat16"
+    mixed_precision_param: Literal["bfloat16", "float32", "float16"] = "bfloat16"
     """
     torch dtype to use for parameters when applying mixed precision via fully_shard or torch.autocast.
     This feature takes effect via fully_shard when data_parallel_shard_degree > 1 or
