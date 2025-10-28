@@ -47,6 +47,15 @@ def _process_alpaca_text(sample: dict[str, Any]) -> str:
     """Process Alpaca dataset sample text."""
     return sample["text"]
 
+def _process_self_instruct_text(sample: dict[str, Any]) -> str:
+    """Process Self-Instruct dataset sample into a single prompt+response text."""
+    prompt = sample.get("prompt", "").strip()
+    completion = sample.get("completion", "").strip()
+
+    # Combine prompt and completion into a single string for tokenization
+    full_text = f"{prompt} {completion}"
+    return full_text
+
 @dataclass
 class DatasetConfig:
     path: str
@@ -78,8 +87,13 @@ DATASETS = {
     ),
     "alpaca": DatasetConfig(
         path="tatsu-lab/alpaca",
-        loader=lambda path: load_dataset(path, split="train", streaming=True),
+        loader=lambda path: load_dataset(path, split="train"),
         text_processor=_process_alpaca_text,
+    ),
+    "self-instruct": DatasetConfig(
+        path="yizhongw/self-instruct",
+        loader=lambda path: load_dataset(path, split="train"),
+        text_processor=_process_self_instruct_text,
     ),
 }
 
