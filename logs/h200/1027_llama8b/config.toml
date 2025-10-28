@@ -1,0 +1,98 @@
+# torchtitan Config.toml
+# NOTE: this toml config is a preset for 64 A100 GPUs.
+
+[job]
+dump_folder = "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data"
+description = "Llama 3.1 8B training with/without freezer"
+
+[profiling]
+enable_profiling = false
+save_traces_folder = "profile_trace"
+profile_freq = 100
+enable_memory_snapshot = false # true
+save_memory_snapshot_folder = "memory_snapshot"
+
+[metrics]
+log_freq = 20
+pplog_freq = 80 # usually log_freq * (global_batch_size / local_batch_size)
+draw_freq = 100
+enable_tensorboard = false
+save_tb_folder = "tb"
+enable_wandb = true
+basename = "llama3.1_8b_pp4"
+draw_graph = true
+disable_color_printing = true
+image_folder = "images"
+
+[model]
+name = "llama3"
+flavor = "8B"
+tokenizer_path = "./assets/tokenizer/Llama-3.1-8B-Instruct"
+# converters = ["float8"]
+
+[optimizer]
+name = "AdamW"
+lr = 1e-5 # 3e-4
+eps = 1e-8
+
+[lr_scheduler]
+warmup_steps = 100  # lr scheduler warm up
+decay_ratio = 0.8  # lr scheduler decay ratio, 80% of the train steps
+decay_type = "cosine"
+lr_min = 0.0
+
+[training]
+global_batch_size = 64 # TODO
+local_batch_size = 32 # 1 -> 8 for pipeline parallelism
+seq_len = 512 # 8192 -> 1024
+max_norm = 1.0  # grad norm clipping
+steps = 1600
+compile = false
+dataset = "alpaca"
+
+[parallelism]
+data_parallel_replicate_degree = 1
+data_parallel_shard_degree = -1
+tensor_parallel_degree = 1
+pipeline_parallel_degree = 4
+pipeline_parallel_schedule = "GPipe" # "InterleavedZeroBubble" "1f1b" Interleaved1f1b
+pipeline_parallel_microbatch_size = 4 # size of microbatch in pipeline parallelism. number of microbatches = local_batch_size / pipeline_parallel_microbatch_size
+context_parallel_degree = 1
+
+[freezing]
+freeze = true
+metric_type = "apf" # fullrand6 apf
+phase_unit = 10
+stability_check_freq = 5
+aggressiveness = 0
+
+[comm]
+train_timeout_seconds = 300
+
+[checkpoint]
+enable_checkpoint = true
+initial_load_path = "/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp"
+folder = "checkpoint"
+interval = 800
+keep_latest_k = 2
+last_save_model_only = true
+export_dtype = "float16" # "float32" -> "float16"
+exclude_from_loading = ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+last_save_in_hf = false
+async_mode = 'async'
+
+[activation_checkpoint]
+mode = "none" # "selective"  # ["none", "selective", "full"]
+selective_ac_option = "op"  # "int" = ac every positive int layer or 'op', ac based on ops policy
+
+[float8]
+enable_fsdp_float8_all_gather = false
+precompute_float8_dynamic_scale_for_fsdp = false
+filter_fqns = ["output"]
+
+[validation]
+enabled = true
+local_batch_size = 32
+seq_len = 512
+freq = 100
+steps = 100

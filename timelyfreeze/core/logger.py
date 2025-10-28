@@ -210,8 +210,8 @@ class PipelineLog:
         if self._is_start_of_batch or self._is_end_of_batch:
             self.cuda_timer_batch[self.range].append(new_event)
 
-        # log the time duration of forward and backward, for every n=10 batches
-        flush_freq = 10
+        # log the time duration of forward and backward, for every n=30 batches
+        flush_freq = 30
         end_of_nth_batch = self._is_end_of_batch and self.step_cnt % flush_freq == 1 and self.step_cnt > 1
         if end_of_nth_batch:
             self._tmp_timer_flush(flush_freq=flush_freq)

@@ -1,0 +1,2449 @@
+✔️ SLURM JOB GPUS: 2,3,4,5
+✔️ Using Slurm-assigned GPU(s): 2,3,4,5
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sun Oct 26 18:56:08 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 2,3,4,5
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/1027_GPipe_nofreeze.log
+✔️Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation
+✔️Running with nofreeze x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml --job.description="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation" --parallelism.pipeline_parallel_degree=4  --freezing.no-freeze
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1026 18:56:09.584000 2480047 site-packages/torch/distributed/run.py:811] 
+W1026 18:56:09.584000 2480047 site-packages/torch/distributed/run.py:811] *****************************************
+W1026 18:56:09.584000 2480047 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1026 18:56:09.584000 2480047 site-packages/torch/distributed/run.py:811] *****************************************
+[rank0]:2025-10-26 18:56:15,253 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank2]:2025-10-26 18:56:15,409 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank1]:2025-10-26 18:56:15,433 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:2025-10-26 18:56:15,482 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:56:16,221 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-10-26 18:56:16,224 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:56:16,229 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank2]:2025-10-26 18:56:16,511 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-10-26 18:56:16,515 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-10-26 18:56:16,582 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-10-26 18:56:16,584 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank1]:Traceback (most recent call last):
+[rank1]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank1]:  File "<frozen runpy>", line 88, in _run_code
+[rank1]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 713, in <module>
+[rank1]:    trainer = TrainerWithFreezer(config)
+[rank1]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank1]:    return f(*args, **kwargs)
+[rank1]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 94, in __init__
+[rank1]:    device_module.set_device(self.device)
+[rank1]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+[rank1]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/cuda/__init__.py", line 571, in set_device
+[rank1]:    torch._C._cuda_setDevice(device)
+[rank1]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+[rank1]:torch.AcceleratorError: CUDA error: out of memory
+[rank1]:Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+[rank1]:CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+[rank1]:For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+[rank1]:Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+[rank1]:
+W1026 18:56:18.936000 2480047 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2480135 closing signal SIGTERM
+W1026 18:56:18.937000 2480047 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2480137 closing signal SIGTERM
+W1026 18:56:18.937000 2480047 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2480138 closing signal SIGTERM
+E1026 18:56:20.927000 2480047 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 1 (pid: 2480136) of binary: /opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/python3.13
+E1026 18:56:20.945000 2480047 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_8ugg7j8t/eb9c415f-8778-4afa-86ce-a1bd411f40fd_xwv4z3kc/attempt_0/1/error.json)
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+    ~~~^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-10-26_18:56:20
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 2480135)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2480135
+[2]:
+  time      : 2025-10-26_18:56:20
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 2480137)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2480137
+[3]:
+  time      : 2025-10-26_18:56:20
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 3 (local_rank: 3)
+  exitcode  : -15 (pid: 2480138)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2480138
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-10-26_18:56:16
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 2480136)
+  error_file: /tmp/torchelastic_8ugg7j8t/eb9c415f-8778-4afa-86ce-a1bd411f40fd_xwv4z3kc/attempt_0/1/error.json
+  traceback : Traceback (most recent call last):
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 94, in __init__
+      device_module.set_device(self.device)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/cuda/__init__.py", line 571, in set_device
+      torch._C._cuda_setDevice(device)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  torch.AcceleratorError: CUDA error: out of memory
+  Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+  CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+  For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+  Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+  
+  
+============================================================
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sun Oct 26 18:56:22 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 2,3,4,5
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/1027_GPipe_apf.log
+✔️Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation
+✔️Running with apf x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml --job.description="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=apf
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1026 18:56:23.680000 2480284 site-packages/torch/distributed/run.py:811] 
+W1026 18:56:23.680000 2480284 site-packages/torch/distributed/run.py:811] *****************************************
+W1026 18:56:23.680000 2480284 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1026 18:56:23.680000 2480284 site-packages/torch/distributed/run.py:811] *****************************************
+[rank0]:2025-10-26 18:56:29,384 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank1]:2025-10-26 18:56:29,434 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank2]:2025-10-26 18:56:29,411 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:2025-10-26 18:56:29,547 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:56:30,453 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-10-26 18:56:30,456 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:56:30,462 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank1]:2025-10-26 18:56:30,484 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-10-26 18:56:30,487 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank2]:2025-10-26 18:56:30,551 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-10-26 18:56:30,553 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-10-26 18:56:30,637 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-10-26 18:56:30,639 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:56:33,376 - INFO - Loading tokenizer from tokenizer.json
+[rank0]:2025-10-26 18:56:33,672 - INFO - Preparing alpaca dataset from tatsu-lab/alpaca
+[rank2]:2025-10-26 18:56:35,580 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:56:35,517 - INFO - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank2]:2025-10-26 18:56:35,656 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20', 'layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank2]:2025-10-26 18:56:35,656 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank1]:2025-10-26 18:56:35,645 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank1]:2025-10-26 18:56:35,720 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.8', 'layers.9', 'layers.10', 'layers.11', 'layers.12', 'layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank1]:2025-10-26 18:56:35,720 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank0]:2025-10-26 18:56:35,774 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'repr' attribute with value False was provided to the `Field()` function, which has no effect in the context it was used. 'repr' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'frozen' attribute with value True was provided to the `Field()` function, which has no effect in the context it was used. 'frozen' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank2]:2025-10-26 18:56:35,893 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2025-10-26 18:56:35,894 - INFO - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank0]:2025-10-26 18:56:35,825 - INFO - Model llama3 8B size: 8,030,261,248 total parameters
+[rank0]:2025-10-26 18:56:35,848 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3', 'layers.4', 'layers.5', 'layers.6', 'layers.7']
+[rank0]:2025-10-26 18:56:35,849 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank1]:2025-10-26 18:56:35,934 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2025-10-26 18:56:35,934 - INFO - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank0]:2025-10-26 18:56:36,067 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2025-10-26 18:56:36,067 - INFO - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run pwf0d632
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_apf_dm1/20251026-1856/wandb/run-20251026_185636-pwf0d632
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1027_GPipe_apf_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/pwf0d632
+[rank3]:2025-10-26 18:56:37,425 - INFO - WandB logging enabled
+[rank3]:2025-10-26 18:56:37,430 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2025-10-26 18:56:37,504 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28', 'layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2025-10-26 18:56:37,504 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank3]:2025-10-26 18:56:37,777 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2025-10-26 18:56:37,779 - INFO - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank0]:2025-10-26 18:56:37,815 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_apf_dm1
+[rank0]:2025-10-26 18:56:37,820 - WARNING - Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled.
+[rank0]:2025-10-26 18:56:37,820 - INFO - Mixed precision training is disabled
+[rank0]:2025-10-26 18:56:37,821 - INFO - Preparing c4_validation dataset from allenai/c4
+[rank0]:2025-10-26 18:56:41,307 - INFO - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 1000 (warmup 100)
+[rank0]:2025-10-26 18:56:41,308 - INFO - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp.
+[rank0]:2025-10-26 18:56:51,332 - INFO - [GC] GC collection for checkpoint loading. 0.01 seconds
+[rank0]:2025-10-26 18:56:51,332 - INFO - Finished loading the checkpoint in 10.02 seconds.
+[rank0]:2025-10-26 18:56:51,332 - INFO - Training starts at step 1
+[rank3]:2025-10-26 18:56:55,424 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: 🚀 View run 1027_GPipe_apf_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/pwf0d632
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/1027_GPipe_apf_dm1/20251026-1856/wandb/run-20251026_185636-pwf0d632/logs
+[rank3]:Traceback (most recent call last):
+[rank3]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:  File "<frozen runpy>", line 88, in _run_code
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:    trainer.train()
+[rank3]:    ~~~~~~~~~~~~~^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:    return f(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:    self.train_step(data_iterator)
+[rank3]:    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:    loss = self.forward_backward_step(input_dict, labels)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:    self.pp_schedule.step(
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        target=targets, losses=losses, input_batch=inputs
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:    self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:    self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:    loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:    return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:    loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:    return torch.nn.functional.cross_entropy(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:    return torch._C._nn.cross_entropy_loss(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        input,
+[rank3]:        ^^^^^^
+[rank3]:    ...<5 lines>...
+[rank3]:        label_smoothing,
+[rank3]:        ^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank3]:[rank3]: Traceback (most recent call last):
+[rank3]:[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:[rank3]:     trainer.train()
+[rank3]:[rank3]:     ~~~~~~~~~~~~~^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:[rank3]:     return f(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:[rank3]:     self.train_step(data_iterator)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:[rank3]:     loss = self.forward_backward_step(input_dict, labels)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:[rank3]:     self.pp_schedule.step(
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         target=targets, losses=losses, input_batch=inputs
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:[rank3]:     self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:[rank3]:     self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:[rank3]:     loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:[rank3]:     return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:[rank3]:            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:[rank3]:     loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:[rank3]:     return torch.nn.functional.cross_entropy(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:[rank3]:     return torch._C._nn.cross_entropy_loss(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         input,
+[rank3]:[rank3]:         ^^^^^^
+[rank3]:[rank3]:     ...<5 lines>...
+[rank3]:[rank3]:         label_smoothing,
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+W1026 18:57:00.055000 2480284 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2480361 closing signal SIGTERM
+W1026 18:57:00.056000 2480284 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2480362 closing signal SIGTERM
+W1026 18:57:00.057000 2480284 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2480363 closing signal SIGTERM
+E1026 18:57:03.426000 2480284 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 3 (pid: 2480364) of binary: /opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/python3.13
+E1026 18:57:03.443000 2480284 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_tumqp12e/49a5da08-e11f-45ba-a789-68dcbf672e44_l0abe_j5/attempt_0/3/error.json)
+[rank2]:Stage 2: Modules to keep: {'layers.21', 'layers.17', 'layers.19', 'layers.20', 'layers.22', 'layers.18', 'layers.23', 'layers.24'}
+[rank1]:Stage 1: Modules to keep: {'layers.14', 'layers.9', 'layers.12', 'layers.10', 'layers.13', 'layers.11', 'layers.16', 'layers.15', 'layers.8'}
+[rank0]:Stage 0: Modules to keep: {'layers.2', 'layers.1', 'tok_embeddings', 'layers.5', 'layers.7', 'layers.6', 'layers.4', 'layers.0', 'layers.3'}
+[rank3]:Stage 3: Modules to keep: {'layers.26', 'output', 'layers.30', 'norm', 'layers.25', 'layers.29', 'layers.31', 'layers.27', 'layers.28'}
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1027_GPipe_apf_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/1027_GPipe_apf_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/1027_GPipe_apf_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 20
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_apf_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1027_GPipe_apf_dm1
+[rank3]:		- pplog_freq: 80
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1027_GPipe_apf_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B-Instruct
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 2e-05
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: alpaca
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 1000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: None
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: GPipe
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_apf_dm1
+[rank3]:		- interval: 500
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/1027_GPipe_apf_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: True
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- seq_len: 1024
+[rank3]:		- freq: 100
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: apf
+[rank3]:		- phase_unit: 10
+[rank3]:		- stability_check_freq: 5
+[rank3]:		- aggressiveness: 0
+[rank3]:
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+    ~~~^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-10-26_18:57:03
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 2480361)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2480361
+[2]:
+  time      : 2025-10-26_18:57:03
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 2480362)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2480362
+[3]:
+  time      : 2025-10-26_18:57:03
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 2480363)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2480363
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-10-26_18:56:55
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 2480364)
+  error_file: /tmp/torchelastic_tumqp12e/49a5da08-e11f-45ba-a789-68dcbf672e44_l0abe_j5/attempt_0/3/error.json
+  traceback : Traceback (most recent call last):
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+      self.train_step(data_iterator)
+      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+      loss = self.forward_backward_step(input_dict, labels)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+      self.pp_schedule.step(
+      ~~~~~~~~~~~~~~~~~~~~~^
+          target=targets, losses=losses, input_batch=inputs
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+      self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+      self._maybe_compute_loss(self._stage, output, target_mbs, i)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+      loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+      return self._loss_fn(output, target)  # type: ignore[misc]
+             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+      loss = unwrapped_loss_fn(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+      return torch.nn.functional.cross_entropy(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          pred.flatten(0, 1).float(), labels.flatten(0, 1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+      return torch._C._nn.cross_entropy_loss(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          input,
+          ^^^^^^
+      ...<5 lines>...
+          label_smoothing,
+          ^^^^^^^^^^^^^^^^
+      )
+      ^
+  torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  
+============================================================
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sun Oct 26 18:57:04 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 2,3,4,5
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/1027_GPipe_auto.log
+✔️Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation
+✔️Running with auto x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml --job.description="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=auto
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1026 18:57:06.131000 2481580 site-packages/torch/distributed/run.py:811] 
+W1026 18:57:06.131000 2481580 site-packages/torch/distributed/run.py:811] *****************************************
+W1026 18:57:06.131000 2481580 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1026 18:57:06.131000 2481580 site-packages/torch/distributed/run.py:811] *****************************************
+[rank2]:2025-10-26 18:57:12,142 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:2025-10-26 18:57:12,160 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:57:12,156 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank1]:2025-10-26 18:57:12,375 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:57:13,240 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-10-26 18:57:13,242 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:57:13,247 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank2]:2025-10-26 18:57:13,366 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-10-26 18:57:13,370 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-10-26 18:57:13,362 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-10-26 18:57:13,365 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank1]:2025-10-26 18:57:13,678 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-10-26 18:57:13,683 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:57:15,992 - INFO - Loading tokenizer from tokenizer.json
+[rank0]:2025-10-26 18:57:16,274 - INFO - Preparing alpaca dataset from tatsu-lab/alpaca
+[rank0]:2025-10-26 18:57:17,892 - INFO - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2025-10-26 18:57:18,190 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:57:18,155 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:57:18,204 - INFO - Model llama3 8B size: 8,030,261,248 total parameters
+[rank1]:2025-10-26 18:57:18,265 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.8', 'layers.9', 'layers.10', 'layers.11', 'layers.12', 'layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank1]:2025-10-26 18:57:18,265 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-10-26 18:57:18,225 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank2]:2025-10-26 18:57:18,295 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20', 'layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank2]:2025-10-26 18:57:18,295 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank0]:2025-10-26 18:57:18,228 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3', 'layers.4', 'layers.5', 'layers.6', 'layers.7']
+[rank0]:2025-10-26 18:57:18,229 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'repr' attribute with value False was provided to the `Field()` function, which has no effect in the context it was used. 'repr' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'frozen' attribute with value True was provided to the `Field()` function, which has no effect in the context it was used. 'frozen' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank0]:2025-10-26 18:57:18,500 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2025-10-26 18:57:18,500 - INFO - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank1]:2025-10-26 18:57:18,560 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2025-10-26 18:57:18,560 - INFO - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank2]:2025-10-26 18:57:18,601 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2025-10-26 18:57:18,602 - INFO - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run 0p2d40pc
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_auto_dm1/20251026-1857/wandb/run-20251026_185719-0p2d40pc
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1027_GPipe_auto_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/0p2d40pc
+[rank3]:2025-10-26 18:57:19,946 - INFO - WandB logging enabled
+[rank3]:2025-10-26 18:57:19,960 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2025-10-26 18:57:20,031 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28', 'layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2025-10-26 18:57:20,032 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank3]:2025-10-26 18:57:20,406 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2025-10-26 18:57:20,407 - INFO - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank0]:2025-10-26 18:57:20,434 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_auto_dm1
+[rank0]:2025-10-26 18:57:20,435 - WARNING - Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled.
+[rank0]:2025-10-26 18:57:20,435 - INFO - Mixed precision training is disabled
+[rank0]:2025-10-26 18:57:20,435 - INFO - Preparing c4_validation dataset from allenai/c4
+[rank0]:2025-10-26 18:57:24,253 - INFO - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 1000 (warmup 100)
+[rank0]:2025-10-26 18:57:24,254 - INFO - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp.
+[rank0]:2025-10-26 18:57:33,478 - INFO - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2025-10-26 18:57:33,478 - INFO - Finished loading the checkpoint in 9.22 seconds.
+[rank0]:2025-10-26 18:57:33,478 - INFO - Training starts at step 1
+[rank3]:2025-10-26 18:57:37,237 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: 🚀 View run 1027_GPipe_auto_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/0p2d40pc
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/1027_GPipe_auto_dm1/20251026-1857/wandb/run-20251026_185719-0p2d40pc/logs
+[rank3]:Traceback (most recent call last):
+[rank3]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:  File "<frozen runpy>", line 88, in _run_code
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:    trainer.train()
+[rank3]:    ~~~~~~~~~~~~~^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:    return f(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:    self.train_step(data_iterator)
+[rank3]:    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:    loss = self.forward_backward_step(input_dict, labels)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:    self.pp_schedule.step(
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        target=targets, losses=losses, input_batch=inputs
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:    self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:    self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:    loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:    return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:    loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:    return torch.nn.functional.cross_entropy(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:    return torch._C._nn.cross_entropy_loss(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        input,
+[rank3]:        ^^^^^^
+[rank3]:    ...<5 lines>...
+[rank3]:        label_smoothing,
+[rank3]:        ^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank3]:[rank3]: Traceback (most recent call last):
+[rank3]:[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:[rank3]:     trainer.train()
+[rank3]:[rank3]:     ~~~~~~~~~~~~~^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:[rank3]:     return f(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:[rank3]:     self.train_step(data_iterator)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:[rank3]:     loss = self.forward_backward_step(input_dict, labels)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:[rank3]:     self.pp_schedule.step(
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         target=targets, losses=losses, input_batch=inputs
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:[rank3]:     self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:[rank3]:     self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:[rank3]:     loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:[rank3]:     return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:[rank3]:            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:[rank3]:     loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:[rank3]:     return torch.nn.functional.cross_entropy(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:[rank3]:     return torch._C._nn.cross_entropy_loss(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         input,
+[rank3]:[rank3]:         ^^^^^^
+[rank3]:[rank3]:     ...<5 lines>...
+[rank3]:[rank3]:         label_smoothing,
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+W1026 18:57:41.371000 2481580 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2481665 closing signal SIGTERM
+W1026 18:57:41.372000 2481580 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2481666 closing signal SIGTERM
+W1026 18:57:41.373000 2481580 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2481667 closing signal SIGTERM
+E1026 18:57:44.336000 2481580 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 3 (pid: 2481668) of binary: /opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/python3.13
+E1026 18:57:44.353000 2481580 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_6_wpfdfd/f9e8b5f9-6c52-41b8-8491-d96d825e169b_mvpjghq_/attempt_0/3/error.json)
+[rank2]:Stage 2: Modules to keep: {'layers.17', 'layers.20', 'layers.23', 'layers.22', 'layers.19', 'layers.21', 'layers.24', 'layers.18'}
+[rank0]:Stage 0: Modules to keep: {'layers.0', 'layers.6', 'layers.2', 'layers.4', 'layers.5', 'layers.3', 'layers.1', 'layers.7', 'tok_embeddings'}
+[rank1]:Stage 1: Modules to keep: {'layers.9', 'layers.8', 'layers.12', 'layers.11', 'layers.16', 'layers.13', 'layers.15', 'layers.14', 'layers.10'}
+[rank3]:Stage 3: Modules to keep: {'layers.26', 'layers.30', 'layers.27', 'layers.31', 'layers.29', 'layers.28', 'layers.25', 'output', 'norm'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1027_GPipe_auto_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/1027_GPipe_auto_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/1027_GPipe_auto_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 20
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_auto_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1027_GPipe_auto_dm1
+[rank3]:		- pplog_freq: 80
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1027_GPipe_auto_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B-Instruct
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 2e-05
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: alpaca
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 1000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: None
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: GPipe
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_auto_dm1
+[rank3]:		- interval: 500
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/1027_GPipe_auto_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: True
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- seq_len: 1024
+[rank3]:		- freq: 100
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: auto
+[rank3]:		- phase_unit: 10
+[rank3]:		- stability_check_freq: 5
+[rank3]:		- aggressiveness: 0
+[rank3]:
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+    ~~~^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-10-26_18:57:44
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 2481665)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2481665
+[2]:
+  time      : 2025-10-26_18:57:44
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 2481666)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2481666
+[3]:
+  time      : 2025-10-26_18:57:44
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 2481667)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2481667
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-10-26_18:57:37
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 2481668)
+  error_file: /tmp/torchelastic_6_wpfdfd/f9e8b5f9-6c52-41b8-8491-d96d825e169b_mvpjghq_/attempt_0/3/error.json
+  traceback : Traceback (most recent call last):
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+      self.train_step(data_iterator)
+      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+      loss = self.forward_backward_step(input_dict, labels)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+      self.pp_schedule.step(
+      ~~~~~~~~~~~~~~~~~~~~~^
+          target=targets, losses=losses, input_batch=inputs
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+      self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+      self._maybe_compute_loss(self._stage, output, target_mbs, i)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+      loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+      return self._loss_fn(output, target)  # type: ignore[misc]
+             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+      loss = unwrapped_loss_fn(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+      return torch.nn.functional.cross_entropy(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          pred.flatten(0, 1).float(), labels.flatten(0, 1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+      return torch._C._nn.cross_entropy_loss(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          input,
+          ^^^^^^
+      ...<5 lines>...
+          label_smoothing,
+          ^^^^^^^^^^^^^^^^
+      )
+      ^
+  torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  
+============================================================
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sun Oct 26 18:57:45 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 2,3,4,5
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/1027_GPipe_fullrand7.log
+✔️Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation
+✔️Running with fullrand7 x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml --job.description="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=fullrand7
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1026 18:57:46.967000 2482473 site-packages/torch/distributed/run.py:811] 
+W1026 18:57:46.967000 2482473 site-packages/torch/distributed/run.py:811] *****************************************
+W1026 18:57:46.967000 2482473 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1026 18:57:46.967000 2482473 site-packages/torch/distributed/run.py:811] *****************************************
+[rank1]:2025-10-26 18:57:52,558 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:57:52,740 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank2]:2025-10-26 18:57:52,901 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:2025-10-26 18:57:52,921 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank1]:2025-10-26 18:57:53,110 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-10-26 18:57:53,113 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:57:53,519 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-10-26 18:57:53,521 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:57:53,526 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank2]:2025-10-26 18:57:53,914 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-10-26 18:57:53,916 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-10-26 18:57:53,925 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-10-26 18:57:53,928 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:57:56,922 - INFO - Loading tokenizer from tokenizer.json
+[rank0]:2025-10-26 18:57:57,207 - INFO - Preparing alpaca dataset from tatsu-lab/alpaca
+[rank0]:2025-10-26 18:57:58,827 - INFO - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank0]:2025-10-26 18:57:59,076 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:57:59,123 - INFO - Model llama3 8B size: 8,030,261,248 total parameters
+[rank1]:2025-10-26 18:57:59,189 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:57:59,145 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3', 'layers.4', 'layers.5', 'layers.6', 'layers.7']
+[rank0]:2025-10-26 18:57:59,145 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank1]:2025-10-26 18:57:59,259 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.8', 'layers.9', 'layers.10', 'layers.11', 'layers.12', 'layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank1]:2025-10-26 18:57:59,259 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-10-26 18:57:59,414 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'repr' attribute with value False was provided to the `Field()` function, which has no effect in the context it was used. 'repr' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'frozen' attribute with value True was provided to the `Field()` function, which has no effect in the context it was used. 'frozen' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank0]:2025-10-26 18:57:59,359 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2025-10-26 18:57:59,359 - INFO - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank1]:2025-10-26 18:57:59,482 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2025-10-26 18:57:59,482 - INFO - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank2]:2025-10-26 18:57:59,503 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20', 'layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank2]:2025-10-26 18:57:59,503 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-10-26 18:57:59,732 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2025-10-26 18:57:59,732 - INFO - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run y6dony84
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_fullrand7_dm1/20251026-1857/wandb/run-20251026_185759-y6dony84
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1027_GPipe_fullrand7_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/y6dony84
+[rank3]:2025-10-26 18:58:00,942 - INFO - WandB logging enabled
+[rank3]:2025-10-26 18:58:00,959 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2025-10-26 18:58:01,032 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28', 'layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2025-10-26 18:58:01,032 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank0]:2025-10-26 18:58:01,938 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_fullrand7_dm1
+[rank0]:2025-10-26 18:58:01,938 - WARNING - Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled.
+[rank0]:2025-10-26 18:58:01,938 - INFO - Mixed precision training is disabled
+[rank0]:2025-10-26 18:58:01,939 - INFO - Preparing c4_validation dataset from allenai/c4
+[rank3]:2025-10-26 18:58:01,877 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2025-10-26 18:58:01,877 - INFO - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank0]:2025-10-26 18:58:06,306 - INFO - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 1000 (warmup 100)
+[rank0]:2025-10-26 18:58:06,307 - INFO - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp.
+[rank0]:2025-10-26 18:58:17,375 - INFO - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2025-10-26 18:58:17,375 - INFO - Finished loading the checkpoint in 11.07 seconds.
+[rank0]:2025-10-26 18:58:17,375 - INFO - Training starts at step 1
+[rank3]:2025-10-26 18:58:23,117 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: uploading config.yaml
+[rank3]:wandb: 🚀 View run 1027_GPipe_fullrand7_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/y6dony84
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/1027_GPipe_fullrand7_dm1/20251026-1857/wandb/run-20251026_185759-y6dony84/logs
+[rank3]:Traceback (most recent call last):
+[rank3]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:  File "<frozen runpy>", line 88, in _run_code
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:    trainer.train()
+[rank3]:    ~~~~~~~~~~~~~^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:    return f(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:    self.train_step(data_iterator)
+[rank3]:    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:    loss = self.forward_backward_step(input_dict, labels)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:    self.pp_schedule.step(
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        target=targets, losses=losses, input_batch=inputs
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:    self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:    self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:    loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:    return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:    loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:    return torch.nn.functional.cross_entropy(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:    return torch._C._nn.cross_entropy_loss(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        input,
+[rank3]:        ^^^^^^
+[rank3]:    ...<5 lines>...
+[rank3]:        label_smoothing,
+[rank3]:        ^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank3]:[rank3]: Traceback (most recent call last):
+[rank3]:[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:[rank3]:     trainer.train()
+[rank3]:[rank3]:     ~~~~~~~~~~~~~^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:[rank3]:     return f(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:[rank3]:     self.train_step(data_iterator)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:[rank3]:     loss = self.forward_backward_step(input_dict, labels)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:[rank3]:     self.pp_schedule.step(
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         target=targets, losses=losses, input_batch=inputs
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:[rank3]:     self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:[rank3]:     self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:[rank3]:     loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:[rank3]:     return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:[rank3]:            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:[rank3]:     loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:[rank3]:     return torch.nn.functional.cross_entropy(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:[rank3]:     return torch._C._nn.cross_entropy_loss(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         input,
+[rank3]:[rank3]:         ^^^^^^
+[rank3]:[rank3]:     ...<5 lines>...
+[rank3]:[rank3]:         label_smoothing,
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+W1026 18:58:28.394000 2482473 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2482553 closing signal SIGTERM
+W1026 18:58:28.395000 2482473 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2482554 closing signal SIGTERM
+W1026 18:58:28.396000 2482473 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2482555 closing signal SIGTERM
+E1026 18:58:31.464000 2482473 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 3 (pid: 2482556) of binary: /opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/python3.13
+E1026 18:58:31.491000 2482473 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_5aykotlz/42688b7d-5637-47b6-a45d-5e53372afcde_dhid8iz4/attempt_0/3/error.json)
+[rank0]:Stage 0: Modules to keep: {'tok_embeddings', 'layers.0', 'layers.7', 'layers.6', 'layers.1', 'layers.3', 'layers.4', 'layers.2', 'layers.5'}
+[rank1]:Stage 1: Modules to keep: {'layers.14', 'layers.15', 'layers.16', 'layers.11', 'layers.8', 'layers.12', 'layers.10', 'layers.9', 'layers.13'}
+[rank2]:Stage 2: Modules to keep: {'layers.20', 'layers.19', 'layers.24', 'layers.18', 'layers.21', 'layers.23', 'layers.17', 'layers.22'}
+[rank3]:Stage 3: Modules to keep: {'layers.25', 'layers.31', 'layers.28', 'output', 'layers.29', 'layers.30', 'layers.27', 'layers.26', 'norm'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1027_GPipe_fullrand7_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/1027_GPipe_fullrand7_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/1027_GPipe_fullrand7_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 20
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_fullrand7_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1027_GPipe_fullrand7_dm1
+[rank3]:		- pplog_freq: 80
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1027_GPipe_fullrand7_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B-Instruct
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 2e-05
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: alpaca
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 1000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: None
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: GPipe
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_fullrand7_dm1
+[rank3]:		- interval: 500
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/1027_GPipe_fullrand7_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: True
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- seq_len: 1024
+[rank3]:		- freq: 100
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: fullrand7
+[rank3]:		- phase_unit: 10
+[rank3]:		- stability_check_freq: 5
+[rank3]:		- aggressiveness: 0
+[rank3]:
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+    ~~~^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-10-26_18:58:31
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 2482553)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2482553
+[2]:
+  time      : 2025-10-26_18:58:31
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 2482554)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2482554
+[3]:
+  time      : 2025-10-26_18:58:31
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 2482555)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2482555
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-10-26_18:58:23
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 2482556)
+  error_file: /tmp/torchelastic_5aykotlz/42688b7d-5637-47b6-a45d-5e53372afcde_dhid8iz4/attempt_0/3/error.json
+  traceback : Traceback (most recent call last):
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+      self.train_step(data_iterator)
+      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+      loss = self.forward_backward_step(input_dict, labels)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+      self.pp_schedule.step(
+      ~~~~~~~~~~~~~~~~~~~~~^
+          target=targets, losses=losses, input_batch=inputs
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+      self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+      self._maybe_compute_loss(self._stage, output, target_mbs, i)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+      loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+      return self._loss_fn(output, target)  # type: ignore[misc]
+             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+      loss = unwrapped_loss_fn(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+      return torch.nn.functional.cross_entropy(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          pred.flatten(0, 1).float(), labels.flatten(0, 1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+      return torch._C._nn.cross_entropy_loss(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          input,
+          ^^^^^^
+      ...<5 lines>...
+          label_smoothing,
+          ^^^^^^^^^^^^^^^^
+      )
+      ^
+  torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  
+============================================================
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sun Oct 26 18:58:32 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 2,3,4,5
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/1027_GPipe_timelyapf.log
+✔️Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation
+✔️Running with timelyapf x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml --job.description="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=timelyapf
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1026 18:58:34.161000 2483783 site-packages/torch/distributed/run.py:811] 
+W1026 18:58:34.161000 2483783 site-packages/torch/distributed/run.py:811] *****************************************
+W1026 18:58:34.161000 2483783 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1026 18:58:34.161000 2483783 site-packages/torch/distributed/run.py:811] *****************************************
+[rank0]:2025-10-26 18:58:39,791 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank2]:2025-10-26 18:58:39,986 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank1]:2025-10-26 18:58:40,029 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:2025-10-26 18:58:40,069 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:58:40,318 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-10-26 18:58:40,322 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:58:40,328 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank2]:2025-10-26 18:58:41,147 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-10-26 18:58:41,150 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank1]:2025-10-26 18:58:41,112 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-10-26 18:58:41,114 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-10-26 18:58:41,242 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-10-26 18:58:41,244 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:58:44,113 - INFO - Loading tokenizer from tokenizer.json
+[rank0]:2025-10-26 18:58:44,413 - INFO - Preparing alpaca dataset from tatsu-lab/alpaca
+[rank0]:2025-10-26 18:58:46,053 - INFO - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2025-10-26 18:58:46,306 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank1]:2025-10-26 18:58:46,394 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.8', 'layers.9', 'layers.10', 'layers.11', 'layers.12', 'layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank1]:2025-10-26 18:58:46,395 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-10-26 18:58:46,389 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:58:46,317 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:58:46,383 - INFO - Model llama3 8B size: 8,030,261,248 total parameters
+[rank2]:2025-10-26 18:58:46,458 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20', 'layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank2]:2025-10-26 18:58:46,459 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'repr' attribute with value False was provided to the `Field()` function, which has no effect in the context it was used. 'repr' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'frozen' attribute with value True was provided to the `Field()` function, which has no effect in the context it was used. 'frozen' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank0]:2025-10-26 18:58:46,406 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3', 'layers.4', 'layers.5', 'layers.6', 'layers.7']
+[rank0]:2025-10-26 18:58:46,406 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank1]:2025-10-26 18:58:46,963 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2025-10-26 18:58:46,964 - INFO - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank2]:2025-10-26 18:58:47,009 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2025-10-26 18:58:47,009 - INFO - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank0]:2025-10-26 18:58:47,000 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2025-10-26 18:58:47,000 - INFO - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run ahopfvz3
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_timelyapf_dm1/20251026-1858/wandb/run-20251026_185847-ahopfvz3
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1027_GPipe_timelyapf_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/ahopfvz3
+[rank3]:2025-10-26 18:58:48,190 - INFO - WandB logging enabled
+[rank3]:2025-10-26 18:58:48,202 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2025-10-26 18:58:48,273 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28', 'layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2025-10-26 18:58:48,274 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank0]:2025-10-26 18:58:48,697 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_timelyapf_dm1
+[rank3]:2025-10-26 18:58:48,664 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2025-10-26 18:58:48,665 - INFO - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank0]:2025-10-26 18:58:48,699 - WARNING - Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled.
+[rank0]:2025-10-26 18:58:48,699 - INFO - Mixed precision training is disabled
+[rank0]:2025-10-26 18:58:48,700 - INFO - Preparing c4_validation dataset from allenai/c4
+[rank0]:2025-10-26 18:58:52,871 - INFO - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 1000 (warmup 100)
+[rank0]:2025-10-26 18:58:52,871 - INFO - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp.
+[rank0]:2025-10-26 18:59:01,961 - INFO - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2025-10-26 18:59:01,962 - INFO - Finished loading the checkpoint in 9.09 seconds.
+[rank0]:2025-10-26 18:59:01,962 - INFO - Training starts at step 1
+[rank3]:2025-10-26 18:59:05,948 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: 🚀 View run 1027_GPipe_timelyapf_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/ahopfvz3
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/1027_GPipe_timelyapf_dm1/20251026-1858/wandb/run-20251026_185847-ahopfvz3/logs
+[rank3]:Traceback (most recent call last):
+[rank3]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:  File "<frozen runpy>", line 88, in _run_code
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:    trainer.train()
+[rank3]:    ~~~~~~~~~~~~~^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:    return f(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:    self.train_step(data_iterator)
+[rank3]:    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:    loss = self.forward_backward_step(input_dict, labels)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:    self.pp_schedule.step(
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        target=targets, losses=losses, input_batch=inputs
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:    self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:    self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:    loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:    return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:    loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:    return torch.nn.functional.cross_entropy(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:    return torch._C._nn.cross_entropy_loss(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        input,
+[rank3]:        ^^^^^^
+[rank3]:    ...<5 lines>...
+[rank3]:        label_smoothing,
+[rank3]:        ^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank3]:[rank3]: Traceback (most recent call last):
+[rank3]:[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:[rank3]:     trainer.train()
+[rank3]:[rank3]:     ~~~~~~~~~~~~~^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:[rank3]:     return f(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:[rank3]:     self.train_step(data_iterator)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:[rank3]:     loss = self.forward_backward_step(input_dict, labels)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:[rank3]:     self.pp_schedule.step(
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         target=targets, losses=losses, input_batch=inputs
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:[rank3]:     self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:[rank3]:     self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:[rank3]:     loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:[rank3]:     return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:[rank3]:            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:[rank3]:     loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:[rank3]:     return torch.nn.functional.cross_entropy(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:[rank3]:     return torch._C._nn.cross_entropy_loss(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         input,
+[rank3]:[rank3]:         ^^^^^^
+[rank3]:[rank3]:     ...<5 lines>...
+[rank3]:[rank3]:         label_smoothing,
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+W1026 18:59:10.654000 2483783 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2483861 closing signal SIGTERM
+W1026 18:59:10.655000 2483783 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2483862 closing signal SIGTERM
+W1026 18:59:10.656000 2483783 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2483863 closing signal SIGTERM
+E1026 18:59:13.519000 2483783 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 3 (pid: 2483864) of binary: /opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/python3.13
+E1026 18:59:13.536000 2483783 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_07d4wzry/f2750028-ad08-4104-8975-55ef4bdb6eae_c4pi566v/attempt_0/3/error.json)
+[rank1]:Stage 1: Modules to keep: {'layers.14', 'layers.9', 'layers.10', 'layers.13', 'layers.12', 'layers.15', 'layers.11', 'layers.8', 'layers.16'}
+[rank0]:Stage 0: Modules to keep: {'layers.3', 'tok_embeddings', 'layers.7', 'layers.1', 'layers.5', 'layers.6', 'layers.4', 'layers.0', 'layers.2'}
+[rank2]:Stage 2: Modules to keep: {'layers.23', 'layers.24', 'layers.19', 'layers.18', 'layers.21', 'layers.22', 'layers.17', 'layers.20'}
+[rank3]:Stage 3: Modules to keep: {'layers.31', 'layers.28', 'layers.25', 'layers.30', 'layers.27', 'layers.29', 'norm', 'layers.26', 'output'}
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1027_GPipe_timelyapf_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/1027_GPipe_timelyapf_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/1027_GPipe_timelyapf_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 20
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_timelyapf_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1027_GPipe_timelyapf_dm1
+[rank3]:		- pplog_freq: 80
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1027_GPipe_timelyapf_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B-Instruct
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 2e-05
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: alpaca
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 1000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: None
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: GPipe
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_timelyapf_dm1
+[rank3]:		- interval: 500
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/1027_GPipe_timelyapf_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: True
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- seq_len: 1024
+[rank3]:		- freq: 100
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: timelyapf
+[rank3]:		- phase_unit: 10
+[rank3]:		- stability_check_freq: 5
+[rank3]:		- aggressiveness: 0
+[rank3]:
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+    ~~~^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-10-26_18:59:13
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 2483861)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2483861
+[2]:
+  time      : 2025-10-26_18:59:13
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 2483862)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2483862
+[3]:
+  time      : 2025-10-26_18:59:13
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 2483863)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2483863
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-10-26_18:59:05
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 2483864)
+  error_file: /tmp/torchelastic_07d4wzry/f2750028-ad08-4104-8975-55ef4bdb6eae_c4pi566v/attempt_0/3/error.json
+  traceback : Traceback (most recent call last):
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+      self.train_step(data_iterator)
+      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+      loss = self.forward_backward_step(input_dict, labels)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+      self.pp_schedule.step(
+      ~~~~~~~~~~~~~~~~~~~~~^
+          target=targets, losses=losses, input_batch=inputs
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+      self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+      self._maybe_compute_loss(self._stage, output, target_mbs, i)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+      loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+      return self._loss_fn(output, target)  # type: ignore[misc]
+             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+      loss = unwrapped_loss_fn(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+      return torch.nn.functional.cross_entropy(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          pred.flatten(0, 1).float(), labels.flatten(0, 1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+      return torch._C._nn.cross_entropy_loss(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          input,
+          ^^^^^^
+      ...<5 lines>...
+          label_smoothing,
+          ^^^^^^^^^^^^^^^^
+      )
+      ^
+  torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  
+============================================================
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sun Oct 26 18:59:15 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 2,3,4,5
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/1027_GPipe_timelyauto.log
+✔️Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation
+✔️Running with timelyauto x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml --job.description="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=timelyauto
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1026 18:59:16.220000 2484557 site-packages/torch/distributed/run.py:811] 
+W1026 18:59:16.220000 2484557 site-packages/torch/distributed/run.py:811] *****************************************
+W1026 18:59:16.220000 2484557 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1026 18:59:16.220000 2484557 site-packages/torch/distributed/run.py:811] *****************************************
+[rank1]:2025-10-26 18:59:21,816 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank2]:2025-10-26 18:59:21,974 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:2025-10-26 18:59:21,970 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank0]:2025-10-26 18:59:21,952 - INFO - Starting job: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank1]:2025-10-26 18:59:22,815 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-10-26 18:59:22,818 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:59:23,129 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-10-26 18:59:23,131 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:59:23,137 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank3]:2025-10-26 18:59:23,198 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-10-26 18:59:23,201 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank2]:2025-10-26 18:59:23,189 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-10-26 18:59:23,194 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-10-26 18:59:25,596 - INFO - Loading tokenizer from tokenizer.json
+[rank0]:2025-10-26 18:59:25,870 - INFO - Preparing alpaca dataset from tatsu-lab/alpaca
+[rank0]:2025-10-26 18:59:27,505 - INFO - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank0]:2025-10-26 18:59:27,754 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank2]:2025-10-26 18:59:27,815 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:59:27,804 - INFO - Model llama3 8B size: 8,030,261,248 total parameters
+[rank0]:2025-10-26 18:59:27,827 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3', 'layers.4', 'layers.5', 'layers.6', 'layers.7']
+[rank0]:2025-10-26 18:59:27,827 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-10-26 18:59:27,887 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20', 'layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank2]:2025-10-26 18:59:27,887 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank1]:2025-10-26 18:59:28,031 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-10-26 18:59:28,073 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2025-10-26 18:59:28,073 - INFO - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank1]:2025-10-26 18:59:28,115 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.8', 'layers.9', 'layers.10', 'layers.11', 'layers.12', 'layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank1]:2025-10-26 18:59:28,115 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-10-26 18:59:28,122 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2025-10-26 18:59:28,122 - INFO - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'repr' attribute with value False was provided to the `Field()` function, which has no effect in the context it was used. 'repr' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'frozen' attribute with value True was provided to the `Field()` function, which has no effect in the context it was used. 'frozen' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank1]:2025-10-26 18:59:28,576 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2025-10-26 18:59:28,576 - INFO - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run ocefrbsq
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_timelyauto_dm1/20251026-1859/wandb/run-20251026_185928-ocefrbsq
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1027_GPipe_timelyauto_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/ocefrbsq
+[rank3]:2025-10-26 18:59:29,807 - INFO - WandB logging enabled
+[rank3]:2025-10-26 18:59:29,824 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2025-10-26 18:59:29,896 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28', 'layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2025-10-26 18:59:29,896 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank3]:2025-10-26 18:59:31,108 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2025-10-26 18:59:31,109 - INFO - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank0]:2025-10-26 18:59:31,130 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_timelyauto_dm1
+[rank0]:2025-10-26 18:59:31,131 - WARNING - Mixed precision training with TP or PP is only supported when FSDP/HSDP/CP is enabled.
+[rank0]:2025-10-26 18:59:31,131 - INFO - Mixed precision training is disabled
+[rank0]:2025-10-26 18:59:31,134 - INFO - Preparing c4_validation dataset from allenai/c4
+[rank0]:2025-10-26 18:59:34,780 - INFO - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 1000 (warmup 100)
+[rank0]:2025-10-26 18:59:34,780 - INFO - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp.
+[rank0]:2025-10-26 18:59:44,335 - INFO - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2025-10-26 18:59:44,335 - INFO - Finished loading the checkpoint in 9.56 seconds.
+[rank0]:2025-10-26 18:59:44,335 - INFO - Training starts at step 1
+[rank3]:2025-10-26 18:59:49,752 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: uploading output.log; uploading config.yaml
+[rank3]:wandb: 🚀 View run 1027_GPipe_timelyauto_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/ocefrbsq
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/1027_GPipe_timelyauto_dm1/20251026-1859/wandb/run-20251026_185928-ocefrbsq/logs
+[rank3]:Traceback (most recent call last):
+[rank3]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:  File "<frozen runpy>", line 88, in _run_code
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:    trainer.train()
+[rank3]:    ~~~~~~~~~~~~~^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:    return f(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:    self.train_step(data_iterator)
+[rank3]:    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:    loss = self.forward_backward_step(input_dict, labels)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:    self.pp_schedule.step(
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        target=targets, losses=losses, input_batch=inputs
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:    self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:    self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:    loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:    return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:    loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:    return torch.nn.functional.cross_entropy(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:    return torch._C._nn.cross_entropy_loss(
+[rank3]:           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:        input,
+[rank3]:        ^^^^^^
+[rank3]:    ...<5 lines>...
+[rank3]:        label_smoothing,
+[rank3]:        ^^^^^^^^^^^^^^^^
+[rank3]:    )
+[rank3]:    ^
+[rank3]:torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank3]:[rank3]: Traceback (most recent call last):
+[rank3]:[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 725, in <module>
+[rank3]:[rank3]:     trainer.train()
+[rank3]:[rank3]:     ~~~~~~~~~~~~~^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:[rank3]:     return f(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+[rank3]:[rank3]:     self.train_step(data_iterator)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+[rank3]:[rank3]:     loss = self.forward_backward_step(input_dict, labels)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+[rank3]:[rank3]:     self.pp_schedule.step(
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         target=targets, losses=losses, input_batch=inputs
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+[rank3]:[rank3]:     self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+[rank3]:[rank3]:     self._maybe_compute_loss(self._stage, output, target_mbs, i)
+[rank3]:[rank3]:     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+[rank3]:[rank3]:     loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+[rank3]:[rank3]:     return self._loss_fn(output, target)  # type: ignore[misc]
+[rank3]:[rank3]:            ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+[rank3]:[rank3]:     loss = unwrapped_loss_fn(*args, **kwargs)
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+[rank3]:[rank3]:     return torch.nn.functional.cross_entropy(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         pred.flatten(0, 1).float(), labels.flatten(0, 1)
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]:   File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+[rank3]:[rank3]:     return torch._C._nn.cross_entropy_loss(
+[rank3]:[rank3]:            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+[rank3]:[rank3]:         input,
+[rank3]:[rank3]:         ^^^^^^
+[rank3]:[rank3]:     ...<5 lines>...
+[rank3]:[rank3]:         label_smoothing,
+[rank3]:[rank3]:         ^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:     )
+[rank3]:[rank3]:     ^
+[rank3]:[rank3]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+W1026 18:59:55.133000 2484557 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2484641 closing signal SIGTERM
+W1026 18:59:55.134000 2484557 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2484642 closing signal SIGTERM
+W1026 18:59:55.134000 2484557 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 2484643 closing signal SIGTERM
+E1026 18:59:58.112000 2484557 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 3 (pid: 2484644) of binary: /opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/python3.13
+E1026 18:59:58.131000 2484557 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_kwkiydg_/aca7f3d5-f8d9-4a96-bab3-f4a1ad6615f2_xuwwct61/attempt_0/3/error.json)
+[rank0]:Stage 0: Modules to keep: {'tok_embeddings', 'layers.5', 'layers.7', 'layers.4', 'layers.0', 'layers.6', 'layers.2', 'layers.1', 'layers.3'}
+[rank2]:Stage 2: Modules to keep: {'layers.20', 'layers.24', 'layers.17', 'layers.22', 'layers.21', 'layers.18', 'layers.19', 'layers.23'}
+[rank1]:Stage 1: Modules to keep: {'layers.16', 'layers.12', 'layers.10', 'layers.15', 'layers.8', 'layers.13', 'layers.9', 'layers.11', 'layers.14'}
+[rank3]:Stage 3: Modules to keep: {'layers.27', 'output', 'layers.26', 'layers.30', 'layers.31', 'layers.29', 'layers.28', 'layers.25', 'norm'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b/config.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1027_GPipe_timelyauto_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/1027_GPipe_timelyauto_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/1027_GPipe_timelyauto_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 20
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1027_GPipe_timelyauto_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1027_GPipe_timelyauto_dm1
+[rank3]:		- pplog_freq: 80
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1027_GPipe_timelyauto_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B-Instruct
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 2e-05
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: alpaca
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 1000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: None
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: GPipe
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1027_GPipe_timelyauto_dm1
+[rank3]:		- interval: 500
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/1027_GPipe_timelyauto_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: True
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- seq_len: 1024
+[rank3]:		- freq: 100
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: timelyauto
+[rank3]:		- phase_unit: 10
+[rank3]:		- stability_check_freq: 5
+[rank3]:		- aggressiveness: 0
+[rank3]:
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+    ~~~^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+    ~~~~~~~~~~~~~~~
+        config=config,
+        ~~~~~~~~~~~~~~
+        entrypoint=cmd,
+        ~~~~~~~~~~~~~~~
+    )(*cmd_args)
+    ~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+    ...<2 lines>...
+    )
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-10-26_18:59:58
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 2484641)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2484641
+[2]:
+  time      : 2025-10-26_18:59:58
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 2484642)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2484642
+[3]:
+  time      : 2025-10-26_18:59:58
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 2484643)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 2484643
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-10-26_18:59:49
+  host      : ip-172-16-131-118.sa-east-1.compute.internal
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 2484644)
+  error_file: /tmp/torchelastic_kwkiydg_/aca7f3d5-f8d9-4a96-bab3-f4a1ad6615f2_xuwwct61/attempt_0/3/error.json
+  traceback : Traceback (most recent call last):
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 584, in train
+      self.train_step(data_iterator)
+      ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 490, in train_step
+      loss = self.forward_backward_step(input_dict, labels)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/train.py", line 447, in forward_backward_step
+      self.pp_schedule.step(
+      ~~~~~~~~~~~~~~~~~~~~~^
+          target=targets, losses=losses, input_batch=inputs
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 626, in step
+      self._step_microbatches(args_split, kwargs_split, targets_split, losses)
+      ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 749, in _step_microbatches
+      self._maybe_compute_loss(self._stage, output, target_mbs, i)
+      ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 317, in _maybe_compute_loss
+      loss = self._compute_loss(output, target_mbs[mb_index])  # type: ignore[index]
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/distributed/pipelining/schedules.py", line 446, in _compute_loss
+      return self._loss_fn(output, target)  # type: ignore[misc]
+             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 40, in accumulated_loss_fn
+      loss = unwrapped_loss_fn(*args, **kwargs)
+    File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/torchtitan/components/loss.py", line 20, in cross_entropy_loss
+      return torch.nn.functional.cross_entropy(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          pred.flatten(0, 1).float(), labels.flatten(0, 1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      )
+      ^
+    File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/torch/nn/functional.py", line 3495, in cross_entropy
+      return torch._C._nn.cross_entropy_loss(
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+          input,
+          ^^^^^^
+      ...<5 lines>...
+          label_smoothing,
+          ^^^^^^^^^^^^^^^^
+      )
+      ^
+  torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1002.00 MiB. GPU 3 has a total capacity of 139.81 GiB of which 712.38 MiB is free. Process 2429365 has 82.19 GiB memory in use. Including non-PyTorch memory, this process has 56.91 GiB memory in use. Of the allocated memory 54.57 GiB is allocated by PyTorch, and 39.94 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+  
+============================================================
+✅ All runs completed. Logs saved in /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1027_llama8b.
