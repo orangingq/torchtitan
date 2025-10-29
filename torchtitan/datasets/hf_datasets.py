@@ -53,6 +53,7 @@ def _process_medical_text(sample: dict[str, Any]) -> str:
     cot = sample["Complex_CoT"].strip()
     response = sample["Response"].strip()
     prompt = f"<|user|>\n{question}\n<|assistant|>## Thinking\n\n{cot}\n\n## Final Response\n\n{response}"
+    logger.info(f"Medical prompt: {prompt}")
     return prompt
 
 @dataclass
@@ -86,7 +87,7 @@ DATASETS = {
     ),
     "alpaca": DatasetConfig(
         path="tatsu-lab/alpaca",
-        loader=lambda path: load_dataset(path, split="train"),
+        loader=lambda path: load_dataset(path, split="train"), # 52k samples
         text_processor=_process_alpaca_text,
     ),
     "medical": DatasetConfig(

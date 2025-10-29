@@ -2,8 +2,8 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16 autocast"
-EXPERIMENT_TAG="1028_llama1b"
-TODAY="1028"
+EXPERIMENT_TAG="1029_llama1b"
+TODAY="1029"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=3,4,5,6
@@ -34,23 +34,23 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-EXPERIMENT_LIST=( # You can expand this list as needed
-  "GPipe timelyapf"
-  "1F1B timelyauto"
-  "1F1B timelyapf"
-  "1F1B fullrand7"
-  "Interleaved1F1B fullrand7"
-  "Interleaved1F1B timelyauto"
-  "Interleaved1F1B timelyapf"
-  "Interleaved1F1B apf"
-)
+# EXPERIMENT_LIST=( # You can expand this list as needed
+#   "GPipe timelyapf"
+#   "1F1B timelyauto"
+#   "1F1B timelyapf"
+#   "1F1B fullrand7"
+#   "Interleaved1F1B fullrand7"
+#   "Interleaved1F1B timelyauto"
+#   "Interleaved1F1B timelyapf"
+#   "Interleaved1F1B apf"
+# )
 
-# for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-#     for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do 
-for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
-    IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
-    PP_SCHEDULER="${EXP_ARRAY[0]}"
-    METRIC_TYPE="${EXP_ARRAY[1]}"
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do 
+# for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
+#     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
+#     PP_SCHEDULER="${EXP_ARRAY[0]}"
+#     METRIC_TYPE="${EXP_ARRAY[1]}"
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"
@@ -84,7 +84,7 @@ for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 
         torchrun "${COMMON_ARGS[@]}" "${ADDITIONAL_ARGS[@]}" "${FREEZE_ARGS[@]}"  2>&1 | tee -a ${OUTPUT_FILE}
 
-    # done
+    done
 done
 
 echo "✅ All runs completed. Logs saved in ${LOG_DIR}."

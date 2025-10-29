@@ -2,7 +2,7 @@
 
 # Define common environment variables
 EXPLAIN="Llama 3.2 1B Instruct Base Model Evaluation"
-TODAY="1028"
+TODAY="1029"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"
@@ -24,7 +24,7 @@ for BASENAME in "${BASENAME_LIST[@]}"; do
 
     # Check if the model path exists
     if [ ! -d "${MODEL_PATH}" ]; then
-        echo "❌Model path ${MODEL_PATH} not found — skipping." | tee -a "${OUTPUT_FILE}"
+        echo "❌Model path ${MODEL_PATH} not found — skipping."
         continue
     fi
 
