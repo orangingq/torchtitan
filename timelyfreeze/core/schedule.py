@@ -102,7 +102,7 @@ def link_actions(pipeline_schedule:List[List[ActionWithTime]])-> List[List[Actio
     return pipeline_schedule
 
 
-def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]])-> List[List[ActionWithFreezing]]:
+def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]], max_freeze_ratio: float=0.9)-> List[List[ActionWithFreezing]]:
     '''
     Updated on July 29, 2025.
     Solve the DAG LP problem to find the optimal schedule for the pipeline schedule.
@@ -156,10 +156,31 @@ def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]])-> List[List[A
     A.append(row)
     b.append(0)
 
+    # Add average freeze-ratio constraint per stage: avg_freeze_ratio(stage) <= max_freeze_ratio
+    for s in range(num_stages):
+        row = np.zeros(num_vars)
+        count = 0
+        sum_term = 0.0
+        for action in actions:
+            w_min, w_max = action.min_duration, action.max_duration
+            if not action.freezable or action.stage != s or w_min >= w_max:
+                continue
+            idx = action_indices[str(action)]
+            # freeze_ratio = (w_max - duration) / (w_max - w_min)
+            # contribution: -1/(w_max-w_min) * duration  + w_max/(w_max-w_min)
+            row[n + idx] = -1.0 / (w_max - w_min)
+            count += 1
+            sum_term += w_max / (w_max - w_min)
+        if count > 0:
+            A.append(row)
+            # sum( -1/(wmax-wmin) * duration ) + sum( wmax/(wmax-wmin) ) <= max_freeze_ratio * count
+            # => sum( -1/(...) * duration ) <= max_freeze_ratio*count - sum_term
+            b.append(max_freeze_ratio * count - sum_term)
+
     # Time duration bounds for each action
     bounds = [(0, None)] * n  # min bounds for start_time of each action (start_time >= 0)
     bounds += [(a.min_duration, a.max_duration) for a in actions] # bounds for the duration of each action
-
+    
     res = linprog(c, A_ub=np.array(A), b_ub=np.array(b), bounds=bounds, method="highs")
 
     if res.success:
