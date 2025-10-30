@@ -1,15 +1,9 @@
 #!/usr/bin/bash
-#SBATCH --job-name=llama8b_train
-#SBATCH --gres=gpu:4
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=128G
-#SBATCH --time=24:00:00
-#SBATCH --output=logs/h200/1027_llama8b/slurm-%j.out
 
 # Define common environment variables
 EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation"
 EXPERIMENT_TAG="1027_llama8b"
-TODAY="1027"
+TODAY="1028"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 # Respect Slurm's CUDA_VISIBLE_DEVICES

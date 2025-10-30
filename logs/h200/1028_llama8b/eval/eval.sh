@@ -2,11 +2,12 @@
 #SBATCH --job-name=eval_basemodel
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
+#SBATCH --time=1:30:00
 #SBATCH --output=logs/h200/1024_llama8b/eval/slurm-%j.out
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1027_llama8b"
+EXPERIMENT_TAG="1028_llama8b"
 
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
@@ -23,39 +24,55 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 CHECKPOINT_ROOT="/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
   "1028_GPipe_nofreeze_dm1"
-  "1028_GPipe_fullrand7_dm1"
   "1028_GPipe_apf_dm1"
-  "1028_1F1B_nofreeze_dm1"
-  "1028_1F1B_fullrand7_dm1"
-  "1028_1F1B_apf_dm1"
-  "1028_Interleaved1F1B_nofreeze_dm1"
-  "1027_Interleaved1F1B_fullrand7_dm1"
-  "1028_Interleaved1F1B_apf_dm1"
+  "1028_GPipe_fullrand7_dm1"
+  "1028_GPipe_auto_dm1"
+  "1028_GPipe_timelyapf_dm1"
+  "1028_GPipe_timelyauto_dm1"
+  # "1028_1F1B_nofreeze_dm1"
+  # "1028_1F1B_apf_dm1"
+  # "1028_1F1B_fullrand7_dm1"
+  # "1028_1F1B_auto_dm1"
+  # "1028_1F1B_timelyapf_dm1"
+  # "1028_1F1B_timelyauto_dm1"
+  # "1028_Interleaved1F1B_nofreeze_dm1"
+  # "1028_Interleaved1F1B_apf_dm1"
+  # "1028_Interleaved1F1B_fullrand7_dm1"
+  # "1028_Interleaved1F1B_auto_dm1"
+  # "1028_Interleaved1F1B_timelyapf_dm1"
+  # "1028_Interleaved1F1B_timelyauto_dm1"
 ) 
 MODEL_TYPE="Llama-3.1-8B-Instruct"
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
     OUTPUT_FILE="${LOG_DIR}/eval_${BASENAME}.log"
-    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-1600"
+    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-2400"
     RESULT_FILE="${MODEL_PATH}/eval_${BASENAME}.json"
 
     # Check if the model path exists
     if [ ! -d "${MODEL_PATH}" ]; then
-        echo "❌Model directory ${MODEL_PATH} not found — skipping." | tee -a "${OUTPUT_FILE}"
+        echo "❌Model directory ${MODEL_PATH} not found — skipping."
+        continue
+    fi
+
+    # Skip evaluation if result file already exists
+    if [ -f "${RESULT_FILE}" ]; then
+        echo "⚠️Result file ${RESULT_FILE} already exists — skipping evaluation." 
         continue
     fi
 
     # Convert to HuggingFace format if .safetensors files are not found
     if ! ls "${MODEL_PATH}"/*.safetensors 1> /dev/null 2>&1; then
-      echo "➡️No .safetensors files found in ${MODEL_PATH}. Converting to HuggingFace format..." | tee -a "${OUTPUT_FILE}"
+      echo "➡️No .safetensors files found in ${MODEL_PATH}. Converting to HuggingFace format..." | tee -a ${OUTPUT_FILE}
       torchrun --nproc_per_node=1 --nnodes=1 --standalone --local_addr=127.0.0.1 --role=rank --tee=3 -m scripts.checkpoint_conversion.convert_to_hf \
         "${MODEL_PATH}" "${MODEL_PATH}" --model_name=llama3 --model_flavor=8B
     fi
 
     # Ensure index file exists
     if [ ! -f "${MODEL_PATH}/model.safetensors.index.json" ]; then
-        echo "➡️Recreating Index file at ${MODEL_PATH}/model.safetensors.index.json." | tee -a "${OUTPUT_FILE}"
+        echo "➡️Recreating Index file at ${MODEL_PATH}/model.safetensors.index.json." | tee -a ${OUTPUT_FILE}
         cat > "${MODEL_PATH}/model.safetensors.index.json" <<'JSON'
 {
   "metadata": {
@@ -81,13 +98,13 @@ JSON
         echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
         echo -e "✔️RESULT: ${RESULT_FILE}"
         echo -e "✔️${EXPLAIN}"
-        echo -e "☑️> python3 -m timelyfreeze.eval_hf_checkpoint --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --output_json=${RESULT_FILE}"
+        echo -e "☑️> python3 -m timelyfreeze.evaluation --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} --output_json=${RESULT_FILE}"
         echo -e "❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️"
     } | tee -a ${OUTPUT_FILE}
 
-    python3 -m timelyfreeze.eval_hf_checkpoint \
+    python3 -m timelyfreeze.evaluation \
       --model_path=${MODEL_PATH} --output_json=${RESULT_FILE} \
-      --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda \
+      --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} \
       2>&1 | tee -a ${OUTPUT_FILE}
 
 done

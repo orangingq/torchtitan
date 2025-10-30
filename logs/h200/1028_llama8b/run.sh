@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation, 2 epochs"
-EXPERIMENT_TAG="1027_llama8b"
+EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16"
+EXPERIMENT_TAG="1028_llama8b"
 TODAY="1028"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"

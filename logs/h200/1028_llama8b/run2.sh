@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation, 2 epochs"
-EXPERIMENT_TAG="1027_llama8b"
+EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16"
+EXPERIMENT_TAG="1028_llama8b"
 TODAY="1028"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
@@ -22,7 +22,7 @@ NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
 LOG_DIR="/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/${EXPERIMENT_TAG}"
 CONFIG_FILE="${LOG_DIR}/config.toml"
-THIS_FILE="${LOG_DIR}/run.sh" # "$(realpath "${BASH_SOURCE[0]}")"
+THIS_FILE="${LOG_DIR}/run2.sh" # "$(realpath "${BASH_SOURCE[0]}")"
 
 COMMON_ARGS=(
     "--standalone"
@@ -49,7 +49,7 @@ COMMON_ARGS=(
 #   "Interleaved1F1B auto"
 # )
 
-for PP_SCHEDULER in GPipe ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
