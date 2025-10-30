@@ -372,13 +372,14 @@ class HuggingFaceMultiDataset(IterableDataset, Stateful):
             except StopIteration:
                 # 다 돈 dataset은 다시 iterator 초기화
                 if not self.infinite:
-                    logger.warning(f"Dataset {self.datasets[ds_i]['name']} exhausted")
-                    self._sample_idx[ds_i] = 0
-                    continue
+                    logger.warning(f"Dataset {self.datasets[ds_i]['name']} have run out of data")
+                    break
                 else:
+                    self._sample_idx[ds_i] = 0
+                    logger.warning(f"Dataset {self.datasets[ds_i]['name']} is being re-looped")
                     iters[ds_i] = self._get_data_iter(ds_i)
                     sample = next(iters[ds_i])
-
+                    
             # 토큰화
             sample_text = self.datasets[ds_i]["text_processor"](sample)
             sample_tokens = self._tokenizer.encode(

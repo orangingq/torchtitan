@@ -4,6 +4,6 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=128G
 #SBATCH --time=24:00:00
-#SBATCH --output=logs/h200/1028_llama8b/slurm-%j.out
+#SBATCH --output=logs/h200/1030_llama8b/slurm-%j.out
 
-bash ./logs/h200/1028_llama8b/run3.sh "$@"
+bash ./logs/h200/1030_llama8b/run3.sh "$@"
