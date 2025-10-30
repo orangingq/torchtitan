@@ -53,7 +53,6 @@ def _process_medical_text(sample: dict[str, Any]) -> str:
     cot = sample["Complex_CoT"].strip()
     response = sample["Response"].strip()
     prompt = f"<|user|>\n{question}\n<|assistant|>## Thinking\n\n{cot}\n\n## Final Response\n\n{response}"
-    logger.info(f"Medical prompt: {prompt}")
     return prompt
 
 @dataclass
