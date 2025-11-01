@@ -56,6 +56,32 @@ def _process_medical_text(sample: dict[str, Any]) -> str:
     prompt = f"<|user|>\n{question}\n<|assistant|>## Thinking\n\n{cot}\n\n## Final Response\n\n{response}"
     return prompt
 
+def _process_openhermes_text(sample: dict[str, Any]) -> str:
+    """
+    Process an OpenHermes 2.5 dataset sample into a single prompt-response text.
+    """
+    convs = sample.get("conversations", [])
+    system_prompt, question, response = None, None, None
+    
+    for turn in convs:
+        role = turn.get("from", "")
+        value = turn.get("value", "").strip()
+
+        if role == "system" and value:
+            system_prompt = value
+        elif role == "human":
+            question = value
+        elif role == "gpt":
+            response = value
+
+    # Build formatted prompt
+    if not question or not response:
+        return ""  # skip incomplete conversations
+    elif system_prompt:
+        return f"<|system|>\n{system_prompt}\n<|user|>\n{question}\n<|assistant|>\n{response}"
+    else:
+        return f"<|user|>\n{question}\n<|assistant|>\n{response}"
+
 @dataclass
 class DatasetConfig:
     path: str
@@ -94,6 +120,11 @@ DATASETS = {
         path="FreedomIntelligence/medical-o1-reasoning-SFT",
         loader=lambda path: load_dataset(path, "en_mix", split="train"), # 24.9k samples for en_mix
         text_processor=_process_medical_text,
+    ),
+    "openhermes": DatasetConfig(
+        path="teknium/OpenHermes-2.5",
+        loader=lambda path: load_dataset(path, split="train"), # 1M samples
+        text_processor=_process_openhermes_text,
     ),
 }
 
