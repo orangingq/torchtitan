@@ -90,7 +90,7 @@ class PipelineLog:
         '''flush the temporary timer for the next logging'''
         assert len(self.cuda_timer_batch[ActionStatus.START]) == flush_freq, f"the length of batch start should be {flush_freq}. start:{len(self.cuda_timer_batch[ActionStatus.START])}, end:{len(self.cuda_timer_batch[ActionStatus.END])}"
         assert len(self.cuda_timer_schedule[ActionStatus.START]) == flush_freq * len(self.log_schedule), f"the length of fwd start should be {flush_freq} * {len(self.log_schedule)}(=len(self.log_schedule)). start:{len(self.cuda_timer_schedule[ActionStatus.START])}, end:{len(self.cuda_timer_schedule[ActionStatus.END])}"
-        assert self.step_cnt % flush_freq == 1, f"the step count should be a multiple of {flush_freq}. step_cnt: {self.step_cnt}"
+        assert self.step_cnt % flush_freq == 0 and self.step_cnt >= flush_freq, f"the step count should be a multiple of {flush_freq}. step_cnt: {self.step_cnt}"
 
         # wait for the last event ends in GPU
         self.cuda_timer_schedule[ActionStatus.END][-1].synchronize()
@@ -152,8 +152,8 @@ class PipelineLog:
         # Process to identify pipeline schedule cycle (for the first cycle)
         if self.log_schedule_flag:
             self._create_actions_list()
-        else:
-            self.log_timer()
+        # else:
+        self.log_timer()
         return self
     
     # context manager
@@ -212,11 +212,11 @@ class PipelineLog:
 
         # log the time duration of forward and backward, for every n=30 batches
         flush_freq = 30
-        end_of_nth_batch = self._is_end_of_batch and self.step_cnt % flush_freq == 1 and self.step_cnt > 1
+        end_of_nth_batch = self._is_end_of_batch and self.step_cnt % flush_freq == 0 and self.step_cnt >= flush_freq
         if end_of_nth_batch:
             self._tmp_timer_flush(flush_freq=flush_freq)
             
-        if self._is_end_of_batch and self.step_cnt % self.config.metrics.pplog_freq == 1:
+        if self._is_end_of_batch and self.step_cnt % self.config.metrics.pplog_freq == 0:
             self.timer_print()
         return
     
@@ -243,15 +243,14 @@ class PipelineLog:
         """Create the actions list and action dict for freezing."""
         # Process to identify pipeline schedule cycle (for the first cycle)
         assert self.log_schedule_flag, "This function should be called only once after the first cycle is recorded."
-        if not self.range == ActionStatus.END:
-            return
         
-        new_action = ActionWithLog(self.step, self.pp_rank, self.microbatch, self.stage)
-        self.log_schedule.append(new_action)
-        if self.stage in self.actions_list[self.step].keys():
-            self.actions_list[self.step][self.stage].append(new_action)
-        else:
-            self.actions_list[self.step][self.stage] = [new_action]
+        if self.range == ActionStatus.START:
+            new_action = ActionWithLog(self.step, self.pp_rank, self.microbatch, self.stage)
+            self.log_schedule.append(new_action)
+            if self.stage in self.actions_list[self.step].keys():
+                self.actions_list[self.step][self.stage].append(new_action)
+            else:
+                self.actions_list[self.step][self.stage] = [new_action]
             
         if self._is_end_of_batch:
             assert len(self.log_schedule) <= self.config.parallelism.microbatches * self.config.parallelism.stages_per_rank * (4 if self.config.parallelism.bwd_separated else 2), \

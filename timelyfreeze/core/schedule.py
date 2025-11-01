@@ -321,7 +321,8 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             )
 
     # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
-    pipeline_schedule_freezing = solve_dag_lp(pipeline_schedule_freezing) # solve the DAG LP problem to find the optimal schedule
+    max_freeze_ratio = getattr(config.freezing, "max_freeze_ratio", 0.9)
+    pipeline_schedule_freezing = solve_dag_lp(pipeline_schedule_freezing, max_freeze_ratio=max_freeze_ratio) # solve the DAG LP problem to find the optimal schedule
 
     if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
@@ -425,7 +426,8 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
             action.min_duration = float(durations[r][stages_order[action.stage]][1])
 
     # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
-    pipeline_schedule = solve_dag_lp(pipeline_schedule) # solve the DAG LP problem to find the optimal schedule
+    max_freeze_ratio = getattr(config.freezing, "max_freeze_ratio", 0.9)
+    pipeline_schedule = solve_dag_lp(pipeline_schedule, max_freeze_ratio=max_freeze_ratio) # solve the DAG LP problem to find the optimal schedule
 
     if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule])

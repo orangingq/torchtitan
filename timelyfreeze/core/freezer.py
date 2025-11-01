@@ -337,7 +337,7 @@ class APFFreezer(_Freezer):
         self.ema_abs = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
 
         # freeze update
-        self.threshold = 0.05 # threshold on effective perturbation. (paper: 0.05)
+        self.threshold = getattr(config.freezing, "threshold", 0.05) # threshold on effective perturbation. (paper: 0.05)
         self.freezing_period = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
         self.frozen_due = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
         self.is_frozen = {name: False for stage in self.stages.values() for name, _ in stage.named_parameters()}
@@ -435,7 +435,7 @@ class AutoFreezer(_Freezer):
         # freezing metrics
         self.prev_grad_norm = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()}
         self.percentile = getattr(config.freezing, "percentile", 50)
-        self.threshold = 0.0
+        self.threshold = 0.0 # will be set automatically based on the percentile
         self.start_layer = 0
 
         # freeze update
@@ -671,7 +671,7 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
         self.ema_abs = {name: 0.0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
 
         # freeze update
-        self.threshold = 0.05 # threshold on effective perturbation. (paper: 0.05)
+        self.threshold = getattr(config.freezing, "threshold", 0.05) # threshold on effective perturbation. (paper: 0.05)
         self.freezing_period = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()} # freeze the layer for a unit of stability_check_freq (paper: 50)
         self.frozen_due = {name: 0 for stage in self.stages.values() for name, _ in stage.named_parameters()}
         return

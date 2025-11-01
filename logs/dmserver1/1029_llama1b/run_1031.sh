@@ -2,7 +2,8 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16 autocast
-+ more freezing in autofreeze mode. (self.percentile = getattr(config.freezing, "percentile", 50->70))
++ more freezing in autofreeze mode. 
++ lr_scheduler min_lr = 0 -> 1e-6, cosine decay.
 "
 EXPERIMENT_TAG="1029_llama1b"
 TODAY="1031"
@@ -19,7 +20,7 @@ NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
 LOG_DIR="$(dirname "${THIS_FILE}")"
-CONFIG_FILE="${LOG_DIR}/config.toml"
+CONFIG_FILE="${LOG_DIR}/config_${TODAY}.toml"
 
 COMMON_ARGS=(
     "--standalone"
@@ -38,7 +39,7 @@ COMMON_ARGS=(
 
 EXPERIMENT_LIST=( # You can expand this list as needed
 #   "GPipe auto"
-  "GPipe timelyapf"
+#   "GPipe timelyapf"
 #   "1F1B timelyauto"
 #   "1F1B timelyapf"
 #   "1F1B fullrand7"
@@ -49,12 +50,12 @@ EXPERIMENT_LIST=( # You can expand this list as needed
 #   "Interleaved1F1B apf"
 )
 
-# for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-#     for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do 
-for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
-    IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
-    PP_SCHEDULER="${EXP_ARRAY[0]}"
-    METRIC_TYPE="${EXP_ARRAY[1]}"
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto  ; do # nofreeze apf auto fullrand7 timelyapf timelyauto
+# for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
+#     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
+#     PP_SCHEDULER="${EXP_ARRAY[0]}"
+#     METRIC_TYPE="${EXP_ARRAY[1]}"
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"
@@ -88,7 +89,7 @@ for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 
         torchrun "${COMMON_ARGS[@]}" "${ADDITIONAL_ARGS[@]}" "${FREEZE_ARGS[@]}"  2>&1 | tee -a ${OUTPUT_FILE}
 
-    # done
+    done
 done
 
 echo "✅ All runs completed. Logs saved in ${LOG_DIR}."

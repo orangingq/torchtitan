@@ -104,9 +104,15 @@ class Freezing:
 
     stability_check_freq: int = 10
     """Frequency of stability checks during training (steps)."""
+    
+    max_freeze_ratio: float = 0.9
+    """<TimelyFreeze> Maximum freeze ratio for each stage (model partition)."""
 
-    aggressiveness: float = 0.1
-    """Aggressiveness of freezing. Higher values lead to more aggressive freezing."""
+    threshold: float = 0.05
+    """<APFFreezer> Threshold for freezing based on the effective perturbation metric."""
+
+    percentile: int = 50
+    """<AutoFreezer> Percentile threshold for freezing. Layers with metrics below this percentile will be frozen."""
 
 
 @dataclass
