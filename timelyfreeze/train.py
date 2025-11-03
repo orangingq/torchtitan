@@ -653,9 +653,10 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
     filename_suffix = ('final' if is_final else 'warmupend' if is_warmupend else 'step') + str(step)
 
     if pplog.pipeline_log is not None and len(pplog.pipeline_log.log_schedule) > 0 \
-        and len(pplog.pipeline_log.log_schedule[0].log_time) > 0:
-        pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline( \
-            gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None))
+        and len(pplog.pipeline_log.log_schedule[0].log_duration) > 0:
+        # pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline( \
+        #     gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None))
+        pipeline_schedule :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None)
         if config.comm.is_last_stage:
             # 1) Draw the realistic pipeline schedule
             draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',

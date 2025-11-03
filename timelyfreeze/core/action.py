@@ -1,6 +1,6 @@
 
 from enum import Enum
-from typing import List
+from typing import List, Literal
 import numpy as np
 import torch
 from torchtitan.tools.logging import logger
@@ -60,70 +60,86 @@ class Action:
 
 class ActionWithLog(Action):
     '''Action class for the pipeline with time log'''
-    def __init__(self, type:ActionType, rank:int, microbatch:int=None, stage:int=None, log_time:list=[]):
+    def __init__(self, type:ActionType, rank:int, microbatch:int=None, stage:int=None, log_duration:list=[]):
         super().__init__(type, rank, microbatch, stage)
-        self.log_time = log_time.copy()
+        self.log_duration = log_duration.copy()
+        self.log_start_time = [] # starting time of each logged time, same length as log_duration
 
-    def add_log_time(self, start_batch_idx:int, time:float|List[float]):
-        '''add the log time starting from the given batch index'''
-        if len(self.log_time) < start_batch_idx:
-            logger.warning(f"Batch index {start_batch_idx} is larger than log time length {len(self.log_time)}. Filling with zeros.")
-            self.log_time.extend([0.0] * (start_batch_idx - len(self.log_time)))
-        elif len(self.log_time) > start_batch_idx:
-            raise ValueError(f"Already have log time for batch index {start_batch_idx}.")
-        
-        if isinstance(time, list):
-            self.log_time.extend(time.copy())
+    def add_log_time(self, start_batch_idx:int, start_time:float|List[float], duration:float|List[float]):
+        '''add the log time starting from the given batch index
+        Args:
+            start_batch_idx (int): the starting batch index to add the log duration
+            start_time (float|List[float]): the log start time to add
+            duration (float|List[float]): the log duration to add
+            Ex. self.log_duration[start_batch_idx] = time[0], self.log_duration[start_batch_idx+1] = time[1], ...
+        '''
+        if len(self.log_duration) < start_batch_idx:
+            logger.warning(f"Batch index {start_batch_idx} is larger than log duration length {len(self.log_duration)}. Filling with zeros.")
+            self.log_duration.extend([0.0] * (start_batch_idx - len(self.log_duration)))
+        elif len(self.log_duration) > start_batch_idx:
+            raise ValueError(f"Already have log duration for batch index {start_batch_idx}.")
+        assert len(self.log_start_time) == len(self.log_duration), "Log start time and log duration must have the same length."
+
+        if isinstance(start_time, list) and isinstance(duration, list):
+            self.log_start_time.extend(start_time.copy())
+            self.log_duration.extend(duration.copy())
         else:
-            self.log_time.append(time)
+            assert isinstance(start_time, float) and isinstance(duration, float), "start_time and duration must be both float or both list of float."
+            self.log_start_time.append(start_time)
+            self.log_duration.append(duration)
         return
     
     @property
-    def get_log_time_len(self):
+    def len_log(self):
         '''get the log time length'''
-        return len(self.log_time)
-    @property
-    def get_log_time_mean(self):
-        '''get the log time mean'''
-        return np.mean(self.log_time) if self.get_log_time_len > 0 else 0
-    @property
-    def get_log_time_median(self):
-        '''get the log time median'''
-        return np.median(self.log_time) if self.get_log_time_len > 0 else 0
+        return len(self.log_duration)
+    def get_start_time(self, log_window:int|None=None, method:Literal['mean', 'median']='median'):
+        '''get the start time'''
+        if self.len_log > 0:
+            if method == 'mean':
+                return np.mean(self.log_start_time[-log_window:]) if log_window is not None else np.mean(self.log_start_time)
+            elif method == 'median':
+                return np.median(self.log_start_time[-log_window:]) if log_window is not None else np.median(self.log_start_time)
+        return 0
+    def get_duration(self, log_window:int|None=None, method:Literal['mean', 'median']='median'):
+        '''get the duration time'''
+        if self.len_log > 0:
+            if method == 'mean':
+                return np.mean(self.log_duration[-log_window:]) if log_window is not None else np.mean(self.log_duration)
+            elif method == 'median':
+                return np.median(self.log_duration[-log_window:]) if log_window is not None else np.median(self.log_duration)
+        return 0
     def __str__(self):
-        return f"ActionWithLog(type={self.type.name}, rank={self.rank}, microbatch={self.microbatch}, stage={self.stage}, log_time[{self.get_log_time_len}]={self.get_log_time_mean:.4f})"
+        return f"ActionWithLog(type={self.type.name}, rank={self.rank}, microbatch={self.microbatch}, stage={self.stage}, start_time[{self.len_log}]={self.get_start_time():.4f}, duration[{self.len_log}]={self.get_duration():.4f})"
     def __repr__(self):
-        return f"ActionWithLog(type={self.type.name}, rank={self.rank}, microbatch={self.microbatch}, stage={self.stage}, log_time[{self.get_log_time_len}]={self.get_log_time_mean:.4f})"
+        return f"ActionWithLog(type={self.type.name}, rank={self.rank}, microbatch={self.microbatch}, stage={self.stage}, start_time[{self.len_log}]={self.get_start_time():.4f}, duration[{self.len_log}]={self.get_duration():.4f})"
     def __eq__(self, other):
         if issubclass(type(other), Action):
             return self.type == other.type and self.rank == other.rank and self.microbatch == other.microbatch and self.stage == other.stage
         else:
             return False
-    def to_tensor(self, with_log_time:bool=False, with_median:bool=False, with_mean:bool=False, log_window=None)->torch.Tensor:
-        if not with_log_time and not with_median and not with_mean:
+    def to_tensor(self, log_window:int|None=None, method:Literal['mean', 'median', None]='median')->torch.Tensor:
+        if method is None:
             return super().to_tensor()
-        
         list_repr = super().to_tensor().tolist() # convert to list
-        if with_median:
-            list_repr.append(self.get_log_time_median if log_window is None else np.median(self.log_time[-log_window:]))
-        if with_mean:
-            list_repr.append(self.get_log_time_mean if log_window is None else np.mean(self.log_time[-log_window:]))
+        list_repr.extend([self.get_start_time(log_window=log_window, method=method), \
+                              self.get_duration(log_window=log_window, method=method)])
         # convert to tensor
         return torch.tensor(list_repr, dtype=torch.float16)
 
 
 
 class ActionWithTime(Action):
-    def __init__(self, type:ActionType, rank:int, microbatch:int=None, stage:int=None, duration:float=0):
+    def __init__(self, type:ActionType, rank:int, microbatch:int=None, stage:int=None, start_time:float=0, duration:float=0):
         super().__init__(type, rank, microbatch, stage)
         # time setting
-        self._start_time : float = 0 # starting time of this action block relative to the start time of this batch. # yet to be assigned
-        self._duration = duration # set the duration of the action explictly
+        self._start_time    :float = start_time # starting time of this action block relative to the start time of this batch. # yet to be assigned
+        self._duration      :float = duration # set the duration of the action explictly
 
         # scheduled flag
-        self.scheduled_flag = False # whether the action is scheduled or not
-        self.prev_actions: list[Action] = [] # previous actions in the pipeline, used for scheduling
-        self.next_actions: list[Action] = [] # next actions in the pipeline, used for scheduling      
+        self.scheduled_flag :bool = False # whether the action is scheduled or not
+        self.prev_actions   :list[Action] = [] # previous actions in the pipeline, used for scheduling
+        self.next_actions   :list[Action] = [] # next actions in the pipeline, used for scheduling      
 
     @property
     def start_time(self):
@@ -182,11 +198,10 @@ class ActionWithFreezing(ActionWithTime):
         self._freeze_flag : bool = False # whether the action can start freezing or not.
         self._expected_freeze_ratio : float = 0.0 # expected freeze ratio
         self.progressive_freezing : float = 0 # the rate of progressive freezing, default is 0. actual_fr = expected_fr * progressive_freezing (will grow to 1 during the training)
-        self.monitored_points = [] # list of (afr, time_duration) pairs, monitored during the progressive freezing phase 
 
         self.freezing_list = None # list of freezing actions
 
-        self.freeze_ratio_history = [] # frozen ratio history per stage
+        self.freeze_ratio_history = [] # frozen ratio history per stage. self.freeze_ratio_history[batch_idx] = frozen ratio at batch_idx
         self.paramwise_frozen_count = {} # [frozen, total] count for each layer in each stage
 
         # cache
@@ -324,12 +339,11 @@ class ActionWithFreezing(ActionWithTime):
             self.paramwise_frozen_count[name][1] += 1
     
         # append the actual frozen ratio to the freeze ratio history
-        if start_batch_idx is not None:
-            if len(self.freeze_ratio_history) < start_batch_idx:
-                logger.warning(f"Batch index {start_batch_idx} is larger than freeze ratio history length {len(self.freeze_ratio_history)}. Filling with zeros.")
-                self.freeze_ratio_history.extend([0.0] * (start_batch_idx - len(self.freeze_ratio_history)))
-            elif len(self.freeze_ratio_history) > start_batch_idx:
-                raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
+        if len(self.freeze_ratio_history) < start_batch_idx:
+            logger.warning(f"Batch index {start_batch_idx} is larger than freeze ratio history length {len(self.freeze_ratio_history)}. Filling with zeros.")
+            self.freeze_ratio_history.extend([0.0] * (start_batch_idx - len(self.freeze_ratio_history)))
+        elif len(self.freeze_ratio_history) > start_batch_idx:
+            raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
         self.freeze_ratio_history.append(float(np.mean(freezing_list)))
         return
     

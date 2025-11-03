@@ -196,10 +196,10 @@ class FullyRandomFreezer_v6(_Freezer):
                 log_schedule_lb :List[ActionWithLog] = copy.deepcopy(self.logger.rank_schedule.schedule)
                 for la, a, pa in zip(log_schedule_lb, self.logger.rank_schedule, self.pipeline_schedule[self.pp_rank]):
                     if a.type in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
-                        la.log_time = a.log_time[self.monitoring_lb_start:]
+                        la.log_duration = a.log_time[self.monitoring_lb_start:]
                         # assert la.get_log_time_mean < pa.max_duration, f"Lowerbound log time {la.get_log_time_mean} is not less than action log time {pa.max_duration}."
                     else:
-                        la.log_time = a.log_time[:self.monitoring_lb_start]
+                        la.log_duration = a.log_time[:self.monitoring_lb_start]
                 pipeline_schedule_lb :List[List[ActionWithTime]] = gather_pipeline_schedule(log_schedule_lb, self.config.comm)
 
                 # set the min_duration of each action block based on the lowerbound log time

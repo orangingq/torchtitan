@@ -39,9 +39,11 @@ COMMON_ARGS=(
 
 EXPERIMENT_LIST=( # You can expand this list as needed
 #   "GPipe auto"
-#   "GPipe timelyapf"
+  "GPipe apf"
+  "GPipe timelyapf"
 #   "1F1B timelyauto"
-#   "1F1B timelyapf"
+  "1F1B apf"
+  "1F1B timelyapf"
 #   "1F1B fullrand7"
 #   "1F1B auto"
 #   "Interleaved1F1B fullrand7"
@@ -51,7 +53,7 @@ EXPERIMENT_LIST=( # You can expand this list as needed
 )
 
 for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto  ; do # nofreeze apf auto fullrand7 timelyapf timelyauto
+    for METRIC_TYPE in apf timelyapf  ; do # nofreeze apf auto fullrand7 timelyapf timelyauto
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"

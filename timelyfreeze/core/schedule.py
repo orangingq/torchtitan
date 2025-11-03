@@ -28,9 +28,9 @@ def gather_pipeline_schedule(log_schedule:List[ActionWithLog], comm: Comm, log_w
     num_actions_all = torch.stack(num_actions_all).cpu().tolist() # [num_pipelines]
 
     # create a tensor to send/gather from all ranks: (schedule info) x (num_actions)
-    schedule_info = len(log_schedule[0].to_tensor(with_median=True)) # 5
+    schedule_info = len(log_schedule[0].to_tensor()) # number of info per action
     data_to_gather = torch.zeros(schedule_info, max(num_actions_all))
-    data_to_gather[:, :num_actions] = torch.stack([action.to_tensor(with_median=True, log_window=log_window) for action in log_schedule]).T
+    data_to_gather[:, :num_actions] = torch.stack([action.to_tensor(log_window=log_window) for action in log_schedule]).T
     data_gather_list = [torch.zeros_like(data_to_gather, device=f'cuda:{comm.local_rank}') for _ in range(comm.pp)]
     dist.all_gather(tensor_list=data_gather_list, tensor=data_to_gather.to(comm.local_rank), group=comm.pp_group)
     data_gather_list = torch.stack(data_gather_list).cpu() # [num_pipelines, schedule, num_actions]
@@ -383,6 +383,8 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
         ax.set_ylabel('Time (ms)', fontsize=9)
         ax.legend(loc='upper left', fontsize=9)
         ax.set_title(f'Stage {stage}', fontdict={'fontsize': 9})
+        for spine in ax.spines.values(): # remove all boundary spines (left, right, top, bottom)
+            spine.set_visible(False)
         return a, b
 
     durations_per_stage :torch.Tensor = torch.zeros((n_stages, 2), device=f'cuda:{config.comm.local_rank}')

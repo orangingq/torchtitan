@@ -103,7 +103,9 @@ class PipelineLog:
         self.cuda_timer_schedule[ActionStatus.START] = np.array(self.cuda_timer_schedule[ActionStatus.START]).reshape(flush_freq, len(self.log_schedule))            
         self.cuda_timer_schedule[ActionStatus.END] = np.array(self.cuda_timer_schedule[ActionStatus.END]).reshape(flush_freq, len(self.log_schedule))
         for i, action in enumerate(self.log_schedule):
-            action.add_log_time(self.step_cnt-flush_freq, [start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
+            action.add_log_time(self.step_cnt-flush_freq, \
+                                start_time=[batch_start.elapsed_time(start) for (batch_start, start) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_schedule[ActionStatus.START][:, i])], \
+                                duration=[start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
         self.log_batch_time.extend([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_batch[ActionStatus.END])])
     
         # reset the tmp timers
@@ -223,9 +225,9 @@ class PipelineLog:
     def timer_print(self):
         '''print the time analysis (avg time per action type, avg batch time, gpu bubble ratio)'''
         emptiness = {type: len(stage_dict) == 0 for type, stage_dict in self.actions_list.items()} 
-        avg_time = {type: np.mean([a.log_time for a_list in stage_dict.values() for a in a_list]) if not empty else 0 for ((type, stage_dict), empty) in zip(self.actions_list.items(), emptiness.values())}
+        avg_time = {type: np.mean([a.log_duration for a_list in stage_dict.values() for a in a_list]) if not empty else 0 for ((type, stage_dict), empty) in zip(self.actions_list.items(), emptiness.values())}
         avg_batch_time = np.mean(self.log_batch_time)
-        cnt_per_batch = {type: sum([a.get_log_time_len for a_list in stage_dict.values() for a in a_list]) // len(self.log_batch_time) for (type, stage_dict) in self.actions_list.items()}
+        cnt_per_batch = {type: sum([a.len_log for a_list in stage_dict.values() for a in a_list]) // len(self.log_batch_time) for (type, stage_dict) in self.actions_list.items()}
         gpu_bubble_ratio = 1 - (sum([avg_time[type]*cnt_per_batch[type] for type in avg_time.keys()]) / avg_batch_time)
         log_str = f"Avg. fwd time: {avg_time[ActionType.FORWARD]:.4f} / "
         if self.config.parallelism.bwd_separated:
