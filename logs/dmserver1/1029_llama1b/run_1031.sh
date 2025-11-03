@@ -53,7 +53,7 @@ EXPERIMENT_LIST=( # You can expand this list as needed
 )
 
 for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in apf timelyapf  ; do # nofreeze apf auto fullrand7 timelyapf timelyauto
+    for METRIC_TYPE in timelyapf  ; do # nofreeze apf auto fullrand7 timelyapf timelyauto
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"

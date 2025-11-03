@@ -104,7 +104,7 @@ class PipelineLog:
         self.cuda_timer_schedule[ActionStatus.END] = np.array(self.cuda_timer_schedule[ActionStatus.END]).reshape(flush_freq, len(self.log_schedule))
         for i, action in enumerate(self.log_schedule):
             action.add_log_time(self.step_cnt-flush_freq, \
-                                start_time=[batch_start.elapsed_time(start) for (batch_start, start) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_schedule[ActionStatus.START][:, i])], \
+                                start_time=[rank_start.elapsed_time(start) for (rank_start, start) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_schedule[ActionStatus.START][:, i])], \
                                 duration=[start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
         self.log_batch_time.extend([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_batch[ActionStatus.END])])
     

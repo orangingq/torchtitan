@@ -22,21 +22,37 @@ def gather_pipeline_schedule(log_schedule:List[ActionWithLog], comm: Comm, log_w
     # dist.barrier(group=args.pp_group, device_ids=[args.local_rank])
 
     # collect the number of actions per rank
+    device = f'cuda:{comm.local_rank}'
     num_actions = len(log_schedule)
-    num_actions_all = [torch.zeros((), device=f'cuda:{comm.local_rank}', dtype=torch.int32) for _ in range(comm.pp)]
-    dist.all_gather(tensor_list=num_actions_all, tensor=torch.tensor(num_actions, device=f'cuda:{comm.local_rank}', dtype=torch.int32), group=comm.pp_group)
-    num_actions_all = torch.stack(num_actions_all).cpu().tolist() # [num_pipelines]
+    local_num_actions = torch.tensor(num_actions, device=device, dtype=torch.int32)
+    num_actions_all_tensor = torch.empty(comm.pp, device=device, dtype=torch.int32)
+    dist.all_gather_into_tensor(num_actions_all_tensor, local_num_actions, group=comm.pp_group)
+    num_actions_all = num_actions_all_tensor.cpu().tolist()  # [num_pipelines]
 
-    # create a tensor to send/gather from all ranks: (schedule info) x (num_actions)
-    schedule_info = len(log_schedule[0].to_tensor()) # number of info per action
-    data_to_gather = torch.zeros(schedule_info, max(num_actions_all))
-    data_to_gather[:, :num_actions] = torch.stack([action.to_tensor(log_window=log_window) for action in log_schedule]).T
-    data_gather_list = [torch.zeros_like(data_to_gather, device=f'cuda:{comm.local_rank}') for _ in range(comm.pp)]
-    dist.all_gather(tensor_list=data_gather_list, tensor=data_to_gather.to(comm.local_rank), group=comm.pp_group)
-    data_gather_list = torch.stack(data_gather_list).cpu() # [num_pipelines, schedule, num_actions]
+    # determine schedule info width robustly across ranks
+    schedule_info_local = int(len(log_schedule[0].to_tensor(log_window=log_window))) if num_actions > 0 else 0
+    schedule_info_local_t = torch.tensor(schedule_info_local, device=device, dtype=torch.int32)
+    schedule_info_all_t = torch.empty(comm.pp, device=device, dtype=torch.int32)
+    dist.all_gather_into_tensor(schedule_info_all_t, schedule_info_local_t, group=comm.pp_group)
+    schedule_info = int(schedule_info_all_t.max().item())
+
+    # create a tensor to send/gather from all ranks: (schedule info) x (max num_actions)
+    max_actions = int(max(num_actions_all)) if len(num_actions_all) > 0 else 0
+    dtype = torch.float16  # ActionWithLog.to_tensor returns float16
+    data_to_gather = torch.zeros((schedule_info, max_actions), device=device, dtype=dtype)
+    if num_actions > 0 and schedule_info > 0:
+        actions_tensor = torch.stack([action.to_tensor(log_window=log_window) for action in log_schedule]).to(device)
+        data_to_gather[:, :num_actions] = actions_tensor.T
+
+    gathered = torch.empty((comm.pp, schedule_info, max_actions), device=device, dtype=dtype)
+    dist.all_gather_into_tensor(gathered, data_to_gather, group=comm.pp_group)
+    data_gather_list = gathered.cpu()  # [num_pipelines, schedule, num_actions]
 
     # create a pipeline schedule in class ActionWithTime
-    pipeline_schedule: List[List[ActionWithTime]] = [[ActionWithTime(*action.tolist()) for action in rank_list.T[:num_actions_all[r]]] for r, rank_list in enumerate(data_gather_list)] 
+    pipeline_schedule: List[List[ActionWithTime]] = [
+        [ActionWithTime(*action.tolist()) for action in rank_list.T[:num_actions_all[r]]]
+        for r, rank_list in enumerate(data_gather_list)
+    ]
     return link_actions(pipeline_schedule)
     
 def link_actions(pipeline_schedule:List[List[ActionWithTime]])-> List[List[ActionWithTime]]:
@@ -45,28 +61,40 @@ def link_actions(pipeline_schedule:List[List[ActionWithTime]])-> List[List[Actio
     This function will set the prev_actions and next_actions attributes of each action.
     '''
     
-    if any([len(action.prev_actions)>0 for actions_per_rank in pipeline_schedule for action in actions_per_rank]) \
-        or any([len(action.next_actions)>0 for actions_per_rank in pipeline_schedule for action in actions_per_rank]):
+    if any(action.prev_actions for actions_per_rank in pipeline_schedule for action in actions_per_rank) \
+        or any(action.next_actions for actions_per_rank in pipeline_schedule for action in actions_per_rank):
             return pipeline_schedule # already linked, return the original schedule
         
     action_dict: Dict[tuple, ActionWithTime] = {(action.type, action.rank, action.microbatch, action.stage): action \
                                                     for actions_per_rank in pipeline_schedule for action in actions_per_rank}
-    def set_links(prev, next):
+    def set_links(prev, nxt):
         '''set the prev/next links between actions'''
-        assert prev is not None and next is not None, f"prev and next should not be None. prev: {prev}, next: {next}"
-        if next in prev.next_actions:
-            assert prev in next.prev_actions, f"prev should be in next.prev_actions. prev: {prev}, next: {next}"
+        if prev is None or nxt is None:
+            logger.debug(f"prev or nxt is None. prev: {prev}, nxt: {nxt}")
+            return
+        if nxt in prev.next_actions:
+            logger.debug(f"nxt is already in prev.next_actions. nxt: {nxt}, prev: {prev}")
             return # already linked, do nothing
-        prev.next_actions.append(next)
-        next.prev_actions.append(prev)
+        prev.next_actions.append(nxt)
+        nxt.prev_actions.append(prev)
         return 
     
     num_ranks: int = len(pipeline_schedule) # same as args.pp
-    stages_per_rank = [list(dict.fromkeys([action.stage for action in pipeline_schedule[rank] if action.type == ActionType.FORWARD and action.stage is not None])) for rank in range(num_ranks)]
-    last_stage: int = max([max(stages) for stages in stages_per_rank])
-    num_microbatches: int = max([action.microbatch for action in pipeline_schedule[0]])+1
+    # compute last_stage and num_microbatches in a single pass, robust to varying ranks
+    last_stage: int = -1
+    max_microbatch: int = -1
+    for actions_per_rank in pipeline_schedule:
+        for action in actions_per_rank:
+            if action.microbatch is not None and action.microbatch > max_microbatch:
+                max_microbatch = action.microbatch
+            if action.type == ActionType.FORWARD and action.stage is not None and action.stage > last_stage:
+                last_stage = action.stage
+    if last_stage < 0:
+        last_stage = 0
+    num_microbatches: int = max_microbatch + 1
 
     # add prev/next links between actions
+    get_action = action_dict.get
     for rank_actions in pipeline_schedule:
         for itr, action in enumerate(rank_actions):
             # next scheduled action
@@ -76,28 +104,33 @@ def link_actions(pipeline_schedule:List[List[ActionWithTime]])-> List[List[Actio
                 
             # microbatch conditions
             if action.microbatch < num_microbatches-1: # microbatch n should be executed after microbatch n-1
-                next_action = action_dict.get((action.type, action.rank, action.microbatch+1, action.stage), None)
+                next_action = get_action((action.type, action.rank, action.microbatch+1, action.stage))
                 set_links(action, next_action)
             
             # action type conditions
             if action.type == ActionType.FORWARD: # full-backward / backward-input should be executed after forward
-                next_action = action_dict.get((ActionType.FULL_BACKWARD, action.rank, action.microbatch, action.stage), 
-                                action_dict.get((ActionType.BACKWARD_INPUT, action.rank, action.microbatch, action.stage), None))
+                next_action = get_action((ActionType.FULL_BACKWARD, action.rank, action.microbatch, action.stage))
+                if next_action is None:
+                    next_action = get_action((ActionType.BACKWARD_INPUT, action.rank, action.microbatch, action.stage))
                 set_links(action, next_action)
             elif action.type == ActionType.BACKWARD_INPUT: # backward-weight should be executed after backward-input
-                next_action = action_dict.get((ActionType.BACKWARD_WEIGHT, action.rank, action.microbatch, action.stage), None)
+                next_action = get_action((ActionType.BACKWARD_WEIGHT, action.rank, action.microbatch, action.stage))
                 set_links(action, next_action)
                 
             # stage conditions
             if action.type == ActionType.FORWARD and action.stage < last_stage: # forward of stage n should be executed after stage n-1
-                next_action = action_dict.get((action.type, (action.rank+1)%num_ranks, action.microbatch, action.stage+1),
-                                action_dict.get((action.type, (action.rank-1+num_ranks)%num_ranks, action.microbatch, action.stage+1), None))             
+                next_action = get_action((action.type, (action.rank+1)%num_ranks, action.microbatch, action.stage+1))
+                if next_action is None:
+                    next_action = get_action((action.type, (action.rank-1+num_ranks)%num_ranks, action.microbatch, action.stage+1))
                 set_links(action, next_action)
             if action.type in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT] and action.stage > 0: # full-backward / backward-input of stage n should be executed after stage n+1
-                next_action = action_dict.get((ActionType.FULL_BACKWARD, (action.rank-1+num_ranks)%num_ranks, action.microbatch, action.stage-1), \
-                                action_dict.get((ActionType.FULL_BACKWARD, (action.rank+1)%num_ranks, action.microbatch, action.stage-1), \
-                                action_dict.get((ActionType.BACKWARD_INPUT, (action.rank-1+num_ranks)%num_ranks, action.microbatch, action.stage-1), \
-                                action_dict.get((ActionType.BACKWARD_INPUT, (action.rank+1)%num_ranks, action.microbatch, action.stage-1), None))))
+                next_action = get_action((ActionType.FULL_BACKWARD, (action.rank-1+num_ranks)%num_ranks, action.microbatch, action.stage-1))
+                if next_action is None:
+                    next_action = get_action((ActionType.FULL_BACKWARD, (action.rank+1)%num_ranks, action.microbatch, action.stage-1))
+                if next_action is None:
+                    next_action = get_action((ActionType.BACKWARD_INPUT, (action.rank-1+num_ranks)%num_ranks, action.microbatch, action.stage-1))
+                if next_action is None:
+                    next_action = get_action((ActionType.BACKWARD_INPUT, (action.rank+1)%num_ranks, action.microbatch, action.stage-1))
                 set_links(action, next_action)
     return pipeline_schedule
 
@@ -109,86 +142,84 @@ def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]], max_freeze_ra
     This function assumes that each action in the pipeline schedule is all linked as a DAG and has max_duration and min_duration.
     This function returns the pipeline schedule with the start time and end time of each action set.
     '''
-    start_node = ActionWithFreezing(ActionType.START, 0, 0, 0, 0) # dummy start node
-    end_node = ActionWithFreezing(ActionType.FINISH, 0, 0, 0, 0) # dummy end node
-    actions = [action for actions_per_rank in pipeline_schedule for action in actions_per_rank]
-    actions = [start_node] + actions + [end_node] # add start and end nodes to the actions
-    action_indices = {str(action): i for i, action in enumerate(actions)}
-    n = len(actions) # number of actions including start and end nodes
-    num_stages = max(action.stage for action in actions) + 1
-    assert n == 2 + sum([len(rank_actions) for rank_actions in pipeline_schedule]), f"num_actions: {n}, sum of rank actions: {sum([len(rank_actions) for rank_actions in pipeline_schedule])}"
-    G = nx.DiGraph() # directed graph to represent the pipeline schedule
+    # Build problem without NetworkX using index mapping
+    start_node = ActionWithFreezing(ActionType.START, 0, 0, 0, 0)
+    end_node = ActionWithFreezing(ActionType.FINISH, 0, 0, 0, 0)
+    actions_flat = [action for actions_per_rank in pipeline_schedule for action in actions_per_rank]
+    m = len(actions_flat)
+    actions_all = [start_node] + actions_flat + [end_node]
+    n = len(actions_all)
+    num_stages = max(action.stage for action in actions_flat) + 1 if m > 0 else 1
+    assert n == 2 + sum(len(rank_actions) for rank_actions in pipeline_schedule), f"num_actions: {n}, sum of rank actions: {sum(len(rank_actions) for rank_actions in pipeline_schedule)}"
 
-    # add nodes
-    for action in actions:
-        G.add_node(str(action))
-    
-    # add edges
-    for action in actions:
-        if action.type != ActionType.START and len(action.prev_actions) == 0: # if the action is the first action in the rank, link it to the start node
-            G.add_edge(str(start_node), str(action))
-        if action.type != ActionType.FINISH and len(action.next_actions) == 0: # if the action is the last action in the rank, link it to the end node
-            G.add_edge(str(action), str(end_node))
-        for next_action in action.next_actions:
-            G.add_edge(str(action), str(next_action))
+    def action_key(a: ActionWithFreezing):
+        return (a.type, a.rank, a.microbatch, a.stage)
+    key_to_idx = {action_key(a): i+1 for i, a in enumerate(actions_flat)}
 
-    num_vars = 2 * n # action.start_time, action.duration
-    c = np.zeros(num_vars) # cost vector for the linear programming problem
-    c[n-1] = 9999.0 # first goal: minimize the total batch time
-    for i in range(n): # second goal: maximize action durations (=minimize freeze ratio)
-        w_min, w_max = actions[i].min_duration, actions[i].max_duration
-        if actions[i].freezable and w_min < w_max:
-            c[n+i] = -1/(w_max - w_min) # maximize action duration.
-        else:
-            c[n+i] = 0
+    # edges (u->v) with indices in [0, n-1]
+    edges = []
+    for i, a in enumerate(actions_flat):
+        u = i + 1
+        if len(a.prev_actions) == 0:
+            edges.append((0, u))
+        if len(a.next_actions) == 0:
+            edges.append((u, n - 1))
+        for na in a.next_actions:
+            v = key_to_idx.get(action_key(na))
+            if v is not None:
+                edges.append((u, v))
 
-    A, b = [], [] # constraints for the linear programming problem
-    # constraint of each edge u->v: u.start_time + u.duration <= v.start_time 
-    for u, v in G.edges: # <=> (u.start_time - v.start_time + u.duration <= 0)
-        row = np.zeros(num_vars) 
-        row[action_indices[u]], row[action_indices[v]], row[n + action_indices[u]] = 1, -1, 1
+    num_vars = 2 * n
+    c = np.zeros(num_vars, dtype=float)
+    c[n - 1] = 9999.0
+
+    w_min = np.zeros(n, dtype=float)
+    w_max = np.zeros(n, dtype=float)
+    freezable = np.zeros(n, dtype=bool)
+    stages = np.full(n, -1, dtype=int)
+    for i, a in enumerate(actions_flat, start=1):
+        w_min[i] = a.min_duration
+        w_max[i] = a.max_duration
+        freezable[i] = a.freezable and (a.min_duration < a.max_duration)
+        stages[i] = a.stage
+    valid = freezable & (w_max > w_min)
+    denom = np.where(valid, (w_max - w_min), 1.0)
+    c[n:n + n][valid] = -1.0 / denom[valid]
+
+    A, b = [], []
+    for (u, v) in edges:
+        row = np.zeros(num_vars, dtype=float)
+        row[u] = 1.0
+        row[v] = -1.0
+        row[n + u] = 1.0
         A.append(row)
-        b.append(0)
+        b.append(0.0)
 
-    # constraint for the start node
-    row = np.zeros(num_vars) 
-    row[0], row[n] = 1, 1 # start_node.start_time + start_node.duration <= 0
-    A.append(row)
-    b.append(0)
+    row0 = np.zeros(num_vars, dtype=float)
+    row0[0] = 1.0
+    row0[n] = 1.0
+    A.append(row0)
+    b.append(0.0)
 
-    # Add average freeze-ratio constraint per stage: avg_freeze_ratio(stage) <= max_freeze_ratio
     for s in range(num_stages):
-        row = np.zeros(num_vars)
-        count = 0
-        sum_term = 0.0
-        for action in actions:
-            w_min, w_max = action.min_duration, action.max_duration
-            if not action.freezable or action.stage != s or w_min >= w_max:
-                continue
-            idx = action_indices[str(action)]
-            # freeze_ratio = (w_max - duration) / (w_max - w_min)
-            # contribution: -1/(w_max-w_min) * duration  + w_max/(w_max-w_min)
-            row[n + idx] = -1.0 / (w_max - w_min)
-            count += 1
-            sum_term += w_max / (w_max - w_min)
-        if count > 0:
-            A.append(row)
-            # sum( -1/(wmax-wmin) * duration ) + sum( wmax/(wmax-wmin) ) <= max_freeze_ratio * count
-            # => sum( -1/(...) * duration ) <= max_freeze_ratio*count - sum_term
-            b.append(max_freeze_ratio * count - sum_term)
+        idxs = np.where((stages == s) & valid)[0]
+        if idxs.size == 0:
+            continue
+        row = np.zeros(num_vars, dtype=float)
+        row[n + idxs] = -1.0 / (w_max[idxs] - w_min[idxs])
+        A.append(row)
+        sum_term = float(np.sum(w_max[idxs] / (w_max[idxs] - w_min[idxs])))
+        b.append(max_freeze_ratio * idxs.size - sum_term)
 
-    # Time duration bounds for each action
-    bounds = [(0, None)] * n  # min bounds for start_time of each action (start_time >= 0)
-    bounds += [(a.min_duration, a.max_duration) for a in actions] # bounds for the duration of each action
-    
-    res = linprog(c, A_ub=np.array(A), b_ub=np.array(b), bounds=bounds, method="highs")
+    bounds = [(0, None)] * n
+    bounds += [(float(w_min[i]), float(w_max[i])) for i in range(n)]
+
+    res = linprog(c, A_ub=np.array(A, dtype=float), b_ub=np.array(b, dtype=float), bounds=bounds, method="highs")
 
     if res.success:
-        # start_times = res.x[:n]
-        durations = res.x[n:2*n]
-        for i, action in enumerate(actions):
-            # action.start_time = start_times[i]
-            action.duration = durations[i]
+        durations = res.x[n:2 * n]
+        for i, a in enumerate(actions_flat, start=1):
+            a.duration = float(durations[i])
     else:
         raise RuntimeError("Linear programming failed.")
     return schedule_pipeline(pipeline_schedule)

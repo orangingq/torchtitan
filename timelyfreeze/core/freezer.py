@@ -9,6 +9,7 @@ from . import logger as pplog
 from .schedule import adjust_freeze_ratio, gather_pipeline_schedule, set_freeze_ratio
 from .config import TimelyFreezeConfig
 from torchtitan.tools.logging import logger
+import copy
 
 class _Freezer:
     def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
@@ -29,6 +30,7 @@ class _Freezer:
 
         self.freeze_ratio_history = {stage_idx: [0] * (self.warmup_phase // self.stability_check_freq) if config.freezing.freeze else [] for stage_idx in self.stages.keys()} # frozen ratio history per stage
         self.paramwise_frozen_count = {stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage_idx, stage in self.stages.items()} # [frozen, total] count for each layer in each stage
+        self._param_names_by_stage = {stage_idx: [name for name, _ in stage.named_parameters()] for stage_idx, stage in self.stages.items()}
         return
 
     def _step_count(self, step:int):
@@ -61,9 +63,8 @@ class _Freezer:
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage_idx, stage in self.stages.items():
-            for name, _ in stage.named_parameters():
-                self.paramwise_frozen_count[stage_idx][name][0] += 0
+        for stage_idx in self.stages.keys():
+            for name in self._param_names_by_stage[stage_idx]:
                 self.paramwise_frozen_count[stage_idx][name][1] += 1
 
             self.freeze_ratio_history[stage_idx].append(0)
@@ -78,18 +79,17 @@ def get_freezer_class_version(freezer:_Freezer)->int:
 
 def get_freezer(model_parts: List[Module], config:TimelyFreezeConfig)->_Freezer:
     '''Get the freezer based on the metric type.'''
-    if config.freezing.metric_type == 'fullrand7': # freeze per microbatch block - updated on Oct 18, 2025
-        return FullyRandomFreezer_v7(model_parts, config)
-    elif config.freezing.metric_type == 'apf': # APF (absolute perturbation freezing)
-        return APFFreezer(model_parts, config)
-    elif config.freezing.metric_type == 'timelyapf': # APF + Timely Freeze
-        return APFFreezerWithTimelyFreeze(model_parts, config)
-    elif config.freezing.metric_type == 'auto': # AutoFreeze
-        return AutoFreezer(model_parts, config)
-    elif config.freezing.metric_type == 'timelyauto': # AutoFreeze + Timely Freeze
-        return AutoFreezerWithTimelyFreeze(model_parts, config)
-    else:
+    mapping = {
+        'fullrand7': FullyRandomFreezer_v7,   # freeze per microbatch block - updated on Oct 18, 2025
+        'apf': APFFreezer,                    # APF (absolute perturbation freezing)
+        'timelyapf': APFFreezerWithTimelyFreeze,  # APF + Timely Freeze
+        'auto': AutoFreezer,                  # AutoFreeze
+        'timelyauto': AutoFreezerWithTimelyFreeze, # AutoFreeze + Timely Freeze
+    }
+    cls = mapping.get(config.freezing.metric_type)
+    if cls is None:
         raise NotImplementedError(f"Metric Type [{config.freezing.metric_type}] is not supported.")
+    return cls(model_parts, config)
 
 
 
@@ -126,6 +126,7 @@ class FullyRandomFreezer_v7(_Freezer):
         self.pipeline_schedule :List[List[ActionWithFreezing]] = []
         '''Pipeline schedule with freezing information. Will be set after monitoring upper/lowerbound.'''
         # self.rand_noise_possibility = 0.05
+        self._weights_cache : Dict[int, torch.Tensor] = {}
         return
     
     def freeze_update(self, step:int):
@@ -169,22 +170,28 @@ class FullyRandomFreezer_v7(_Freezer):
         # start progressive freezing phase
         elif self.step_cnt <= self.progressive_freezing_phase:
             # during the warmup phase, gradually increase the progressive_freezing
-            for a, la in zip(self.pipeline_schedule[self.config.comm.pp_rank], pplog.pipeline_log.log_schedule):
+            for a in self.pipeline_schedule[self.config.comm.pp_rank]:
                 a.progressive_freezing = (self.step_cnt-self.warmup_phase)/(self.progressive_freezing_phase-self.warmup_phase)
             
         # Stable Freezing Phase - periodically adjust the freeze ratio 
-        elif self.step_cnt > self.progressive_freezing_phase + self.freeze_adjust_freq and self.step_cnt % self.freeze_adjust_freq == 0: 
-            monitored_values_dict = {stage: [] for stage in self.stages.keys()}
-            for a, la in zip(self.pipeline_schedule[self.config.comm.pp_rank], pplog.pipeline_log.log_schedule):
-                if not a.freezable:
-                    continue
-                times = la.log_duration[self.progressive_freezing_start_step:]
-                time_outliers = (np.percentile(times, 5), np.percentile(times, 95))
-                afrs = a.freeze_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
-                monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times) if time_outliers[0]<=time<=time_outliers[1]] 
-            self.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
-            logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
-            self.freeze_adjust_freq = self.freeze_adjust_freq * 2 # stop adjusting the freeze ratio        
+        # elif self.step_cnt > self.progressive_freezing_phase + self.freeze_adjust_freq and self.step_cnt % self.freeze_adjust_freq == 0: 
+        #     monitored_values_dict = {stage: [] for stage in self.stages.keys()}
+        #     for a, la in zip(self.pipeline_schedule[self.config.comm.pp_rank], pplog.pipeline_log.log_schedule):
+        #         if not a.freezable:
+        #             continue
+        #         times = la.log_duration[self.progressive_freezing_start_step:]
+        #         time_outliers = (np.percentile(times, 5), np.percentile(times, 95))
+        #         afrs = a.freeze_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
+        #         monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times) if time_outliers[0]<=time<=time_outliers[1]] 
+        #     curr_batch_time = max(rank_action[-1].end_time for rank_action in self.pipeline_schedule)
+        #     pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
+        #     next_batch_time = max(rank_action[-1].end_time for rank_action in pipeline_schedule)
+        #     if next_batch_time < curr_batch_time:
+        #         self.pipeline_schedule = pipeline_schedule
+        #         logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+        #         self.freeze_adjust_freq = self.freeze_adjust_freq * 2 # stop adjusting the freeze ratio  
+        #     else:
+        #         logger.info(f"Adjusted Freeze Ratio per Block (no change): {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
         else:
             pass
         return
@@ -195,13 +202,17 @@ class FullyRandomFreezer_v7(_Freezer):
         if len(self.pipeline_schedule) == 0:
             return
         
-        for action in self.pipeline_schedule[self.config.comm.pp_rank]:
-            actual_num_freeze = min(action.num_params, int(np.round(action.num_params * action.actual_freeze_ratio)))
+        schedule = self.pipeline_schedule[self.config.comm.pp_rank]
+        for action in schedule:
+            actual_num_freeze = min(action.num_params, int(round(action.num_params * action.actual_freeze_ratio)))
             if actual_num_freeze <= 0:
                 action.freezing_list = [False] * action.num_params
             else:
                 if action.stage == 0: # front layers more likely to freeze
-                    weights = torch.linspace(1.0, 0.1, steps=action.num_params)
+                    weights = self._weights_cache.get(action.num_params)
+                    if weights is None:
+                        weights = torch.linspace(1.0, 0.1, steps=action.num_params)
+                        self._weights_cache[action.num_params] = weights
                     idx = torch.multinomial(weights, actual_num_freeze, replacement=False)
                 else:
                     idx = torch.randperm(action.num_params)[:actual_num_freeze]
@@ -216,13 +227,20 @@ class FullyRandomFreezer_v7(_Freezer):
         if self.step_cnt % self.stability_check_freq != 0:
             return
 
-        for stage_idx, stage in self.stages.items():
+        ppr = self.config.comm.pp_rank
+        schedule = self.pipeline_schedule[ppr] if len(self.pipeline_schedule) > 0 else []
+        for stage_idx in self.stages.keys():
             if self.monitored_ub:
-                for name, _ in stage.named_parameters():
-                    self.paramwise_frozen_count[stage_idx][name][0] = sum([a.paramwise_frozen_count[name][0] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
-                    self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
+                for name in self._param_names_by_stage[stage_idx]:
+                    self.paramwise_frozen_count[stage_idx][name][0] = sum(
+                        a.paramwise_frozen_count[name][0] for a in schedule if a.stage == stage_idx and name in a.paramwise_frozen_count
+                    )
+                    self.paramwise_frozen_count[stage_idx][name][1] = sum(
+                        a.paramwise_frozen_count[name][1] for a in schedule if a.stage == stage_idx and name in a.paramwise_frozen_count
+                    )
 
-                average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and a.freezable]))
+                vals = [a.actual_freeze_ratio for a in schedule if a.stage == stage_idx and a.freezable]
+                average_freeze_ratio = float(sum(vals) / len(vals)) if len(vals) > 0 else 0.0
                 self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
             else:
                 self.freeze_ratio_history[stage_idx].append(0)

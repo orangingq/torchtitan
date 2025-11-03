@@ -657,6 +657,11 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
         # pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline( \
         #     gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None))
         pipeline_schedule :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None)
+        rank_start = 0.0
+        for rank_schedule in pipeline_schedule:
+            for action in rank_schedule:
+                action.start_time = rank_start + action.start_time
+            rank_start = rank_schedule[0].end_time
         if config.comm.is_last_stage:
             # 1) Draw the realistic pipeline schedule
             draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',

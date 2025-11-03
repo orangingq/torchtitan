@@ -17,6 +17,8 @@ def get_abs_path(path:str, base_dir:str)->str:
     '''
     if not os.path.isabs(path):
         path = os.path.abspath(os.path.join(base_dir, path))
+    else:
+        path = os.path.normpath(path)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 
@@ -43,9 +45,12 @@ def draw_line_chart(data_x, data_y, save_file, config: TimelyFreezeConfig, title
     
     fig, ax = plt.subplots()
     # Fit and plot trend line
-    if len(data_y) > 30:
-        moving_avg = np.convolve(data_y, np.ones(window_size)/window_size, mode='valid')
-        ax.plot(data_x[window_size-1:], moving_avg, linestyle='-', color="#DCD2C0", linewidth=8, alpha=0.5, zorder=1)
+    n = len(data_y)
+    if n > 30:
+        w = max(1, min(window_size, n))
+        kernel = np.ones(w, dtype=float) / w
+        moving_avg = np.convolve(np.asarray(data_y, dtype=float), kernel, mode='valid')
+        ax.plot(data_x[w-1:], moving_avg, linestyle='-', color="#DCD2C0", linewidth=8, alpha=0.5, zorder=1)
     ax.scatter(data_x, data_y, marker='o', color='#988456', s=6 if len(data_y) > 50 else 12, zorder=2)
 
     ax.set_title(title if title is not None else f"Line Chart of Rank {config.comm.global_rank} (Stage {config.comm.pp_rank})", 
@@ -55,8 +60,8 @@ def draw_line_chart(data_x, data_y, save_file, config: TimelyFreezeConfig, title
     if ylabel:
         ax.set_ylabel(ylabel, fontdict={'fontsize': 13})
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
-    plt.savefig(save_file)
-    plt.close()
+    fig.savefig(save_file)
+    plt.close(fig)
     logger.info(f"{title if title is not None else 'Line Chart'}  is saved as: {save_file}")
     return save_file
 
@@ -66,7 +71,7 @@ def draw_elementwise_histogram(data, stage, save_file, config: TimelyFreezeConfi
     Draw the elementwise histogram of the model.
     data: list of the count and total per element. [[count: int, total: int] for each element].    
     '''
-    total_sum = sum([data_l[1] for data_l in data])
+    total_sum = sum(data_l[1] for data_l in data)
     if total_sum == 0:
         logger.warning("data is empty. Skip drawing the elementwise histogram.")
         return None
@@ -119,8 +124,8 @@ def draw_elementwise_histogram(data, stage, save_file, config: TimelyFreezeConfi
     plt.subplots_adjust(bottom=0.2)
 
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
-    plt.savefig(save_file)
-    plt.close()
+    fig.savefig(save_file)
+    plt.close(fig)
     logger.info(f"Elementwise Histogram is saved as: {save_file}\n\t> Counts Sum: {int(past_counts)}, Total Sum: {int(total_sum)} ({past_counts/total_sum*100:.2f}%), " \
              + f"Ratio(%) per element: {[int(data_l[0] / data_l[1]*10000)/100 for data_l in data]}")
     return
@@ -135,7 +140,7 @@ def draw_pipeline_schedule(save_file:str,
     num_stages_per_rank = config.parallelism.stages_per_rank
 
     # draw the pipeline schedule
-    max_time = max([actions_per_rank[-1].end_time for actions_per_rank in pipeline_schedule])    
+    max_time = max(actions_per_rank[-1].end_time for actions_per_rank in pipeline_schedule)
     space = 0 # max_time / 100
     color_map = {
         ActionType.FORWARD: '#4285F4', # Blue
@@ -181,13 +186,13 @@ def draw_pipeline_schedule(save_file:str,
         ax.set_title(title, fontsize=18) # "Pipeline Schedule TimeBlock Sequence" if title is None else title
 
     # Add vertical construction lines for better visualization
-    for time in plt.xticks()[0]: 
+    for time in ax.get_xticks(): 
         ax.axvline(x=time, color='gray', linestyle='--', linewidth=0.5, alpha=0.7, zorder=0)
 
     # Add bubble ratio text on the right side of the plot
-    up_time = max([actions_per_rank[-1].end_time - actions_per_rank[0]._start_time for actions_per_rank in pipeline_schedule])
-    gpu_util_time = [sum([action.duration for action in actions_per_rank]) for actions_per_rank in pipeline_schedule]
-    gpu_bubble_ratio = [(1- gpu_util_time[rank] / up_time) for rank in range(num_ranks)]
+    up_time = max(actions_per_rank[-1].end_time - actions_per_rank[0]._start_time for actions_per_rank in pipeline_schedule)
+    gpu_util_time = [sum(action.duration for action in actions_per_rank) for actions_per_rank in pipeline_schedule]
+    gpu_bubble_ratio = [(1 - gpu_util_time[rank] / up_time) for rank in range(num_ranks)]
 
     # draw the pipeline schedule blocks 
     for actions_per_rank in pipeline_schedule:
@@ -226,8 +231,8 @@ def draw_pipeline_schedule(save_file:str,
                     )
     
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
-    plt.savefig(save_file, bbox_inches='tight', pad_inches=0)
-    plt.close()
+    fig.savefig(save_file, bbox_inches='tight', pad_inches=0)
+    plt.close(fig)
 
     logger.info(f"Pipeline schedule is saved as: {save_file}\n> Batch Time: {up_time:.2f} ms, GPU Bubble Ratio: {', '.join([f'{val*100:.2f}%' for val in gpu_bubble_ratio])}")
 
