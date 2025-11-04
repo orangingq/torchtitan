@@ -377,7 +377,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
     It will also visualize the pipeline schedule with the adjusted freeze ratio.
     Arguments:
     - pipeline_schedule: List of List of ActionWithFreezing, the pipeline schedule to be adjusted.
-    - monitored_values: Dictionary of monitored values for each action, where the key is a tuple of the stage index and the value is a list of tuples of (freeze ratio, time).
+    - monitored_values: Dict[stage] -> List of tuples. Each tuple is (freeze ratio, time) or (freeze ratio, time, microbatch). If microbatch is provided, points are colored by microbatch (larger → darker).
     Returns:
     - Updated pipeline_schedule with adjusted freeze ratio.
     '''
@@ -387,7 +387,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
     if config.metrics.draw_graph:
         fig, axes = plt.subplots(1, n_stages, figsize=(3*n_stages, 3)) # 3 inches per plot, 3 inches height
 
-    def draw_trend_line(stage: int, ax: plt.Axes, afrs: List[float], times: List[float], y_range: List[float]) -> Tuple[float, float]:
+    def draw_trend_line(stage: int, ax: plt.Axes, afrs: List[float], times: List[float], y_range: List[float], microbatches=None) -> Tuple[float, float]:
         ''' Draw the trend line for the monitored values.
         Arguments:
         - stage: the stage index for the title.
@@ -406,7 +406,23 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
         r_range = np.linspace(0, 1, 100)
         t_range = trend_fn(r_range)
         ax.plot(r_range, t_range, linestyle='-', color='#685A3A', linewidth=1, label=f't = {a:.2f}r + {b:.2f}') # EDE8DF
-        ax.scatter(afrs, times, color='#AE9B71', marker='o', s=1) # 7A6A45 988456 A08A5A
+        # color points by microbatch: higher microbatch → darker
+        if microbatches is not None and len(microbatches) == len(times):
+            mb_arr = np.array(microbatches, dtype=float)
+            if mb_arr.size > 0:
+                mb_min, mb_max = float(mb_arr.min()), float(mb_arr.max())
+                if mb_max > mb_min:
+                    norm = (mb_arr - mb_min) / (mb_max - mb_min)
+                else:
+                    norm = np.zeros_like(mb_arr)
+                base = np.array([0xD3, 0xC4, 0xA5], dtype=float) / 255.0
+                factors = 1.0 - 0.6 * norm  # 1.0 (light) → 0.4 (dark)
+                colors = np.clip(base[None, :] * factors[:, None], 0.0, 1.0)
+                ax.scatter(afrs, times, c=colors, marker='o', s=1)
+            else:
+                ax.scatter(afrs, times, color="#AE9B71", marker='o', s=1)
+        else:
+            ax.scatter(afrs, times, color='#AE9B71', marker='o', s=1)
         ax.grid(True, linestyle='--', alpha=0.5)
         ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
         ax.set_yticks([y_min, y_min*0.75+y_max*0.25, (y_min+y_max)/2, y_min*0.25+y_max*0.75, y_max])
@@ -420,14 +436,22 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
 
     durations_per_stage :torch.Tensor = torch.zeros((n_stages, 2), device=f'cuda:{config.comm.local_rank}')
     stages_order = {s:i for i,s in enumerate(sorted(set(monitored_values_dict.keys())))}
-    monitored_values_dict = {s: [[v[0] for v in monitored_values_dict[s]], [v[1] for v in monitored_values_dict[s]]] for s in stages_order.keys()}
+    # Accept both (afr, time) and (afr, time, microbatch)
+    monitored_values_dict = {
+        s: [
+            [v[0] for v in monitored_values_dict[s]],
+            [v[1] for v in monitored_values_dict[s]],
+            [v[2] if isinstance(v, (list, tuple)) and len(v) > 2 else 0 for v in monitored_values_dict[s]]
+        ]
+        for s in stages_order.keys()
+    }
     y_range_per_stage = {s: [min(monitored_values_dict[s][1]), max(monitored_values_dict[s][1])] for s in stages_order.keys()}
 
     for stage, i in stages_order.items():
         # trend line for of monitored values
         if config.metrics.draw_graph:
             axis = axes if len(stages_order) == 1 else axes[i]
-            a, b = draw_trend_line(stage, axis, monitored_values_dict[stage][0], monitored_values_dict[stage][1], y_range_per_stage[stage])
+            a, b = draw_trend_line(stage, axis, monitored_values_dict[stage][0], monitored_values_dict[stage][1], y_range_per_stage[stage], monitored_values_dict[stage][2])
         else:
             a, b = np.polyfit(monitored_values_dict[stage][0], monitored_values_dict[stage][1], 1)
         durations_per_stage[i][0] = b # max_duration (no freezing) = a * 0 + b

@@ -108,6 +108,9 @@ class Freezing:
     max_freeze_ratio: float = 0.9
     """<TimelyFreeze> Maximum freeze ratio for each stage (model partition)."""
 
+    adjustment: bool = False
+    """<TimelyFreeze> Whether to adjust the freeze ratio periodically."""
+
     threshold: float = 0.05
     """<APFFreezer> Threshold for freezing based on the effective perturbation metric."""
 

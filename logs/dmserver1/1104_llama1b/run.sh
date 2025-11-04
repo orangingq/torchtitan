@@ -1,12 +1,9 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16 autocast
-+ more freezing in autofreeze mode. 
-+ lr_scheduler min_lr = 0 -> 1e-6, cosine decay.
-"
-EXPERIMENT_TAG="1029_llama1b"
-TODAY="1031"
+EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16 autocast"
+EXPERIMENT_TAG="1104_llama1b"
+TODAY="1104"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=3,4,5,6
@@ -20,7 +17,7 @@ NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
 LOG_DIR="$(dirname "${THIS_FILE}")"
-CONFIG_FILE="${LOG_DIR}/config_${TODAY}.toml"
+CONFIG_FILE="${LOG_DIR}/config.toml"
 
 COMMON_ARGS=(
     "--standalone"
@@ -37,23 +34,19 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-EXPERIMENT_LIST=( # You can expand this list as needed
-#   "GPipe auto"
-  "GPipe apf"
-  "GPipe timelyapf"
+# EXPERIMENT_LIST=( # You can expand this list as needed
+#   "GPipe timelyapf"
 #   "1F1B timelyauto"
-  "1F1B apf"
-  "1F1B timelyapf"
+#   "1F1B timelyapf"
 #   "1F1B fullrand7"
-#   "1F1B auto"
 #   "Interleaved1F1B fullrand7"
 #   "Interleaved1F1B timelyauto"
 #   "Interleaved1F1B timelyapf"
 #   "Interleaved1F1B apf"
-)
+# )
 
-for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in apf  ; do # nofreeze apf auto fullrand7 timelyapf timelyauto
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in auto timelyapf fullrand7 apf timelyauto nofreeze ; do 
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"
