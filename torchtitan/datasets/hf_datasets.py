@@ -82,6 +82,7 @@ def _process_openhermes_text(sample: dict[str, Any]) -> str:
     else:
         return f"<|user|>\n{question}\n<|assistant|>\n{response}"
 
+
 @dataclass
 class DatasetConfig:
     path: str
@@ -108,7 +109,7 @@ DATASETS = {
     ),
     "slimorca": DatasetConfig(
         path="Open-Orca/SlimOrca",
-        loader=lambda path: load_dataset(path, split="train"),
+        loader=lambda path: load_dataset(path, split="train"), # 518k samples
         text_processor=_process_slimorca_text,
     ),
     "alpaca": DatasetConfig(

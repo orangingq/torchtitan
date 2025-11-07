@@ -3,11 +3,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --time=1:30:00
-#SBATCH --output=logs/h200/1024_llama8b/eval/slurm-%j.out
+#SBATCH --output=logs/h200/1104_llama8b/eval/slurm-%j.out
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1030_llama8b"
+EXPERIMENT_TAG="1104_llama8b"
 
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
@@ -23,24 +23,24 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  # "1101_GPipe_nofreeze_h200"
-  # "1101_GPipe_apf_h200"
-  # "1101_GPipe_fullrand7_h200"
+  "1101_GPipe_nofreeze_h200"
+  "1101_1F1B_nofreeze_h200"
+  "1101_Interleaved1F1B_nofreeze_h200"
+  "1101_GPipe_apf_h200"
+  "1101_GPipe_fullrand7_h200"
   # "1101_GPipe_auto_h200"
   # "1101_GPipe_timelyapf_h200"
   # "1101_GPipe_timelyauto_h200"
-  # "1101_1F1B_nofreeze_h200"
   # "1101_1F1B_apf_h200"
   # "1101_1F1B_fullrand7_h200"
   # "1101_1F1B_auto_h200"
   # "1101_1F1B_timelyapf_h200"
   # "1101_1F1B_timelyauto_h200"
-  "1101_Interleaved1F1B_nofreeze_h200"
-  "1101_Interleaved1F1B_apf_h200"
-  "1101_Interleaved1F1B_fullrand7_h200"
-  "1101_Interleaved1F1B_auto_h200"
-  "1101_Interleaved1F1B_timelyapf_h200"
-  "1101_Interleaved1F1B_timelyauto_h200"
+  # "1101_Interleaved1F1B_apf_h200"
+  # "1101_Interleaved1F1B_fullrand7_h200"
+  # "1101_Interleaved1F1B_auto_h200"
+  # "1101_Interleaved1F1B_timelyapf_h200"
+  # "1101_Interleaved1F1B_timelyauto_h200"
 ) 
 MODEL_TYPE="Llama-3.1-8B-Instruct"
 TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
@@ -48,7 +48,7 @@ TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
     OUTPUT_FILE="${LOG_DIR}/eval_${BASENAME}.log"
-    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-2400"
+    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-2000"
     RESULT_FILE="${MODEL_PATH}/eval_${BASENAME}.json"
 
     # Check if the model path exists

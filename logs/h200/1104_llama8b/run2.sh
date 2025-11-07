@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16"
-EXPERIMENT_TAG="1030_llama8b"
-TODAY="1101"
+EXPLAIN="Llama 3.1 8B Experiment"
+EXPERIMENT_TAG="1104_llama8b"
+TODAY="1104"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 # Respect Slurm's CUDA_VISIBLE_DEVICES
@@ -49,8 +49,8 @@ COMMON_ARGS=(
 #   "Interleaved1F1B auto"
 # )
 
-for PP_SCHEDULER in GPipe ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in fullrand7 timelyapf timelyauto apf ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
+for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"

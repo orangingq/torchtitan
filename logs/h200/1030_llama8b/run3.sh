@@ -3,7 +3,7 @@
 # Define common environment variables
 EXPLAIN="Llama 3.1 8B Instruct Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16"
 EXPERIMENT_TAG="1030_llama8b"
-TODAY="1030"
+TODAY="1101"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 # Respect Slurm's CUDA_VISIBLE_DEVICES
@@ -21,7 +21,7 @@ export TORCHFT_LIGHTHOUSE="http://localhost:29510"
 NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
 LOG_DIR="/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/${EXPERIMENT_TAG}"
-CONFIG_FILE="${LOG_DIR}/config.toml"
+CONFIG_FILE="${LOG_DIR}/config_${TODAY}.toml"
 THIS_FILE="${LOG_DIR}/run3.sh" # "$(realpath "${BASH_SOURCE[0]}")"
 
 COMMON_ARGS=(
@@ -50,14 +50,14 @@ COMMON_ARGS=(
 # )
 
 for PP_SCHEDULER in Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
+    for METRIC_TYPE in fullrand7 timelyapf timelyauto apf ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"
 #     METRIC_TYPE="${EXP_ARRAY[1]}"
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_h200"
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--job.basename=${BASENAME}"
