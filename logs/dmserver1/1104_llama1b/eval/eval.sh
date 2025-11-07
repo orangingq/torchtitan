@@ -12,32 +12,30 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1104_GPipe_nofreeze_dm1"
-  "1104_GPipe_apf_dm1"
-  "1104_GPipe_fullrand7_dm1"
-  "1104_GPipe_auto_dm1"
-  "1104_GPipe_timelyapf_dm1"
-  "1104_GPipe_timelyauto_dm1"
-  "1104_1F1B_nofreeze_dm1"
-  "1104_1F1B_apf_dm1"
-  "1104_1F1B_fullrand7_dm1"
-  "1104_1F1B_auto_dm1"
-  "1104_1F1B_timelyapf_dm1"
-  "1104_1F1B_timelyauto_dm1"
-  "1104_Interleaved1F1B_nofreeze_dm1"
-  "1104_Interleaved1F1B_apf_dm1"
-  "1104_Interleaved1F1B_fullrand7_dm1"
-  "1104_Interleaved1F1B_auto_dm1"
-  "1104_Interleaved1F1B_timelyapf_dm1"
-  "1104_Interleaved1F1B_timelyauto_dm1"
+  "1108_GPipe_nofreeze_dm1"
+  "1107_GPipe_apf_dm1"
+  "1107_GPipe_fullrand7_dm1"
+  "1107_GPipe_timelyapf_dm1"
+  "1107_GPipe_timelyauto_dm1"
+  "1108_1F1B_nofreeze_dm1"
+  "1107_1F1B_fullrand7_dm1"
+  "1107_1F1B_auto_dm1"
+  "1107_1F1B_apf_dm1"
+  "1107_1F1B_timelyauto_dm1"
+  "1108_Interleaved1F1B_nofreeze_dm1"
+  "1107_Interleaved1F1B_fullrand7_dm1"
+  "1107_Interleaved1F1B_auto_dm1"
+  "1107_Interleaved1F1B_apf_dm1"
+  "1107_Interleaved1F1B_timelyapf_dm1"
+  "1107_Interleaved1F1B_timelyauto_dm1"
 ) 
-MODEL_TYPE="Llama-3.2-1B-Instruct"
+MODEL_TYPE="Llama-3.2-1B"
 TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
     OUTPUT_FILE="${LOG_DIR}/eval_${BASENAME}.log"
-    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-1600"
+    MODEL_PATH="${CHECKPOINT_ROOT}/${BASENAME}/step-800"
     RESULT_FILE="${MODEL_PATH}/eval_${BASENAME}.json"
 
     # Check if the model path exists
@@ -87,13 +85,14 @@ JSON
         echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
         echo -e "✔️RESULT: ${RESULT_FILE}"
         echo -e "✔️${EXPLAIN}"
-        echo -e "☑️> python3 -m timelyfreeze.evaluation --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} --output_json=${RESULT_FILE}"
+        echo -e "☑️> python3 -m timelyfreeze.evaluation --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=16 --device_map=cuda --tasks=${TASKS} --output_json=${RESULT_FILE}"
         echo -e "❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️"
     } | tee -a ${OUTPUT_FILE}
 
     python3 -m timelyfreeze.evaluation \
       --model_path=${MODEL_PATH} --output_json=${RESULT_FILE} \
-      --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} \
+      --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=16 --device_map=cuda --tasks=${TASKS} \
+      --num_fewshot 0 --num_fewshot_task mmlu=5,arc_challenge=10 \
       2>&1 | tee -a ${OUTPUT_FILE}
 
 done

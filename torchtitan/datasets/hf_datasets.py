@@ -48,6 +48,23 @@ def _process_alpaca_text(sample: dict[str, Any]) -> str:
     """Process Alpaca dataset sample text."""
     return sample["text"]
 
+def _process_alpaca_cleaned_text(sample: dict[str, Any]) -> str:
+    """
+    Process cleaned Alpaca dataset sample into a single prompt+response text.
+    https://github.com/tatsu-lab/stanford_alpaca#data-release
+    """
+    instruction = sample["instruction"].strip()
+    input_text = sample.get("input", "").strip()
+    response = sample["output"].strip()
+
+    if input_text:
+        prompt = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request." \
+            + f"\n\n### Instruction: \n{instruction}\n\n### Input: \n{input_text}\n\n### Response: \n{response}"
+    else:
+        prompt = "Below is an instruction that describes a task. Write a response that appropriately completes the request." \
+            + f"\n\n### Instruction: \n{instruction}\n\n### Response: \n{response}"
+    return prompt
+
 def _process_medical_text(sample: dict[str, Any]) -> str:
     """Process Self-Instruct dataset sample into a single prompt+response text."""
     question = sample["Question"].strip()
@@ -115,6 +132,11 @@ DATASETS = {
         path="tatsu-lab/alpaca",
         loader=lambda path: load_dataset(path, split="train"), # 52k samples
         text_processor=_process_alpaca_text,
+    ),
+    "alpaca_cleaned": DatasetConfig(
+        path="yahma/alpaca-cleaned",
+        loader=lambda path: load_dataset(path, split="train"), # 51.8k samples
+        text_processor=_process_alpaca_cleaned_text,
     ),
     "medical": DatasetConfig(
         path="FreedomIntelligence/medical-o1-reasoning-SFT",

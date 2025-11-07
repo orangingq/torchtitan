@@ -654,8 +654,6 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
 
     if pplog.pipeline_log is not None and len(pplog.pipeline_log.log_schedule) > 0 \
         and len(pplog.pipeline_log.log_schedule[0].log_duration) > 0:
-        # pipeline_schedule :List[List[ActionWithTime]] = schedule_pipeline( \
-        #     gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None))
         pipeline_schedule :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None)
         rank_start = 0.0
         for rank_schedule in pipeline_schedule:

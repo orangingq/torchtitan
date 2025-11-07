@@ -21,7 +21,9 @@ def parse_args():
     ap.add_argument("--limit", type=int, default=None,
                     help="Limit the number of samples per task (for debugging)")
     ap.add_argument("--num_fewshot", type=int, default=None,
-                    help="Number of few-shot examples (default: task-specific, e.g. 5 for MMLU)")
+                    help="Global few-shot examples for all tasks (overridden by --num_fewshot_task)")
+    ap.add_argument("--num_fewshot_task", action="append", default=None,
+                    help="Per-task few-shot like 'task=K'. Repeatable. Also accepts comma-separated pairs or JSON.")
     ap.add_argument("--dtype", type=str, default="auto",
                     choices=["auto", "float16", "bfloat16", "float32"],
                     help="Data type for model loading")
@@ -39,6 +41,23 @@ def main():
     args = parse_args()
     setproctitle(f"[Eval] TimelyFreeze⏰ - {args.model_path}") # set the process title
     tasks = [t.strip() for t in args.tasks.split(",") if t.strip()]
+    # Parse per-task fewshot mapping
+    fewshot_map = {}
+    if args.num_fewshot_task:
+        for entry in args.num_fewshot_task:
+            try:
+                if entry.strip().startswith("{"):
+                    obj = json.loads(entry)
+                    for k, v in obj.items():
+                        fewshot_map[str(k).strip()] = int(v)
+                else:
+                    parts = [p for p in entry.split(",") if p]
+                    for p in parts:
+                        if "=" in p:
+                            k, v = p.split("=", 1)
+                            fewshot_map[k.strip()] = int(v.strip())
+            except Exception as e:
+                print(f"Warning: failed to parse --num_fewshot_task entry '{entry}': {e}")
     
     config_path = os.path.join(args.model_path, "config.json")
     if not os.path.isfile(config_path):
@@ -58,14 +77,32 @@ def main():
     # if args.trust_remote_code:
     #     model_args.append("trust_remote_code=True")
 
-    results = evaluator.simple_evaluate(
-        model="hf",
-        model_args=",".join(model_args),
-        tasks=tasks,
-        batch_size=args.batch_size,
-        num_fewshot=args.num_fewshot,
-        limit=args.limit,
-    )
+    # Run evaluation, grouping tasks by few-shot setting
+    groups = {}
+    for t in tasks:
+        k = fewshot_map.get(t, args.num_fewshot)
+        groups.setdefault(k, []).append(t)
+
+    merged = None
+    for k, task_group in groups.items():
+        part = evaluator.simple_evaluate(
+            model="hf",
+            model_args=",".join(model_args),
+            tasks=task_group,
+            batch_size=args.batch_size,
+            num_fewshot=k,
+            limit=args.limit,
+        )
+        if merged is None:
+            merged = part
+        else:
+            # merge 'results' and other common dicts if present
+            for key in ["results", "versions"]:
+                if key in part:
+                    merged.setdefault(key, {})
+                    merged[key].update(part[key])
+            # keep last config/other fields as-is
+    results = merged if merged is not None else {}
 
     def print_metric(task_name, metrics):
         acc = None

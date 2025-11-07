@@ -1,12 +1,16 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, 2 epochs, with bf16 autocast"
+EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+"
+
 EXPERIMENT_TAG="1104_llama1b"
-TODAY="1104"
+TODAY="1108"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
-export CUDA_VISIBLE_DEVICES=3,4,5,6
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
 export OMP_NUM_THREADS=1
@@ -17,7 +21,7 @@ NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
 LOG_DIR="$(dirname "${THIS_FILE}")"
-CONFIG_FILE="${LOG_DIR}/config.toml"
+CONFIG_FILE="${LOG_DIR}/config_${TODAY}.toml"
 
 COMMON_ARGS=(
     "--standalone"
@@ -32,28 +36,33 @@ COMMON_ARGS=(
     "--job.config_file=${CONFIG_FILE}"
     "--job.description=\"${EXPLAIN}\""
     "--parallelism.pipeline_parallel_degree=${NGPU}"
+    "--training.seed=2025"
 )
 
-# EXPERIMENT_LIST=( # You can expand this list as needed
+EXPERIMENT_LIST=( # You can expand this list as needed
+#   "GPipe auto"
 #   "GPipe timelyapf"
-#   "1F1B timelyauto"
+#   "GPipe apf"
 #   "1F1B timelyapf"
+#   "1F1B apf"
 #   "1F1B fullrand7"
-#   "Interleaved1F1B fullrand7"
-#   "Interleaved1F1B timelyauto"
+#   "1F1B timelyauto"
+#   "1F1B fullrand7"
 #   "Interleaved1F1B timelyapf"
 #   "Interleaved1F1B apf"
-# )
+#   "Interleaved1F1B fullrand7"
+#   "Interleaved1F1B timelyauto"
+)
 
-for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in auto timelyapf fullrand7 apf timelyauto nofreeze ; do 
+for PP_SCHEDULER in 1F1B GPipe Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in nofreeze ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"
 #     METRIC_TYPE="${EXP_ARRAY[1]}"
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_dm1"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025_dm1"
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--job.basename=${BASENAME}"
@@ -66,6 +75,9 @@ for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # 1F1B GPipe Interleaved1F1B
             FREEZE_ARGS=(
                 "--freezing.freeze"
                 "--freezing.metric_type=${METRIC_TYPE}"
+                "--freezing.threshold=0.05"
+                "--freezing.percentile=80"
+                "--freezing.max_freeze_ratio=0.8"
             )
         fi
 
