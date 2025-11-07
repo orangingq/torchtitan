@@ -313,6 +313,7 @@ class ActionWithFreezing(ActionWithTime):
         
         max_p = 1 if self.stage == 0 else 0.995 # For the front layers, allow full parameter freezing
         if self.freezing_list is None:
+            logger.warning(f"Freezing list is not set. Generating a new freezing list based on the actual freeze ratio={self.actual_freeze_ratio}.")
             if self.actual_freeze_ratio <= 0:
                 freezing_list = [False] * self.num_params
             else:

@@ -411,7 +411,7 @@ class APFFreezer(_Freezer):
                 if param.grad is None:
                     continue
 
-                curr_param = param.detach().clone().cpu()  # current parameter value
+                curr_param = param.detach().clone() # .cpu()  # current parameter value
                 if self.last_param[name] is None:
                     grad, grad_abs = 0.0, 0.0
                 else:
@@ -557,7 +557,6 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
         TimelyFreeze + AutoFreeze (follow the freeze ratio of timelyfreeze, but primarily use AutoFreeze metric to select which params to freeze)
         '''
         super().__init__(model_parts, config)
-
         # freezing metrics
         self.alpha = 0.99 # parameter for exponential moving average (paper: 0.99)
         self.last_param = {name: None for stage in self.stages.values() for name, _ in stage.named_parameters()} # cumulative update
@@ -627,7 +626,7 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
             if actual_num_freeze > 0:
                 weights = [1 if val else 0.01 for val in freeze_cand[action.stage]]
                 assert len(weights) == action.num_params, f"Length Mismatch: {len(weights)} vs {action.num_params}"
-                idx = torch.multinomial(torch.tensor(weights, dtype=torch.float16), actual_num_freeze, replacement=False)
+                idx = torch.multinomial(torch.tensor(weights), actual_num_freeze, replacement=False)
                 freezing_list = torch.zeros(action.num_params, dtype=torch.bool)
                 freezing_list[idx] = True
                 action.freezing_list = freezing_list.tolist()
@@ -663,7 +662,7 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
                 if param.grad is None:
                     continue
 
-                curr_param = param.detach().clone().cpu()  # current parameter value
+                curr_param = param.detach().clone()# .cpu()  # current parameter value
                 if self.last_param[name] is None:
                     grad, grad_abs = 0.0, 0.0
                 else:
@@ -749,7 +748,7 @@ class AutoFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
             if actual_num_freeze > 0:
                 weights = [1 if val else 0.01 for val in freeze_cand[action.stage]]
                 assert len(weights) == action.num_params, f"Length Mismatch: {len(weights)} vs {action.num_params}"
-                idx = torch.multinomial(torch.tensor(weights, dtype=torch.float16), actual_num_freeze, replacement=False)
+                idx = torch.multinomial(torch.tensor(weights), actual_num_freeze, replacement=False)
                 freezing_list = torch.zeros(action.num_params, dtype=torch.bool)
                 freezing_list[idx] = True
                 action.freezing_list = freezing_list.tolist()
