@@ -57,12 +57,16 @@ def _process_alpaca_cleaned_text(sample: dict[str, Any]) -> str:
     input_text = sample.get("input", "").strip()
     response = sample["output"].strip()
 
+    # if input_text:
+    #     prompt = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request." \
+    #         + f"\n\n### Instruction: \n{instruction}\n\n### Input: \n{input_text}\n\n### Response: \n{response}"
+    # else:
+    #     prompt = "Below is an instruction that describes a task. Write a response that appropriately completes the request." \
+    #         + f"\n\n### Instruction: \n{instruction}\n\n### Response: \n{response}"
     if input_text:
-        prompt = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request." \
-            + f"\n\n### Instruction: \n{instruction}\n\n### Input: \n{input_text}\n\n### Response: \n{response}"
+        prompt = f"<|user|>\n{instruction}\n\nInput: {input_text}\n<|assistant|>\n{response}"
     else:
-        prompt = "Below is an instruction that describes a task. Write a response that appropriately completes the request." \
-            + f"\n\n### Instruction: \n{instruction}\n\n### Response: \n{response}"
+        prompt = f"<|user|>\n{instruction}\n<|assistant|>\n{response}"
     return prompt
 
 def _process_medical_text(sample: dict[str, Any]) -> str:
@@ -70,7 +74,7 @@ def _process_medical_text(sample: dict[str, Any]) -> str:
     question = sample["Question"].strip()
     cot = sample["Complex_CoT"].strip()
     response = sample["Response"].strip()
-    prompt = f"<|user|>\n{question}\n<|assistant|>## Thinking\n\n{cot}\n\n## Final Response\n\n{response}"
+    prompt = f"<|user|>\n{question}\n<|assistant|>\n{cot}\n\nResponse:\n{response}"
     return prompt
 
 def _process_openhermes_text(sample: dict[str, Any]) -> str:
@@ -125,7 +129,7 @@ DATASETS = {
     ),
     "slimorca": DatasetConfig(
         path="Open-Orca/SlimOrca",
-        loader=lambda path: load_dataset(path, split="train"),
+        loader=lambda path: load_dataset(path, split="train"), # 518k samples
         text_processor=_process_slimorca_text,
     ),
     "alpaca": DatasetConfig(
