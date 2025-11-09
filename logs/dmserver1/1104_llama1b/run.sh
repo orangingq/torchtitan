@@ -37,6 +37,9 @@ COMMON_ARGS=(
     "--job.description=\"${EXPLAIN}\""
     "--parallelism.pipeline_parallel_degree=${NGPU}"
     "--training.seed=2025"
+    "--training.dataset=slimorca"
+    "--training.steps=1000"
+    "--optimizer.lr=5e-5"
 )
 
 EXPERIMENT_LIST=( # You can expand this list as needed
@@ -54,15 +57,15 @@ EXPERIMENT_LIST=( # You can expand this list as needed
 #   "Interleaved1F1B timelyauto"
 )
 
-for PP_SCHEDULER in 1F1B GPipe Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in nofreeze ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"
 #     METRIC_TYPE="${EXP_ARRAY[1]}"
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025_dm1"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025_slimalpaca_1600.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025_slimalpaca_1600_dm1"
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--job.basename=${BASENAME}"
