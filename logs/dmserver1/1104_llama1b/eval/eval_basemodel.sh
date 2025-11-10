@@ -2,7 +2,7 @@
 
 # Define common environment variables
 EXPLAIN="Llama 3.2 1B Base Model Evaluation"
-TODAY="1104"
+TODAY="1109"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"

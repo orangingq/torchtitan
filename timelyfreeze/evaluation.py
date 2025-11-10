@@ -92,6 +92,9 @@ def main():
             batch_size=args.batch_size,
             num_fewshot=k,
             limit=args.limit,
+            confirm_run_unsafe_code=True,
+            random_seed=42,
+            gen_kwargs={ "max_new_tokens": 512, "temperature": 0.0 },
         )
         if merged is None:
             merged = part
@@ -106,7 +109,7 @@ def main():
 
     def print_metric(task_name, metrics):
         acc = None
-        for k in ["acc,none", "acc", "exact_match", "accuracy"]:
+        for k in ["acc,none", "acc", "exact_match", "accuracy", "pass@1", "pass@10", "pass_at_1"]:
             if k in metrics:
                 acc = metrics[k]
                 break

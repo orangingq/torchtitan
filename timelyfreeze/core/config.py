@@ -1,14 +1,11 @@
-import logging
 import os
-import sys
 import time
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import dataclass, field, fields
 from typing import Any, Literal, Optional
 import torch
 from torch.distributed import ProcessGroup
 import torch.distributed as dist
 from setproctitle import setproctitle
-from torchtitan.tools.logging import init_logger, logger
 
 from torchtitan.config.job_config import JobConfig, \
                     Job as BaseJob, \

@@ -4,13 +4,15 @@
 EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
 1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
 1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+1109: switch to alpaca_gpt4+alpaca_cleaned dataset
 "
 
 EXPERIMENT_TAG="1104_llama1b"
-TODAY="1108"
+TODAY="1109"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=2,3,4,5
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
 export OMP_NUM_THREADS=1
@@ -36,10 +38,6 @@ COMMON_ARGS=(
     "--job.config_file=${CONFIG_FILE}"
     "--job.description=\"${EXPLAIN}\""
     "--parallelism.pipeline_parallel_degree=${NGPU}"
-    "--training.seed=2025"
-    "--training.dataset=slimorca"
-    "--training.steps=1000"
-    "--optimizer.lr=5e-5"
 )
 
 EXPERIMENT_LIST=( # You can expand this list as needed
@@ -57,18 +55,27 @@ EXPERIMENT_LIST=( # You can expand this list as needed
 #   "Interleaved1F1B timelyauto"
 )
 
-for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in nofreeze ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
+SEED=42
+for PP_SCHEDULER in 1F1B GPipe Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in fullrand7 nofreeze apf timelyapf timelyauto auto ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
 # for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
 #     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
 #     PP_SCHEDULER="${EXP_ARRAY[0]}"
 #     METRIC_TYPE="${EXP_ARRAY[1]}"
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025_slimalpaca_1600.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_seed2025_slimalpaca_1600_dm1"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_dm1"
+
+        # Skip evaluation if result file already exists
+        if [ -f "${OUTPUT_FILE}" ]; then
+            echo "⚠️Result file ${OUTPUT_FILE} already exists — skipping evaluation." 
+            continue
+        fi
+
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--job.basename=${BASENAME}"
+            "--training.seed=${SEED}"
         )
         if [[ "$METRIC_TYPE" == "nofreeze" ]]; then       
             FREEZE_ARGS=(

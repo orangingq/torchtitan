@@ -5,7 +5,6 @@ import torch
 import torch.distributed as dist
 from typing import List, Dict, Tuple
 from scipy.optimize import linprog
-import networkx as nx
 from torchtitan.tools.logging import logger
 
 from .action import Action, ActionType, ActionWithTime, ActionWithLog, ActionWithFreezing

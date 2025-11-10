@@ -5,6 +5,8 @@ EXPLAIN="Main Table Experiment"
 EXPERIMENT_TAG="1104_llama1b"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
+export HF_ALLOW_CODE_EVAL=1
+export TOKENIZERS_PARALLELISM=false
 echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"
 
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
@@ -12,25 +14,27 @@ LOG_DIR="$(dirname "${THIS_FILE}")"
 
 CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
 BASENAME_LIST=( # You can expand this list as needed
-  "1108_GPipe_nofreeze_seed2025_dm1"
-  "1107_GPipe_apf_dm1"
-  "1107_GPipe_fullrand7_dm1"
-  "1107_GPipe_timelyapf_dm1"
-  "1107_GPipe_timelyauto_dm1"
-  "1108_1F1B_nofreeze_seed2025_dm1"
-  "1107_1F1B_fullrand7_dm1"
-  "1107_1F1B_auto_dm1"
-  "1107_1F1B_apf_dm1"
-  "1107_1F1B_timelyauto_dm1"
-  "1108_Interleaved1F1B_nofreeze_seed2025_dm1"
-  "1107_Interleaved1F1B_fullrand7_dm1"
-  "1107_Interleaved1F1B_auto_dm1"
-  "1107_Interleaved1F1B_apf_dm1"
-  "1107_Interleaved1F1B_timelyapf_dm1"
-  "1107_Interleaved1F1B_timelyauto_dm1"
+  "1109_GPipe_nofreeze_42_dm1"
+  "1109_GPipe_apf_42_dm1"
+  "1109_GPipe_auto_42_dm1"
+  "1109_GPipe_fullrand7_42_dm1"
+  "1109_GPipe_timelyapf_42_dm1"
+  "1109_GPipe_timelyauto_42_dm1"
+  "1109_1F1B_nofreeze_42_dm1"
+  "1109_1F1B_fullrand7_42_dm1"
+  "1109_1F1B_auto_42_dm1"
+  "1109_1F1B_apf_42_dm1"
+  "1109_1F1B_timelyauto_42_dm1"
+  "1109_1F1B_timelyapf_42_dm1"
+  "1109_Interleaved1F1B_nofreeze_42_dm1"
+  "1109_Interleaved1F1B_fullrand7_42_dm1"
+  "1109_Interleaved1F1B_auto_42_dm1"
+  "1109_Interleaved1F1B_apf_42_dm1"
+  "1109_Interleaved1F1B_timelyapf_42_dm1"
+  "1109_Interleaved1F1B_timelyauto_42_dm1"
 ) 
 MODEL_TYPE="Llama-3.2-1B"
-TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1" # "humaneval,mbpp" 
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
