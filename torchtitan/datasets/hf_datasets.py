@@ -57,12 +57,6 @@ def _process_alpaca_cleaned_text(sample: dict[str, Any]) -> str:
     input_text = sample.get("input", "").strip()
     response = sample["output"].strip()
 
-    # if input_text:
-    #     prompt = "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request." \
-    #         + f"\n\n### Instruction: \n{instruction}\n\n### Input: \n{input_text}\n\n### Response: \n{response}"
-    # else:
-    #     prompt = "Below is an instruction that describes a task. Write a response that appropriately completes the request." \
-    #         + f"\n\n### Instruction: \n{instruction}\n\n### Response: \n{response}"
     if input_text:
         prompt = f"<|user|>\n{instruction}\n\nInput: {input_text}\n<|assistant|>\n{response}"
     else:
@@ -70,11 +64,23 @@ def _process_alpaca_cleaned_text(sample: dict[str, Any]) -> str:
     return prompt
 
 def _process_medical_text(sample: dict[str, Any]) -> str:
-    """Process Self-Instruct dataset sample into a single prompt+response text."""
+    """Process Medical dataset sample into a single prompt+response text."""
     question = sample["Question"].strip()
     cot = sample["Complex_CoT"].strip()
     response = sample["Response"].strip()
     prompt = f"<|user|>\n{question}\n<|assistant|>\n{cot}\n\nResponse:\n{response}"
+    return prompt
+
+def _process_codealpaca_text(sample: dict[str, Any]) -> str:
+    """Process CodeAlpaca dataset sample into a single prompt+response text."""
+    instruction = sample["instruction"].strip()
+    input_text = sample.get("input", "").strip()
+    response = sample["output"].strip()
+
+    if input_text:
+        prompt = f"<|user|>\n{instruction}\n\nInput: {input_text}\n<|assistant|>\n{response}"
+    else:
+        prompt = f"<|user|>\n{instruction}\n<|assistant|>\n{response}"
     return prompt
 
 def _process_openhermes_text(sample: dict[str, Any]) -> str:
@@ -142,10 +148,20 @@ DATASETS = {
         loader=lambda path: load_dataset(path, split="train"), # 51.8k samples
         text_processor=_process_alpaca_cleaned_text,
     ),
+    "alpaca_gpt4": DatasetConfig(
+        path="vicgalle/alpaca-gpt4",
+        loader=lambda path: load_dataset(path, split="train"), # 52k samples
+        text_processor=_process_alpaca_cleaned_text,
+    ),
     "medical": DatasetConfig(
         path="FreedomIntelligence/medical-o1-reasoning-SFT",
         loader=lambda path: load_dataset(path, "en_mix", split="train"), # 24.9k samples for en_mix
         text_processor=_process_medical_text,
+    ),
+    "codealpaca": DatasetConfig(
+        path='sahil2801/CodeAlpaca-20k',
+        loader=lambda path: load_dataset(path, split="train"), # 20k samples
+        text_processor=_process_codealpaca_text,
     ),
     "openhermes": DatasetConfig(
         path="teknium/OpenHermes-2.5",

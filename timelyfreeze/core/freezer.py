@@ -3,13 +3,11 @@ from typing import Dict, List
 import numpy as np
 import torch
 from torch.nn import Module
-from torch.distributed.tensor import DTensor
 from .action import ActionWithFreezing, ActionWithTime
 from . import logger as pplog
 from .schedule import adjust_freeze_ratio, gather_pipeline_schedule, set_freeze_ratio
 from .config import TimelyFreezeConfig
 from torchtitan.tools.logging import logger
-import copy
 
 class _Freezer:
     def __init__(self, model_parts: List[Module], config: TimelyFreezeConfig):
