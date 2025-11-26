@@ -746,7 +746,7 @@ class AutoFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
             if actual_num_freeze > 0:
                 weights = [1 if val else 0.01 for val in freeze_cand[action.stage]]
                 assert len(weights) == action.num_params, f"Length Mismatch: {len(weights)} vs {action.num_params}"
-                idx = torch.multinomial(torch.tensor(weights), actual_num_freeze, replacement=False)
+                idx = torch.multinomial(torch.tensor(weights, dtype=torch.float16), actual_num_freeze, replacement=False)
                 freezing_list = torch.zeros(action.num_params, dtype=torch.bool)
                 freezing_list[idx] = True
                 action.freezing_list = freezing_list.tolist()

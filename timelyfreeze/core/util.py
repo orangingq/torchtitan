@@ -134,7 +134,7 @@ def draw_elementwise_histogram(data, stage, save_file, config: TimelyFreezeConfi
 def draw_pipeline_schedule(save_file:str, 
                             pipeline_schedule:List[List[ActionWithTime]],
                             config: TimelyFreezeConfig,
-                            title=None, xlabel=None, ylabel=None):
+                            title: str|None=None, xlabel: str|None=None, ylabel: str|None=None, tick_unit: int|None=None):
     num_ranks = config.comm.pp
     stages_per_rank = [list(dict.fromkeys([action.stage for action in pipeline_schedule[rank] if action.type == ActionType.FORWARD and action.stage is not None])) for rank in range(num_ranks)]
     num_stages_per_rank = config.parallelism.stages_per_rank
@@ -150,14 +150,15 @@ def draw_pipeline_schedule(save_file:str,
     }
     stage_color_map = [{stage: f'#{int(255-s/(num_stages_per_rank-0.999)*255):02X}{int(255-s/(num_stages_per_rank-0.999)*255):02X}{int(255-s/(num_stages_per_rank-0.999)*255):02X}' 
                         for s, stage in enumerate(stages_per_rank[rank])} for rank in range(num_ranks)]
-    if max_time >= 2000:
-        tick_unit = 500
-    elif max_time >= 1000:
-        tick_unit = 200
-    elif max_time >= 400:
-        tick_unit = 100
-    else:
-        tick_unit = 50
+    if tick_unit is None:
+        if max_time >= 2000:
+            tick_unit = 500
+        elif max_time >= 1000:
+            tick_unit = 200
+        elif max_time >= 400:
+            tick_unit = 100
+        else:
+            tick_unit = 50
     # set the figure size and axes
     fig, ax = plt.subplots(figsize=(max(1, round(max_time/tick_unit*3)), 3), dpi=100)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)

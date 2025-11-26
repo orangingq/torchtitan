@@ -2,10 +2,7 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1104_llama1b"
-MODEL_TYPE="Llama-3.2-1B"
-TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1" # "humaneval,mbpp" 
-KEYWORD="1109_*_th*"
+EXPERIMENT_TAG="1116_apf"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 export HF_ALLOW_CODE_EVAL=1
@@ -15,11 +12,11 @@ echo "✔️Using GPU ${CUDA_VISIBLE_DEVICES}"
 THIS_FILE="$(realpath "${BASH_SOURCE[0]}")"
 LOG_DIR="$(dirname "${THIS_FILE}")"
 PROJECT_DIR="$(dirname "${LOG_DIR}")"
-CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
 
-# Discover existing ${KEYWORD}.log files in the experiment dir and build BASENAME_LIST
+CHECKPOINT_ROOT="/data2/shcho/torchtitan/checkpoint"
+# Discover existing 1116_*.log files in the experiment dir and build BASENAME_LIST
 BASENAME_LIST=()
-for f in "${PROJECT_DIR}"/${KEYWORD}.log; do
+for f in "${PROJECT_DIR}"/1116_*.log; do
   [ -e "$f" ] || continue
   bn="$(basename "$f" .log)"
   BASENAME_LIST+=("${bn}_dm1")
@@ -27,9 +24,11 @@ done
 echo "✔️Discovered ${#BASENAME_LIST[@]} models to evaluate."
 
 if [ ${#BASENAME_LIST[@]} -eq 0 ]; then
-  echo "⚠️ No ${KEYWORD}.log files found in ${LOG_DIR} — nothing to evaluate."
+  echo "⚠️ No 1116_*.log files found in ${LOG_DIR} — nothing to evaluate."
   exit 0
 fi
+MODEL_TYPE="Llama-3.2-1B"
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1" # "humaneval,mbpp" 
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 

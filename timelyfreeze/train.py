@@ -666,7 +666,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Realistic Pipeline Schedule", 
-                                xlabel="Time (ms)", ylabel="Rank"
+                                xlabel="Time (ms)", ylabel="Rank", tick_unit=100
                                 )
 
             if is_final:
@@ -681,7 +681,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Theoretical Pipeline Schedule", 
-                                xlabel="Time (ms)", ylabel="Rank"
+                                xlabel="Time (ms)", ylabel="Rank", tick_unit=100
                                 )
             
 

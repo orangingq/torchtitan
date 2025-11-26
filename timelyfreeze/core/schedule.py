@@ -170,7 +170,7 @@ def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]], max_freeze_ra
 
     num_vars = 2 * n
     c = np.zeros(num_vars, dtype=float)
-    c[n - 1] = 9999.0
+    c[n - 1] = 999999.0
 
     w_min = np.zeros(n, dtype=float)
     w_max = np.zeros(n, dtype=float)
@@ -336,7 +336,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
                             title=f"Max Batch Time: {max_batch_time:.2f} ms",
-                            xlabel="Time (ms)", ylabel="Rank"
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
                             )
         
     # initialize the duration of each action to have a minimum batch time
@@ -347,7 +347,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
                             title=f"Min Batch Time: {min_batch_time:.2f} ms",
-                            xlabel="Time (ms)", ylabel="Rank"
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
                             )
 
     # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
@@ -362,7 +362,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
                             title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                            xlabel="Time (ms)", ylabel="Rank"
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
                             )
         logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})")
     return pipeline_schedule_freezing
@@ -493,7 +493,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
                             config=config,
                             pipeline_schedule=pipeline_schedule,
                             title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                            xlabel="Time (ms)", ylabel="Rank"
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
                             )
         logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     return pipeline_schedule
