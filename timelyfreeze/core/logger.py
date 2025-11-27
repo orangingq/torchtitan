@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 import numpy as np
 from torchtitan.tools.logging import logger
 from torch.cuda import Event
@@ -83,7 +83,8 @@ class PipelineLog:
         # log the schedule order
         self.log_schedule_flag :bool= True
         self.log_schedule:List[ActionWithLog] = []
-        self.action_dict: Dict[tuple, ActionWithFreezing] = None # the action dict, which is a dict of ActionWithFreezing with key (step, pp_rank, microbatch, stage)
+        self.action_dict: Dict[Tuple[ActionType, int, int, int], ActionWithFreezing] = None 
+        '''the action dict, which is a dict of ActionWithFreezing with key (action_type, pp_rank, microbatch, stage)'''
         return
     
     def _tmp_timer_flush(self, flush_freq:int=10):
@@ -177,20 +178,26 @@ class PipelineLog:
         return self(microbatch, stage, ActionType.SEND_F, ActionStatus.START, postfix=postfix) 
     def bwd_recv(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.RECV_B, ActionStatus.START, postfix=postfix) 
-    def backward(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+    def backward(self, microbatch, stage, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
             if (ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage) in self.action_dict:
                 self.action_dict[(ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
+            else:
+                logger.warning(f"The action (FULL_BACKWARD, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
         return self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix) 
-    def backward_input(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+    def backward_input(self, microbatch, stage, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
-            if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
+            if (ActionType.BACKWARD_INPUT, self.pp_rank, microbatch, stage) in self.action_dict:
+                self.action_dict[(ActionType.BACKWARD_INPUT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
+            else:
+                logger.warning(f"The action (BACKWARD_INPUT, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
         return self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.START, postfix=postfix) 
-    def backward_weight(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
+    def backward_weight(self, microbatch, stage, postfix:str='')->'PipelineLog':
         if not self.disabled and self.action_dict is not None:
             if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
                 self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
+            else:
+                logger.warning(f"The action (BACKWARD_WEIGHT, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
         return self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.START, postfix=postfix) 
     def bwd_send(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.SEND_B, ActionStatus.START, postfix=postfix) 

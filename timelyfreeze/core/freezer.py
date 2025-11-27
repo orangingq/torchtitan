@@ -26,7 +26,7 @@ class _Freezer:
         self.warmup_phase = max(self.phase_unit, self.config.lr_scheduler.warmup_steps - self.phase_unit)
         '''Warmup Phase: do nothing'''
 
-        self.freeze_ratio_history = {stage_idx: [0] * (self.warmup_phase // self.stability_check_freq) if config.freezing.freeze else [] for stage_idx in self.stages.keys()} # frozen ratio history per stage
+        self.frozen_ratio_history = {stage_idx: [0] * (self.warmup_phase // self.stability_check_freq) if config.freezing.freeze else [] for stage_idx in self.stages.keys()} # frozen ratio history per stage
         self.paramwise_frozen_count = {stage_idx: {name: [0, 0] for name, _ in stage.named_parameters()} for stage_idx, stage in self.stages.items()} # [frozen, total] count for each layer in each stage
         self._param_names_by_stage = {stage_idx: [name for name, _ in stage.named_parameters()] for stage_idx, stage in self.stages.items()}
         return
@@ -65,7 +65,7 @@ class _Freezer:
             for name in self._param_names_by_stage[stage_idx]:
                 self.paramwise_frozen_count[stage_idx][name][1] += 1
 
-            self.freeze_ratio_history[stage_idx].append(0)
+            self.frozen_ratio_history[stage_idx].append(0)
         return
 
 def get_freezer_class_version(freezer:_Freezer)->int:
@@ -141,7 +141,7 @@ class FullyRandomFreezer_v7(_Freezer):
             if self.step_cnt % self.config.metrics.log_freq == 0 and \
                 self.warmup_phase < self.step_cnt <= self.progressive_freezing_phase + 2 * self.phase_unit and \
                     self.monitored_ub and self.monitored_lb:
-                logger.info(f"Current/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+                logger.info(f"Logged(Actual)/Expected Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.frozen_ratio_history[-1]:.2f}({action.actual_freeze_ratio:.2f})/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
         return
     
     def set_expected_freeze_ratio(self):
@@ -198,7 +198,7 @@ class FullyRandomFreezer_v7(_Freezer):
                 logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
                 continue
             lo, hi = np.percentile(times, 5), np.percentile(times, 95)
-            afrs = a.freeze_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
+            afrs = a.frozen_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
             monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in zip(afrs, times) if lo <= t <= hi]
 
         # Propose adjustment and estimate expected batch time from schedule end times
@@ -227,6 +227,8 @@ class FullyRandomFreezer_v7(_Freezer):
             actual_num_freeze = min(action.num_params, int(round(action.num_params * action.actual_freeze_ratio)))
             if actual_num_freeze <= 0:
                 action.freezing_list = [False] * action.num_params
+            elif actual_num_freeze >= action.num_params:
+                action.freezing_list = [True] * action.num_params
             else:
                 if action.stage == 0: # front layers more likely to freeze
                     weights = self._weights_cache.get(action.num_params)
@@ -259,11 +261,11 @@ class FullyRandomFreezer_v7(_Freezer):
                         a.paramwise_frozen_count[name][1] for a in schedule if a.stage == stage_idx and name in a.paramwise_frozen_count
                     )
 
-                vals = [a.actual_freeze_ratio for a in schedule if a.stage == stage_idx and a.freezable]
-                average_freeze_ratio = float(sum(vals) / len(vals)) if len(vals) > 0 else 0.0
-                self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
+                vals = [a.frozen_ratio_history[-1] if len(a.frozen_ratio_history) > 0 else 0.0 for a in schedule if a.stage == stage_idx and a.freezable]
+                avg_frozen_ratio = float(sum(vals) / len(vals)) if len(vals) > 0 else 0.0
+                self.frozen_ratio_history[stage_idx].append(avg_frozen_ratio)
             else:
-                self.freeze_ratio_history[stage_idx].append(0)
+                self.frozen_ratio_history[stage_idx].append(0)
 
         return
     
@@ -437,7 +439,7 @@ class APFFreezer(_Freezer):
                 self.paramwise_frozen_count[stage_idx][name][1] += 1
 
             self.freeze_ratio[stage_idx] = cnt_0 / cnt_1
-            self.freeze_ratio_history[stage_idx].append(self.freeze_ratio[stage_idx])
+            self.frozen_ratio_history[stage_idx].append(self.freeze_ratio[stage_idx])
         return
     
 
@@ -544,7 +546,7 @@ class AutoFreezer(_Freezer):
                 self.paramwise_frozen_count[stage_idx][name][1] += 1
 
             self.freeze_ratio[stage_idx] = cnt_0 / cnt_1
-            self.freeze_ratio_history[stage_idx].append(self.freeze_ratio[stage_idx])
+            self.frozen_ratio_history[stage_idx].append(self.freeze_ratio[stage_idx])
         return
     
 
@@ -645,9 +647,9 @@ class APFFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
 
                 vals = [a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and a.freezable]
                 average_freeze_ratio = float(sum(vals) / len(vals)) if len(vals) > 0 else 0.0
-                self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
+                self.frozen_ratio_history[stage_idx].append(average_freeze_ratio)
             else:
-                self.freeze_ratio_history[stage_idx].append(0)
+                self.frozen_ratio_history[stage_idx].append(0)
         return
     
 
@@ -766,9 +768,9 @@ class AutoFreezerWithTimelyFreeze(FullyRandomFreezer_v7):
                     self.paramwise_frozen_count[stage_idx][name][1] = sum([a.paramwise_frozen_count[name][1] for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and name in a.paramwise_frozen_count])
 
                 average_freeze_ratio = float(np.mean([a.actual_freeze_ratio for a in self.pipeline_schedule[self.config.comm.pp_rank] if a.stage == stage_idx and a.freezable]))
-                self.freeze_ratio_history[stage_idx].append(average_freeze_ratio)
+                self.frozen_ratio_history[stage_idx].append(average_freeze_ratio)
             else:
-                self.freeze_ratio_history[stage_idx].append(0)
+                self.frozen_ratio_history[stage_idx].append(0)
         return
     
     def _get_layer_index(self, name: str):

@@ -10,6 +10,7 @@ from torchtitan.tools.logging import logger
 from .action import Action, ActionType, ActionWithTime, ActionWithLog, ActionWithFreezing
 from .util import draw_pipeline_schedule, get_abs_path
 from .config import TimelyFreezeConfig, Comm
+from scipy.optimize import minimize, LinearConstraint, Bounds
 
 
 def gather_pipeline_schedule(log_schedule:List[ActionWithLog], comm: Comm, log_window :int|None = None)-> List[List[ActionWithTime]]:
@@ -224,6 +225,182 @@ def solve_dag_lp(pipeline_schedule:List[List[ActionWithFreezing]], max_freeze_ra
     return schedule_pipeline(pipeline_schedule)
 
 
+def solve_dag_qp(pipeline_schedule:List[List[ActionWithFreezing]], max_freeze_ratio: float=0.9)-> List[List[ActionWithFreezing]]:
+        '''
+        Solve the DAG QP problem (was LP). This variant uses a quadratic program
+        to obtain a smoother/regularized solution for action durations while
+        keeping the same linear constraints as the original LP formulation.
+
+        Variables:
+          x[0:n]   -> start times t_i for each node (including start/end)
+          x[n:2n]  -> durations w_i for each node
+
+        Objective (QP):
+          minimize  big_w * t_{n-1}  - sum_i alpha_i * w_i  + 0.5 * gamma * sum_i (w_i^2)
+        where alpha_i = 1 / (w_max[i] - w_min[i]) for freezable valid actions (as before),
+        gamma is a small regularization parameter to make the problem strictly convex.
+
+        Constraints:
+          For each edge (u->v): t_u + w_u <= t_v
+          Start-node constraint: t_0 + w_0 <= 0
+          Per-stage freeze ratio linear constraints preserved from LP:
+             sum_i ( - w_i / (w_max[i] - w_min[i]) ) <= max_freeze_ratio * count - sum(w_max / (w_max - w_min))
+
+        Bounds:
+          t_i >= 0
+          w_min[i] <= w_i <= w_max[i]
+        '''
+
+        # Build problem indices and edges (same mapping as previous LP)
+        start_node = ActionWithFreezing(ActionType.START, 0, 0, 0, 0)
+        end_node = ActionWithFreezing(ActionType.FINISH, 0, 0, 0, 0)
+        actions_flat = [action for actions_per_rank in pipeline_schedule for action in actions_per_rank]
+        m = len(actions_flat)
+        actions_all = [start_node] + actions_flat + [end_node]
+        n = len(actions_all)
+        num_stages = max((action.stage for action in actions_flat), default=0) + 1 if m > 0 else 1
+        assert n == 2 + sum(len(rank_actions) for rank_actions in pipeline_schedule), f"num_actions: {n}, sum of rank actions: {sum(len(rank_actions) for rank_actions in pipeline_schedule)}"
+
+        def action_key(a: ActionWithFreezing):
+            return (a.type, a.rank, a.microbatch, a.stage)
+        key_to_idx = {action_key(a): i+1 for i, a in enumerate(actions_flat)}
+
+        edges = []
+        for i, a in enumerate(actions_flat):
+            u = i + 1
+            if len(a.prev_actions) == 0:
+                edges.append((0, u))
+            if len(a.next_actions) == 0:
+                edges.append((u, n - 1))
+            for na in a.next_actions:
+                v = key_to_idx.get(action_key(na))
+                if v is not None:
+                    edges.append((u, v))
+
+        # Prepare parameters used in objective and bounds
+        w_min = np.zeros(n, dtype=float)
+        w_max = np.zeros(n, dtype=float)
+        freezable = np.zeros(n, dtype=bool)
+        stages = np.full(n, -1, dtype=int)
+        for i, a in enumerate(actions_flat, start=1):
+            w_min[i] = a.min_duration
+            w_max[i] = a.max_duration
+            freezable[i] = a.freezable and (a.min_duration < a.max_duration)
+            stages[i] = a.stage
+        valid = freezable & (w_max > w_min)
+        denom = np.where(valid, (w_max - w_min), 1.0)
+
+        # alpha weights (same sign as LP): LP used -1/denom in c to encourage freezing,
+        # so we keep -alpha * w in objective (alpha = 1/denom).
+        alpha = np.zeros(n, dtype=float)
+        alpha[valid] = 1.0 / denom[valid]
+
+        # objective parameters
+        big_w = 1e6  # large weight on makespan (t_{n-1})
+        gamma = 1e-3  # small quadratic regularization on durations to obtain QP
+
+        # Build linear constraints A_ub x <= b_ub similar to LP; we'll convert to LinearConstraint
+        num_vars = 2 * n
+        A_ub = []
+        b_ub = []
+        for (u, v) in edges:
+            row = np.zeros(num_vars, dtype=float)
+            row[u] = 1.0        # t_u
+            row[v] = -1.0       # -t_v
+            row[n + u] = 1.0    # +w_u
+            A_ub.append(row)
+            b_ub.append(0.0)
+
+        # start node constraint
+        row0 = np.zeros(num_vars, dtype=float)
+        row0[0] = 1.0
+        row0[n + 0] = 1.0
+        A_ub.append(row0)
+        b_ub.append(0.0)
+
+        # per-stage freeze ratio constraints (preserve LP formulation)
+        for s in range(num_stages):
+            idxs = np.where((stages == s) & valid)[0]
+            if idxs.size == 0:
+                continue
+            row = np.zeros(num_vars, dtype=float)
+            # for each duration variable index j in idxs, set coefficient for w_j
+            row[n + idxs] = -1.0 / (w_max[idxs] - w_min[idxs])
+            A_ub.append(row)
+            sum_term = float(np.sum(w_max[idxs] / (w_max[idxs] - w_min[idxs])))
+            b_ub.append(max_freeze_ratio * idxs.size - sum_term)
+
+        A_ub = np.array(A_ub, dtype=float)
+        b_ub = np.array(b_ub, dtype=float)
+
+        # Bounds: t_i >= 0 ; w_i in [w_min, w_max]
+        lb = np.zeros(num_vars, dtype=float)
+        ub = np.full(num_vars, np.inf, dtype=float)
+        # durations bounds
+        for i in range(n):
+            lb[n + i] = float(w_min[i])
+            ub[n + i] = float(w_max[i])
+
+        bounds = Bounds(lb, ub)
+
+        # Initial guess: start times zeros, durations = w_max (safe feasible)
+        x0 = np.zeros(num_vars, dtype=float)
+        x0[n:2*n] = w_max.copy()
+
+        # Ensure initial guess satisfies linear inequalities A_ub x0 <= b_ub.
+        # If not, try shrink durations to w_min gradually until feasible.
+        if A_ub.size > 0:
+            violated = (A_ub @ x0) - b_ub
+            if np.any(violated > 1e-8):
+                # simple projection on durations: linearly reduce durations proportionally
+                # until all constraints satisfied or reach w_min.
+                max_steps = 100
+                for _ in range(max_steps):
+                    violated = (A_ub @ x0) - b_ub
+                    if not np.any(violated > 1e-8):
+                        break
+                    shrink_mask = (w_max > w_min)
+                    if not np.any(shrink_mask):
+                        break
+                    x0[n:2*n][shrink_mask] = np.maximum(w_min[shrink_mask], 0.9 * x0[n:2*n][shrink_mask] + 0.1 * w_min[shrink_mask])
+        # Define objective and gradient
+        def obj(x):
+            t_end = x[n - 1]
+            w = x[n:2*n]
+            linear_term = -np.dot(alpha, w)
+            quad_term = 0.5 * gamma * np.dot(w, w)
+            return big_w * t_end + linear_term + quad_term
+
+        def jac(x):
+            grad = np.zeros_like(x, dtype=float)
+            # derivative wrt t_end
+            grad[n - 1] = big_w
+            # derivative wrt durations w
+            w = x[n:2*n]
+            grad[n:2*n] = -alpha + gamma * w
+            return grad
+
+        # Linear constraints: A_ub x <= b_ub  --> transform to LinearConstraint with upper=b_ub and lower=-inf
+        if A_ub.size > 0:
+            lin_con = LinearConstraint(A_ub, -np.inf * np.ones_like(b_ub), b_ub)
+            constraints = [lin_con]
+        else:
+            constraints = []
+
+        # Solve with trust-constr which handles bounds and linear constraints well
+        res = minimize(fun=obj, x0=x0, method='trust-constr', jac=jac, constraints=constraints, bounds=bounds,
+                       options={'maxiter': 1000, 'gtol': 1e-6, 'verbose': 0})
+
+        if res.success:
+            x_opt = res.x
+            durations = x_opt[n:2*n]
+            for i, a in enumerate(actions_flat, start=1):
+                a.duration = float(durations[i])
+        else:
+            raise RuntimeError(f"Quadratic programming failed: {res.message}")
+
+        return schedule_pipeline(pipeline_schedule)
+
 
 def schedule_pipeline(pipeline_schedule:List[List[ActionWithTime]],
         fwd_time:List[float]=None, bwd_time:List[float]=None, bwd_input_time:List[float]=None, bwd_weight_time:List[float]=None
@@ -336,7 +513,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
                             title=f"Max Batch Time: {max_batch_time:.2f} ms",
-                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                             )
         
     # initialize the duration of each action to have a minimum batch time
@@ -347,12 +524,12 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
                             title=f"Min Batch Time: {min_batch_time:.2f} ms",
-                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                             )
 
     # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
     max_freeze_ratio = getattr(config.freezing, "max_freeze_ratio", 0.9)
-    pipeline_schedule_freezing = solve_dag_lp(pipeline_schedule_freezing, max_freeze_ratio=max_freeze_ratio) # solve the DAG LP problem to find the optimal schedule
+    pipeline_schedule_freezing = solve_dag_qp(pipeline_schedule_freezing, max_freeze_ratio=max_freeze_ratio) # solve the DAG LP problem to find the optimal schedule
 
     if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
@@ -362,7 +539,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
                             title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                             )
         logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})")
     return pipeline_schedule_freezing
@@ -493,7 +670,7 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
                             config=config,
                             pipeline_schedule=pipeline_schedule,
                             title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                            xlabel="Time (ms)", ylabel="Rank", tick_unit=100
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                             )
         logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     return pipeline_schedule

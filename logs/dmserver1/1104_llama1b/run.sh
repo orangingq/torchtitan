@@ -49,11 +49,11 @@ COMMON_ARGS=(
 
 
 SEED=42
-for PP_SCHEDULER in 1F1B Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in apf timelyapf ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
+for PP_SCHEDULER in 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in fullrand7 ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_th1e-2.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_th1e-2_dm1"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_forfun.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_forfun_dm1"
 
         # Skip evaluation if result file already exists
         if [ -f "${OUTPUT_FILE}" ]; then

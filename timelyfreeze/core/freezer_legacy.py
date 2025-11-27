@@ -221,7 +221,7 @@ class FullyRandomFreezer_v6(_Freezer):
                 if a.type not in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_WEIGHT]:
                     continue
                 times = la.log_time[self.progressive_freezing_start_step:]
-                afrs = a.freeze_ratio_history[:len(times)]
+                afrs = a.frozen_ratio_history[:len(times)]
                 if a.stage not in monitored_values_dict.keys():
                     monitored_values_dict[a.stage] = []
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times) if (a.stage>0 or afr<=0.99)]
@@ -501,7 +501,7 @@ class FullyRandomFreezer_v6(_Freezer):
                 if not a.freezable:
                     continue
                 times = la.log_time[self.progressive_freezing_start_step:]
-                afrs = a.freeze_ratio_history[:len(times)]
+                afrs = a.frozen_ratio_history[:len(times)]
                 if a.stage not in monitored_values_dict.keys():
                     monitored_values_dict[a.stage] = []
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times)] #  if (a.stage>0 or afr<=0.99)
@@ -813,7 +813,7 @@ class APFFreezerWithTimelyFreeze(_Freezer):
                 if not a.freezable:
                     continue
                 times = la.log_time[self.progressive_freezing_start_step:]
-                afrs = a.freeze_ratio_history[:len(times)]
+                afrs = a.frozen_ratio_history[:len(times)]
                 monitored_values_dict[a.stage] += [(afr, time) for (afr, time) in zip(afrs, times)] 
             self.pipeline_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
             logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.pp_rank] if action.freezable])}")
