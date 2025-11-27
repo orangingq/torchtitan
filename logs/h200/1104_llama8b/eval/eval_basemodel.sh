@@ -2,11 +2,12 @@
 #SBATCH --job-name=eval_basemodel
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
+#SBATCH --time=0:30:00
 #SBATCH --output=logs/h200/1024_llama8b/eval/slurm-%j.out
 
 # Define common environment variables
 EXPLAIN="Llama 3.1 8B Base Model Evaluation"
-TODAY="1104"
+TODAY="1109"
 
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
@@ -24,7 +25,7 @@ CHECKPOINT_ROOT="/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model"
 BASENAME_LIST=( # You can expand this list as needed
     "Llama-3.1-8B"
 ) 
-TASKS="mmlu,agieval,commonsense_qa,winogrande,hellaswag,arc_challenge,truthfulqa_mc1"
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1" # agieval,commonsense_qa,winogrande,
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 

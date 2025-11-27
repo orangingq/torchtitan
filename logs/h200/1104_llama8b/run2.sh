@@ -1,9 +1,12 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Llama 3.1 8B Experiment"
+EXPLAIN="Llama 3.1 8B Experiment
+1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+1116: everything same, but with seed=11
+"
 EXPERIMENT_TAG="1104_llama8b"
-TODAY="1104"
+TODAY="1116"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 # Respect Slurm's CUDA_VISIBLE_DEVICES
@@ -39,25 +42,18 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-# EXPERIMENT_LIST=( # You can expand this list as needed
-#   "GPipe nofreeze"
-#   "GPipe timelyauto"
-#   "1F1B timelyauto"
-#   "1F1B timelyapf"
-#   "Interleaved1F1B timelyauto"
-#   "Interleaved1F1B timelyapf"
-#   "Interleaved1F1B auto"
-# )
-
-for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in nofreeze apf auto fullrand7 timelyapf timelyauto ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
-# for EXPERIMENT in "${EXPERIMENT_LIST[@]}"; do
-#     IFS=' ' read -r -a EXP_ARRAY <<< "$EXPERIMENT"
-#     PP_SCHEDULER="${EXP_ARRAY[0]}"
-#     METRIC_TYPE="${EXP_ARRAY[1]}"
+for PP_SCHEDULER in GPipe Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+    for METRIC_TYPE in timelyauto timelyapf fullrand7 auto apf nofreeze ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_h200"
+
+        # Skip evaluation if result file already exists
+        if [ -f "${OUTPUT_FILE}" ]; then
+            echo "⚠️Result file ${OUTPUT_FILE} already exists — skipping evaluation." 
+            continue
+        fi
+
         ADDITIONAL_ARGS=(
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--job.basename=${BASENAME}"
@@ -70,6 +66,9 @@ for PP_SCHEDULER in 1F1B ; do # 1F1B GPipe Interleaved1F1B  InterleavedZeroBubbl
             FREEZE_ARGS=(
                 "--freezing.freeze"
                 "--freezing.metric_type=${METRIC_TYPE}"
+                "--freezing.threshold=0.005" # GPipe: 0.005, 1F1B/Interleaved1F1B: 0.01
+                "--freezing.max_freeze_ratio=0.7"
+                "--freezing.percentile=80" # 70 -> 80 (freezing more)
             )
         fi
 

@@ -8,6 +8,9 @@
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
 EXPERIMENT_TAG="1104_llama8b"
+MODEL_TYPE="Llama-3.1-8B"
+TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
+KEYWORD="1109_*" # Pattern to identify log files for evaluation
 
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
@@ -20,30 +23,22 @@ fi
 
 THIS_FILE="/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/${EXPERIMENT_TAG}/eval/eval.sh" # "$(realpath "${BASH_SOURCE[0]}")"
 LOG_DIR="$(dirname "${THIS_FILE}")"
-
+PROJECT_DIR="$(dirname "${LOG_DIR}")"
 CHECKPOINT_ROOT="/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint"
-BASENAME_LIST=( # You can expand this list as needed
-  "1101_GPipe_nofreeze_h200"
-  "1101_1F1B_nofreeze_h200"
-  "1101_Interleaved1F1B_nofreeze_h200"
-  "1101_GPipe_apf_h200"
-  "1101_GPipe_fullrand7_h200"
-  # "1101_GPipe_auto_h200"
-  # "1101_GPipe_timelyapf_h200"
-  # "1101_GPipe_timelyauto_h200"
-  # "1101_1F1B_apf_h200"
-  # "1101_1F1B_fullrand7_h200"
-  # "1101_1F1B_auto_h200"
-  # "1101_1F1B_timelyapf_h200"
-  # "1101_1F1B_timelyauto_h200"
-  # "1101_Interleaved1F1B_apf_h200"
-  # "1101_Interleaved1F1B_fullrand7_h200"
-  # "1101_Interleaved1F1B_auto_h200"
-  # "1101_Interleaved1F1B_timelyapf_h200"
-  # "1101_Interleaved1F1B_timelyauto_h200"
-) 
-MODEL_TYPE="Llama-3.1-8B-Instruct"
-TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
+
+# Discover existing ${KEYWORD}.log files in the experiment dir and build BASENAME_LIST
+BASENAME_LIST=()
+for f in "${PROJECT_DIR}"/${KEYWORD}.log; do
+  [ -e "$f" ] || continue
+  bn="$(basename "$f" .log)"
+  BASENAME_LIST+=("${bn}_h200")
+done
+echo "✔️Discovered ${#BASENAME_LIST[@]} models to evaluate."
+
+if [ ${#BASENAME_LIST[@]} -eq 0 ]; then
+  echo "⚠️ No ${KEYWORD}.log files found in ${LOG_DIR} — nothing to evaluate."
+  exit 0
+fi
 
 for BASENAME in "${BASENAME_LIST[@]}"; do
 
@@ -62,7 +57,12 @@ for BASENAME in "${BASENAME_LIST[@]}"; do
         echo "⚠️Result file ${RESULT_FILE} already exists — skipping evaluation." 
         continue
     fi
-
+    
+    # Skip evaluation if output log already exists
+    if [ -f "${OUTPUT_FILE}" ]; then
+        echo "⚠️Output log ${OUTPUT_FILE} already exists — skipping evaluation." 
+        continue
+    fi
     # Convert to HuggingFace format if .safetensors files are not found
     if ! ls "${MODEL_PATH}"/*.safetensors 1> /dev/null 2>&1; then
       echo "➡️No .safetensors files found in ${MODEL_PATH}. Converting to HuggingFace format..." | tee -a ${OUTPUT_FILE}
@@ -98,13 +98,14 @@ JSON
         echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
         echo -e "✔️RESULT: ${RESULT_FILE}"
         echo -e "✔️${EXPLAIN}"
-        echo -e "☑️> python3 -m timelyfreeze.evaluation --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} --output_json=${RESULT_FILE}"
+        echo -e "☑️> python3 -m timelyfreeze.evaluation --model_path=${MODEL_PATH} --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} --num_fewshot 0 --num_fewshot_task mmlu=5,arc_challenge=10 --output_json=${RESULT_FILE}"
         echo -e "❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️"
     } | tee -a ${OUTPUT_FILE}
 
     python3 -m timelyfreeze.evaluation \
       --model_path=${MODEL_PATH} --output_json=${RESULT_FILE} \
       --dtype=float16 --model_type=${MODEL_TYPE} --batch_size=32 --device_map=cuda --tasks=${TASKS} \
+      --num_fewshot 0 --num_fewshot_task mmlu=5,arc_challenge=10 \
       2>&1 | tee -a ${OUTPUT_FILE}
 
 done
