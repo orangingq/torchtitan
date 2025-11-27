@@ -309,13 +309,6 @@ def draw_pipeline_schedule(
 
         max_time = max(actions_per_rank[-1].end_time for actions_per_rank in pipeline_schedule)
         space = 0
-        # if color_map is None:
-        #     color_map = {
-        #         ActionType.FORWARD: default_color_palette["blue"],
-        #         ActionType.FULL_BACKWARD: default_color_palette["green"],
-        #         ActionType.BACKWARD_INPUT: default_color_palette["jade_green"],
-        #         ActionType.BACKWARD_WEIGHT: default_color_palette["green"],
-        #     }
         stage_color_palette = [
             f"#{int(255 - s / (num_stages_per_rank - 0.999) * 255):02X}"
             f"{int(255 - s / (num_stages_per_rank - 0.999) * 255):02X}"
@@ -376,11 +369,17 @@ def draw_pipeline_schedule(
 
         str_info = ""
         recent_n = 10
+        action_type_name = {
+            ActionType.FORWARD: "F",
+            ActionType.FULL_BACKWARD: "B",
+            ActionType.BACKWARD_INPUT: "BI",
+            ActionType.BACKWARD_WEIGHT: "BW",
+        }
         for actions_per_rank in pipeline_schedule:
             action_info = []
             for action in actions_per_rank:
                 entry = (
-                    f"[S{action.stage},MB{action.microbatch},{action.type.name}]".ljust(25)
+                    f"[S{action.stage},MB{action.microbatch},{action_type_name[action.type]}]".ljust(14)
                     + f"{int(action.start_time)}-{int(action.duration)}-{int(action.end_time)}ms".ljust(16)
                 )
 
