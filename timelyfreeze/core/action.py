@@ -201,7 +201,7 @@ class ActionWithFreezing(ActionWithTime):
 
         self.freezing_list = None # list of freezing actions
 
-        self.freeze_ratio_history = [] # frozen ratio history per stage. self.freeze_ratio_history[batch_idx] = frozen ratio at batch_idx
+        self.frozen_ratio_history = [] # frozen ratio history per stage. self.frozen_ratio_history[batch_idx] = frozen ratio at batch_idx
         self.paramwise_frozen_count = {} # [frozen, total] count for each layer in each stage
 
         # cache
@@ -340,12 +340,12 @@ class ActionWithFreezing(ActionWithTime):
             self.paramwise_frozen_count[name][1] += 1
     
         # append the actual frozen ratio to the freeze ratio history
-        if len(self.freeze_ratio_history) < start_batch_idx:
-            logger.warning(f"Batch index {start_batch_idx} is larger than freeze ratio history length {len(self.freeze_ratio_history)}. Filling with zeros.")
-            self.freeze_ratio_history.extend([0.0] * (start_batch_idx - len(self.freeze_ratio_history)))
-        elif len(self.freeze_ratio_history) > start_batch_idx:
+        if len(self.frozen_ratio_history) < start_batch_idx:
+            logger.debug(f"Batch index {start_batch_idx} is larger than freeze ratio history length {len(self.frozen_ratio_history)}. Filling with zeros.")
+            self.frozen_ratio_history.extend([0.0] * (start_batch_idx - len(self.frozen_ratio_history)))
+        elif len(self.frozen_ratio_history) > start_batch_idx:
             raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
-        self.freeze_ratio_history.append(float(np.mean(freezing_list)))
+        self.frozen_ratio_history.append(float(np.mean(freezing_list)))
         return
     
     def unfreeze(self):

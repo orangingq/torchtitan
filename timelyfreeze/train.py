@@ -666,7 +666,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Realistic Pipeline Schedule", 
-                                xlabel="Time (ms)", ylabel="Rank"
+                                xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                                 )
 
             if is_final:
@@ -681,7 +681,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Theoretical Pipeline Schedule", 
-                                xlabel="Time (ms)", ylabel="Rank"
+                                xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                                 )
             
 
@@ -689,10 +689,10 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
         if config.freezing.freeze:
             for s in config.parallelism.stages_list:
                 # 4) Draw the frozen ratio history
-                draw_line_chart([freezer.stability_check_freq * k for k in range(len(freezer.freeze_ratio_history[s]))], 
-                                    freezer.freeze_ratio_history[s], 
+                draw_line_chart([freezer.stability_check_freq * k for k in range(len(freezer.frozen_ratio_history[s]))], 
+                                    freezer.frozen_ratio_history[s], 
                                     config=config,
-                                    save_file=f'freeze_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
+                                    save_file=f'frozen_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
                                     title=f"Frozen Ratio History of Rank {config.comm.global_rank} (Stage {s})", xlabel="Step", ylabel="Frozen Ratio")
         
                 if is_final:

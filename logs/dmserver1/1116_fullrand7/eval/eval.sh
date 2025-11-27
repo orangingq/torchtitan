@@ -2,10 +2,10 @@
 
 # Define common environment variables
 EXPLAIN="Main Table Experiment"
-EXPERIMENT_TAG="1104_llama1b"
+EXPERIMENT_TAG="1116_fullrand7"
 MODEL_TYPE="Llama-3.2-1B"
 TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1" # "humaneval,mbpp" 
-KEYWORD="1109_*_th*"
+KEYWORD="1116_*"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 export HF_ALLOW_CODE_EVAL=1

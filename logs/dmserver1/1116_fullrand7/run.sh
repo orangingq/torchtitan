@@ -1,25 +1,13 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
-1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
-1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
-    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
-1109: switch to alpaca_gpt4+alpaca_cleaned dataset
-"
-EXPERIMENT_TAG="1104_llama1b"
-TODAY="1109"
+EXPLAIN="TimelyFreeze (fullrand7) configuration experiment on different max_freeze_ratio values."
+
+EXPERIMENT_TAG="1116_fullrand7"
+TODAY="1116"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
-export WANDB_TAG="${EXPERIMENT_TAG}"
-# Respect Slurm's CUDA_VISIBLE_DEVICES
-if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
-    export CUDA_VISIBLE_DEVICES="${1:-0,1,2,3}"
-    echo "✔️ Using manually set GPU(s): ${CUDA_VISIBLE_DEVICES}"
-else
-    echo "✔️ SLURM JOB GPUS: ${SLURM_JOB_GPUS}"
-    echo "✔️ Using Slurm-assigned GPU(s): ${CUDA_VISIBLE_DEVICES}"
-fi
+export CUDA_VISIBLE_DEVICES=1,3,4,6
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
 export OMP_NUM_THREADS=1
@@ -47,13 +35,12 @@ COMMON_ARGS=(
     "--parallelism.pipeline_parallel_degree=${NGPU}"
 )
 
-
 SEED=42
 for PP_SCHEDULER in 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for METRIC_TYPE in fullrand7 ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
+    for MAX_FREEZE_RATIO in 0.4 0.5 0.6 0.7 0.8 0.9 ; do # 0.01 0.03 0.05 0.07 0.1 0.2 0.3 0.4 0.5
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_forfun.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}_forfun_dm1"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_fullrand7_mfr${MAX_FREEZE_RATIO}_${SEED}.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_fullrand7_mfr${MAX_FREEZE_RATIO}_${SEED}_dm1"
 
         # Skip evaluation if result file already exists
         if [ -f "${OUTPUT_FILE}" ]; then
@@ -65,28 +52,16 @@ for PP_SCHEDULER in 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubbl
             "--parallelism.pipeline_parallel_schedule=${PP_SCHEDULER}" 
             "--job.basename=${BASENAME}"
             "--training.seed=${SEED}"
+            "--training.local_batch_size=16" # only for GPipe
+            "--parallelism.pipeline_parallel_microbatch_size=2" # only for GPipe
         )
-
-        if [[ "$PP_SCHEDULER" == "GPipe" ]]; then
-            ADDITIONAL_ARGS+=(
-                "--training.local_batch_size=16"
-                "--parallelism.pipeline_parallel_microbatch_size=2"
-            )
-        fi
-
-        if [[ "$METRIC_TYPE" == "nofreeze" ]]; then       
-            FREEZE_ARGS=(
-                "--freezing.no-freeze"
-            )
-        else
-            FREEZE_ARGS=(
-                "--freezing.freeze"
-                "--freezing.metric_type=${METRIC_TYPE}"
-                "--freezing.threshold=0.01"
-                "--freezing.percentile=80"
-                "--freezing.max_freeze_ratio=0.8"
-            )
-        fi
+        FREEZE_ARGS=(
+            "--freezing.freeze"
+            "--freezing.metric_type=fullrand7"
+            # "--freezing.threshold=0.01"
+            # "--freezing.percentile=80"
+            "--freezing.max_freeze_ratio=${MAX_FREEZE_RATIO}"
+        )
 
         # Print the current timestamp and the server name
         {
@@ -96,7 +71,7 @@ for PP_SCHEDULER in 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubbl
             echo -e "✔️SCRIPT: ${THIS_FILE}"
             echo -e "✔️OUTPUT: ${OUTPUT_FILE}"
             echo -e "✔️${EXPLAIN}"
-            echo -e "✔️Running with ${METRIC_TYPE} x ${PP_SCHEDULER} ... "
+            echo -e "✔️Running with fullrand7 (max_freeze_ratio=${MAX_FREEZE_RATIO}) x ${PP_SCHEDULER} ... "
             echo -e "☑️> torchrun ${COMMON_ARGS[@]} ${PP_ARGS[@]} ${FREEZE_ARGS[@]}"
             echo -e "🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥"
         } | tee -a ${OUTPUT_FILE}
