@@ -336,7 +336,7 @@ class ActionWithFreezing(ActionWithTime):
             self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
             param.requires_grad_(not freezing_list[idx]) # freeze the parameters by setting requires_grad to False
 
-            self.paramwise_frozen_count[name][0] += int(param.requires_grad)
+            self.paramwise_frozen_count[name][0] += int(not param.requires_grad) # count frozen parameters
             self.paramwise_frozen_count[name][1] += 1
     
         # append the actual frozen ratio to the freeze ratio history
