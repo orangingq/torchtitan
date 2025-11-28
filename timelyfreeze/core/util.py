@@ -4,7 +4,7 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 from torchtitan.tools.logging import logger
-from typing import List, Literal
+from typing import List
 
 # Set default matplotlib parameters for consistent styling
 matplotlib.rcParams['font.family'] = 'sans-serif'
@@ -60,13 +60,13 @@ def draw_line_chart(
     window_size=5,
     figsize: tuple[float, float] = (10, 6),
     line_color: str = default_color_palette["light_blue"],
-    scatter_color: str = default_color_palette["middle_blue"],
+    scatter_color: str = default_color_palette["blue"],
     scatter_size: int = 12,
     line_width: float = 2.0,
     alpha: float = 0.7,
-    title_fontsize: int = 14,
-    label_fontsize: int = 12,
-    tick_fontsize: int = 10,
+    title_fontsize: int = 20,
+    label_fontsize: int = 16,
+    tick_fontsize: int = 16,
 ):
     """
     Draw the line chart of the data.
@@ -124,12 +124,12 @@ def draw_line_chart(
 
     ax.set_title(
         title if title is not None else f"Line Chart of Rank {config.comm.global_rank} (Stage {config.comm.pp_rank})",
-        fontdict={'fontsize': title_fontsize},
+        fontsize=title_fontsize,
     )
     if xlabel:
-        ax.set_xlabel(xlabel, fontdict={'fontsize': label_fontsize})
+        ax.set_xlabel(xlabel, fontsize=label_fontsize)
     if ylabel:
-        ax.set_ylabel(ylabel, fontdict={'fontsize': label_fontsize})
+        ax.set_ylabel(ylabel, fontsize=label_fontsize)
     ax.tick_params(axis='both', labelsize=tick_fontsize)
 
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
@@ -149,8 +149,8 @@ def draw_elementwise_histogram(
     bar_width: float = 0.8,
     max_xticks: int = 20,
     figsize: tuple[float, float] | None = None,
-    fontsize: int = 11,
-    ticklabel_fontsize: int = 10,
+    fontsize: int = 14,
+    ticklabel_fontsize: int = 14,
     title_fontsize: int = 16,
 ):
     """
@@ -386,8 +386,6 @@ def draw_pipeline_schedule(
                 if isinstance(action, ActionWithFreezing) and len(action.frozen_ratio_history) > recent_n:
                     mean_recent = float(np.mean(np.asarray(action.frozen_ratio_history[-recent_n:], dtype=float)))
                     entry += f" AFR({recent_n}):{mean_recent:.4f}".ljust(15)
-                else:
-                    entry = entry.ljust(41)
                 action_info.append(entry)
 
                 # If backward is split, paint input/weight separately, otherwise draw a single block.

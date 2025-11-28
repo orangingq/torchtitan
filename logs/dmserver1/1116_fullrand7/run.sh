@@ -1,18 +1,19 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="TimelyFreeze (fullrand7) configuration experiment on different max_freeze_ratio values."
+EXPLAIN="1116: TimelyFreeze (fullrand7) configuration experiment on different max_freeze_ratio values.
+1128: fixed a bug in freezing ratio calculation (should be based on total layers, not unfrozen layers), dp solver -> qp solver"
 
 EXPERIMENT_TAG="1116_fullrand7"
-TODAY="1116"
+TODAY="1128"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
-export CUDA_VISIBLE_DEVICES=1,2,3,4
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
-export OMP_NUM_THREADS=1
+export OMP_NUM_THREADS=4
 export LOG_RANK=0,1,2,3
-export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+# export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 export TORCHFT_LIGHTHOUSE="http://localhost:29510"
 NGPU=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | grep -c .)
 
@@ -37,7 +38,7 @@ COMMON_ARGS=(
 
 SEED=42
 for PP_SCHEDULER in 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for MAX_FREEZE_RATIO in 0.4 0.5 0.6 0.7 0.8 0.9 ; do # 0.01 0.03 0.05 0.07 0.1 0.2 0.3 0.4 0.5
+    for MAX_FREEZE_RATIO in 0.7 0.8 0.3 0.4 0.5 0.6 0.9 ; do # 0.01 0.03 0.05 0.07 0.1 0.2 0.3 0.4 0.5
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_fullrand7_mfr${MAX_FREEZE_RATIO}_${SEED}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_fullrand7_mfr${MAX_FREEZE_RATIO}_${SEED}_dm1"

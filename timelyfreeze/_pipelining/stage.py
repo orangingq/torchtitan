@@ -809,9 +809,10 @@ class _PipelineStageBase(ABC):
         if self.dw_builder:
             # TODO: We may want to change our semantics so we are allowed to ignore
             # the 'dw_builder' and call full_backward directly when it is a full_backward op.
-            grads_input, _ = self.backward_maybe_with_nosync(
-                "full", bwd_kwargs, last_backward=last_backward
-            )
+            with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                    grads_input, _ = self.backward_maybe_with_nosync(
+                    "full", bwd_kwargs, last_backward=last_backward
+                )
             if full_backward:
                 self.dw_builder()()
             else:
