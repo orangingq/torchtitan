@@ -36,7 +36,7 @@ from torchtitan.tools.profiling import (
 
 from timelyfreeze.core.freezer import _Freezer, get_freezer
 from timelyfreeze.core.config import TimelyFreezeConfig
-from timelyfreeze.core.action import ActionType, ActionWithTime
+from timelyfreeze.core.action import ActionType, ActionWithFreezing, ActionWithTime
 from timelyfreeze.core.schedule import gather_pipeline_schedule, schedule_pipeline
 from timelyfreeze.core.util import draw_elementwise_histogram, draw_line_chart, draw_pipeline_schedule
 from timelyfreeze.core import logger as pplog

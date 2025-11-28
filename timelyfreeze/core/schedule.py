@@ -512,7 +512,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
         draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_max_batch_time.svg',
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
-                            title=f"Max Batch Time: {max_batch_time:.2f} ms",
+                            # title=f"Max Batch Time: {max_batch_time:.2f} ms",
                             xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                             )
         
@@ -523,7 +523,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
         draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_min_batch_time.svg',
                             config=config,
                             pipeline_schedule=pipeline_schedule_freezing,
-                            title=f"Min Batch Time: {min_batch_time:.2f} ms",
+                            # title=f"Min Batch Time: {min_batch_time:.2f} ms",
                             xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                             )
 
@@ -531,17 +531,17 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
     max_freeze_ratio = getattr(config.freezing, "max_freeze_ratio", 0.9)
     pipeline_schedule_freezing = solve_dag_qp(pipeline_schedule_freezing, max_freeze_ratio=max_freeze_ratio) # solve the DAG LP problem to find the optimal schedule
 
-    # if config.comm.is_last_stage:
-    batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
-    average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
-    if config.metrics.draw_graph:
-        draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_frozen_pipeline_schedule_rank{config.comm.local_rank}.svg',
-                        config=config,
-                        pipeline_schedule=pipeline_schedule_freezing,
-                        title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                        xlabel="Time (ms)", ylabel="Rank", tick_unit=200
-                        )
-    logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})")
+    if config.comm.is_last_stage:
+        batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing])
+        average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule_freezing for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
+        if config.metrics.draw_graph:
+            draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_frozen_pipeline_schedule.svg',
+                            config=config,
+                            pipeline_schedule=pipeline_schedule_freezing,
+                            # title=f"Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
+                            )
+        logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f}, Time Reduction Rate: {1 - (batch_time / max_batch_time):.2f})")
     return pipeline_schedule_freezing
 
 

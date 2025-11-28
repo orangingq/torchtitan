@@ -379,15 +379,15 @@ def draw_pipeline_schedule(
             action_info = []
             for action in actions_per_rank:
                 entry = (
-                    f"[S{action.stage},MB{action.microbatch},{action_type_name[action.type]}]".ljust(14)
-                    + f"{int(action.start_time)}-{int(action.duration)}-{int(action.end_time)}ms".ljust(16)
+                    f"[S{action.stage},MB{action.microbatch},{action_type_name[action.type]}]".ljust(12)
+                    + f"{int(action.start_time)}-{int(action.duration)}-{int(action.end_time)}ms".ljust(14)
                 )
 
                 if isinstance(action, ActionWithFreezing) and len(action.frozen_ratio_history) > recent_n:
                     mean_recent = float(np.mean(np.asarray(action.frozen_ratio_history[-recent_n:], dtype=float)))
-                    entry += f" AFR({recent_n}):{mean_recent:.4f}".ljust(20)
+                    entry += f" AFR({recent_n}):{mean_recent:.4f}".ljust(15)
                 else:
-                    entry = entry.ljust(40)
+                    entry = entry.ljust(41)
                 action_info.append(entry)
 
                 # If backward is split, paint input/weight separately, otherwise draw a single block.

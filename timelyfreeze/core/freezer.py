@@ -123,7 +123,6 @@ class FullyRandomFreezer_v7(_Freezer):
 
         self.pipeline_schedule :List[List[ActionWithFreezing]] = []
         '''Pipeline schedule with freezing information. Will be set after monitoring upper/lowerbound.'''
-        # self.rand_noise_possibility = 0.05
         self._weights_cache : Dict[int, torch.Tensor] = {}
         return
     
