@@ -717,7 +717,7 @@ class _PipelineStageBase(ABC):
 
         # Compute forward
         try:
-            with pipeline_log.forward(microbatch=fwd_chunk_id, stage=self.stage_index, postfix="stage forward"): # CSH - to log the forward GPU time
+            with pipeline_log.forward(microbatch=fwd_chunk_id, stage=self.stage_index): # CSH - to log the forward GPU time
                 output = self.forward_maybe_with_nosync(*composite_args, **composite_kwargs)
 
         except Exception as e:
@@ -809,17 +809,18 @@ class _PipelineStageBase(ABC):
         if self.dw_builder:
             # TODO: We may want to change our semantics so we are allowed to ignore
             # the 'dw_builder' and call full_backward directly when it is a full_backward op.
-            with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
-                    grads_input, _ = self.backward_maybe_with_nosync(
-                    "full", bwd_kwargs, last_backward=last_backward
-                )
+            grads_input, _ = self.backward_maybe_with_nosync(
+                "full", bwd_kwargs, last_backward=last_backward
+            )
             if full_backward:
-                self.dw_builder()()
+                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index): # CSH - to log the backward GPU time
+                    self.dw_builder()()
             else:
-                self.dw_runner[bwd_chunk_id] = self.dw_builder()
+                with pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index): # CSH - to log the backward GPU time
+                    self.dw_runner[bwd_chunk_id] = self.dw_builder()
         else:
             if full_backward:
-                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index): # CSH - to log the backward GPU time
                     grads_input, _ = self.backward_maybe_with_nosync(
                         "full", bwd_kwargs, last_backward=last_backward
                     )
@@ -833,7 +834,7 @@ class _PipelineStageBase(ABC):
 
                     # perform the partial backwards for the inputs with a custom backward function
                     # when the "stage_ouput" is a loss, then it is a tensor, otherwise it is a tuple of tensors
-                    with pipeline_log.backward_input(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="input backward one chunk"): # CSH - to log the backward GPU time
+                    with pipeline_log.backward_input(microbatch=bwd_chunk_id, stage=self.stage_index): # CSH - to log the backward GPU time
                         grads_input, param_groups = self.backward_maybe_with_nosync(
                             "input", bwd_kwargs, last_backward=last_backward
                         )
@@ -883,7 +884,7 @@ class _PipelineStageBase(ABC):
                     "param_groups": param_groups,
                 }
 
-                with pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="weight backward one chunk"): # CSH - to log the backward GPU time
+                with pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index): # CSH - to log the backward GPU time
                     self.backward_maybe_with_nosync(
                         "weight", bwd_kwargs, last_backward=last_backward
                     )
@@ -898,7 +899,7 @@ class _PipelineStageBase(ABC):
                     "output_grads": output_grads,
                     "input_values": input_values,
                 }
-                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                with pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index): # CSH - to log the backward GPU time
                     self.backward_maybe_with_nosync(
                         "full", bwd_kwargs, last_backward=last_backward
                     )

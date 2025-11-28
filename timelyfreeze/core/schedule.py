@@ -8,7 +8,7 @@ from scipy.optimize import linprog
 from torchtitan.tools.logging import logger
 
 from .action import Action, ActionType, ActionWithTime, ActionWithLog, ActionWithFreezing
-from .util import draw_pipeline_schedule, get_abs_path
+from .util import draw_afr_time_scatter_plot, draw_pipeline_schedule, get_abs_path
 from .config import TimelyFreezeConfig, Comm
 from scipy.optimize import minimize, LinearConstraint, Bounds
 
@@ -545,7 +545,8 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
     return pipeline_schedule_freezing
 
 
-def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monitored_values_dict: Dict[int, List[Tuple[float, float]]], config:TimelyFreezeConfig)-> List[List[ActionWithFreezing]]:
+
+def adjust_freeze_ratio(pipeline_schedule: List[List[ActionWithFreezing]], monitored_values_dict: Dict[int, List[Tuple[float, float]]], config: TimelyFreezeConfig) -> List[List[ActionWithFreezing]]:
     '''
     Assume the given pipeline_schedule is of ActionWithFreezing type.
     Adjust the freeze ratio of each action in the pipeline schedule to minimize the batch time.
@@ -557,62 +558,11 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
     Returns:
     - Updated pipeline_schedule with adjusted freeze ratio.
     '''
-
     timestamp = time.strftime("%y%m%d_%H%M")
     n_stages = config.parallelism.stages_per_rank
-    if config.metrics.draw_graph:
-        fig, axes = plt.subplots(1, n_stages, figsize=(3*n_stages, 3)) # 3 inches per plot, 3 inches height
 
-    def draw_trend_line(stage: int, ax: plt.Axes, afrs: List[float], times: List[float], y_range: List[float], microbatches=None) -> Tuple[float, float]:
-        ''' Draw the trend line for the monitored values.
-        Arguments:
-        - stage: the stage index for the title.
-        - ax: the axis to draw the trend line on.
-        - afrs: List of freeze ratios.
-        - times: List of times corresponding to the freeze ratios.
-        Returns:
-        - Tuple of slope (a) and intercept (b) of the trend line.
-        '''
-        a, b = np.polyfit(afrs, times, 1)
-        # assert a < 0, f"Expected a negative slope for the trend line. a: {a}, b: {b}"
-        trend_fn = lambda r: a * r + b # linear function for the trend line
-        ax.set_xlim(0, 1)
-        y_min, y_max = y_range # min(times) * 0.9, max(times) * 1.1
-        ax.set_ylim(y_min, y_max) # set the y limit to 10% above the maximum time
-        r_range = np.linspace(0, 1, 100)
-        t_range = trend_fn(r_range)
-        ax.plot(r_range, t_range, linestyle='-', color='#685A3A', linewidth=1, label=f't = {a:.2f}r + {b:.2f}') # EDE8DF
-        # color points by microbatch: higher microbatch → darker
-        if microbatches is not None and len(microbatches) == len(times):
-            mb_arr = np.array(microbatches, dtype=float)
-            if mb_arr.size > 0:
-                mb_min, mb_max = float(mb_arr.min()), float(mb_arr.max())
-                if mb_max > mb_min:
-                    norm = (mb_arr - mb_min) / (mb_max - mb_min)
-                else:
-                    norm = np.zeros_like(mb_arr)
-                base = np.array([0xD3, 0xC4, 0xA5], dtype=float) / 255.0
-                factors = 1.0 - 0.6 * norm  # 1.0 (light) → 0.4 (dark)
-                colors = np.clip(base[None, :] * factors[:, None], 0.0, 1.0)
-                ax.scatter(afrs, times, c=colors, marker='o', s=1)
-            else:
-                ax.scatter(afrs, times, color="#AE9B71", marker='o', s=1)
-        else:
-            ax.scatter(afrs, times, color='#AE9B71', marker='o', s=1)
-        ax.grid(True, linestyle='--', alpha=0.5)
-        ax.set_xticks([0, 0.25, 0.5, 0.75, 1])
-        ax.set_yticks([y_min, y_min*0.75+y_max*0.25, (y_min+y_max)/2, y_min*0.25+y_max*0.75, y_max])
-        ax.set_xlabel('Freeze Ratio', fontsize=9)
-        ax.set_ylabel('Time (ms)', fontsize=9)
-        ax.legend(loc='upper left', fontsize=9)
-        ax.set_title(f'Stage {stage}', fontdict={'fontsize': 9})
-        for spine in ax.spines.values(): # remove all boundary spines (left, right, top, bottom)
-            spine.set_visible(False)
-        return a, b
-
-    durations_per_stage :torch.Tensor = torch.zeros((n_stages, 2), device=f'cuda:{config.comm.local_rank}')
-    stages_order = {s:i for i,s in enumerate(sorted(set(monitored_values_dict.keys())))}
-    # Accept both (afr, time) and (afr, time, microbatch)
+    durations_per_stage: torch.Tensor = torch.zeros((n_stages, 2), device=f'cuda:{config.comm.local_rank}')
+    stages_order = {s: i for i, s in enumerate(sorted(set(monitored_values_dict.keys())))}
     monitored_values_dict = {
         s: [
             [v[0] for v in monitored_values_dict[s]],
@@ -621,57 +571,47 @@ def adjust_freeze_ratio(pipeline_schedule:List[List[ActionWithFreezing]], monito
         ]
         for s in stages_order.keys()
     }
-    y_range_per_stage = {s: [min(monitored_values_dict[s][1]), max(monitored_values_dict[s][1])] for s in stages_order.keys()}
 
     for stage, i in stages_order.items():
-        # trend line for of monitored values
-        if config.metrics.draw_graph:
-            axis = axes if len(stages_order) == 1 else axes[i]
-            a, b = draw_trend_line(stage, axis, monitored_values_dict[stage][0], monitored_values_dict[stage][1], y_range_per_stage[stage], monitored_values_dict[stage][2])
+        freeze_ratios, elapsed_times, microbatches = monitored_values_dict[stage]
+        if config.comm.is_last_stage and config.metrics.draw_graph:
+            a, b = draw_afr_time_scatter_plot(
+            afrs=freeze_ratios,
+            times=elapsed_times,
+            save_file=f'afr_time_plot/{timestamp}_stage{stage}.svg',
+            microbatches=microbatches,
+            config=config,
+            title=f"Scatter Plot of Stage {stage}",
+            )
         else:
-            a, b = np.polyfit(monitored_values_dict[stage][0], monitored_values_dict[stage][1], 1)
-        durations_per_stage[i][0] = b # max_duration (no freezing) = a * 0 + b
-        durations_per_stage[i][1] = a + b # min_duration (all freezing) = a * 1 + b
+            slope, intercept = np.polyfit(freeze_ratios, elapsed_times, 1)
+            a, b = float(slope), float(intercept)
+        durations_per_stage[i][0] = b  # max_duration (no freezing) = a * 0 + b
+        durations_per_stage[i][1] = a + b  # min_duration (all freezing) = a * 1 + b
 
-    # draw the trend line for the entire rank schedule
-    if config.metrics.draw_graph:
-        title = 'Observed values (freeze ratio vs time) with Trend Line'
-        # fig.suptitle(title, fontsize=12)
-        plt.tight_layout()
-        save_file = get_abs_path(f'pipeline_schedule_adjustment/{timestamp}_rank{config.comm.global_rank}_trend_line.svg', base_dir=config.metrics.image_folder)
-        plt.savefig(save_file)
-        plt.close()
-        logger.info(f"{title} is saved as: {save_file}")
+    durations: List[torch.Tensor] = [torch.zeros_like(durations_per_stage, device=f'cuda:{config.comm.local_rank}') for _ in range(config.comm.pp)]
+    dist.all_gather(durations, durations_per_stage, group=config.comm.pp_group)
+    durations = [d.cpu() for d in durations]
 
-
-    durations :List[torch.Tensor] = [torch.zeros_like(durations_per_stage, device=f'cuda:{config.comm.local_rank}') for _ in range(config.comm.pp)]
-    # gather trend lines across all pipelines
-    dist.all_gather(durations, durations_per_stage, group=config.comm.pp_group) # gather the durations from all ranks
-    durations = [d.cpu() for d in durations] # move the durations to CPU for further processing
-
-    # set the max_duration and min_duration of each action in the pipeline schedule
     for r, rank_schedule in enumerate(pipeline_schedule):
-        stages_order = {s:i for i,s in enumerate(sorted(set([action.stage for action in rank_schedule])))}
+        stages_order = {s: i for i, s in enumerate(sorted(set([action.stage for action in rank_schedule])))}
         for action in rank_schedule:
             if not action.freezable:
                 continue
             action.max_duration = float(durations[r][stages_order[action.stage]][0])
             action.min_duration = float(durations[r][stages_order[action.stage]][1])
 
-    # calculate the expected freeze ratio based on the maximum and minimum batch time and schedule the pipeline.
     max_freeze_ratio = getattr(config.freezing, "max_freeze_ratio", 0.9)
-    pipeline_schedule = solve_dag_lp(pipeline_schedule, max_freeze_ratio=max_freeze_ratio) # solve the DAG LP problem to find the optimal schedule
+    pipeline_schedule = solve_dag_lp(pipeline_schedule, max_freeze_ratio=max_freeze_ratio)
 
     if config.comm.is_last_stage:
         batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule])
         average_freeze_ratio = sum([action.expected_freeze_ratio for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]]) / sum([1 for rank_actions in pipeline_schedule for action in rank_actions if action.type in [ActionType.BACKWARD_WEIGHT, ActionType.FULL_BACKWARD]])
         if config.metrics.draw_graph:
             draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_adjusted_frozen_pipeline_schedule.svg',
-                            config=config,
-                            pipeline_schedule=pipeline_schedule,
-                            title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
-                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
-                            )
+                                    config=config,
+                                    pipeline_schedule=pipeline_schedule,
+                                    title=f"Adjusted Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})",
+                                    xlabel="Time (ms)", ylabel="Rank", tick_unit=200)
         logger.info(f"\t> Batch Time: {batch_time:.2f} ms (Average Freeze Ratio: {average_freeze_ratio:.2f})")
     return pipeline_schedule
-
