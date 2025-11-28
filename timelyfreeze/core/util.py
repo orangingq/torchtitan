@@ -18,12 +18,14 @@ default_color_palette: dict[str, str] = {
     "black": "#000000",
     "dark_gray": "#757575",
     "light_gray": "#C9C9C9",
+    "dark_blue": "#0B3D91",
     "blue": "#166CF7",
     "middle_blue": "#64a5fa",
     "light_blue": "#b2d3ff",
+    "very_light_blue": "#e6f0ff",
     "green": "#20A443",
     "jade_green": "#2FB8C2",
-    "deepdark_gold": "#433b26",
+    "dark_gold": "#433b26",
     "gold": "#988456",
     "light_gold": "#DCD2C0",
     "off_white": "#f6f4ef",
@@ -267,6 +269,8 @@ def draw_elementwise_histogram(
     fontsize: int = 14,
     ticklabel_fontsize: int = 14,
     title_fontsize: int = 16,
+    color_start: str = default_color_palette["very_light_blue"],
+    color_end: str = default_color_palette["dark_blue"],
 ):
     """
     Draw stacked total-count and per-element histograms.
@@ -282,7 +286,11 @@ def draw_elementwise_histogram(
         bar_width (float): Thickness of the stacked bar in the top subplot.
         max_xticks (int): Maximum number of tick labels displayed on the bottom axis.
         figsize (tuple[float, float] | None): Optional manual figure size override.
-        fontsize (int): 
+        fontsize (int): Font size for text annotations inside bars.
+        ticklabel_fontsize (int): Font size for x-axis tick labels.
+        title_fontsize (int): Font size for the figure title.
+        color_start (str): Hex color for the gradient start.
+        color_end (str): Hex color for the gradient end.
     """
     total_sum = sum(data_l[1] for data_l in data)
     if total_sum == 0:
@@ -299,8 +307,8 @@ def draw_elementwise_histogram(
     )
 
     # Smooth gradient colors per stage to highlight distribution differences.
-    color_start = np.array(matplotlib.colors.to_rgb(default_color_palette["off_white"])) 
-    color_end   = np.array(matplotlib.colors.to_rgb(default_color_palette["deepdark_gold"])) # np.array([67, 59, 38]) / 255.0
+    color_start = np.array(matplotlib.colors.to_rgb(color_start)) # np.array([246, 244, 239]) / 255.0
+    color_end   = np.array(matplotlib.colors.to_rgb(color_end)) # np.array([67, 59, 38]) / 255.0
     bar_colors = np.linspace(
         color_start, color_end, num_elements * (config.parallelism.num_stages + 1),
     )[stage * num_elements : (stage + 1) * num_elements]
