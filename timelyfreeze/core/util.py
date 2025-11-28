@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Tuple
 import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
@@ -18,11 +18,11 @@ default_color_palette: dict[str, str] = {
     "black": "#000000",
     "dark_gray": "#757575",
     "light_gray": "#C9C9C9",
-    "blue": "#4285F4",
+    "blue": "#166CF7",
     "middle_blue": "#64a5fa",
     "light_blue": "#b2d3ff",
-    "green": "#34A853",
-    "jade_green": "#46BDC6",
+    "green": "#20A443",
+    "jade_green": "#2FB8C2",
     "deepdark_gold": "#433b26",
     "gold": "#988456",
     "light_gold": "#DCD2C0",
@@ -62,11 +62,11 @@ def draw_line_chart(
     line_color: str = default_color_palette["light_blue"],
     scatter_color: str = default_color_palette["blue"],
     scatter_size: int = 12,
-    line_width: float = 2.0,
+    line_width: float = 5.0,
     alpha: float = 0.7,
     title_fontsize: int = 20,
-    label_fontsize: int = 16,
-    tick_fontsize: int = 16,
+    label_fontsize: int = 18,
+    tick_fontsize: int = 18,
 ):
     """
     Draw the line chart of the data.
@@ -137,6 +137,121 @@ def draw_line_chart(
     plt.close(fig)
     logger.info(f"{title if title is not None else 'Line Chart'} is saved as: {save_file}")
     return save_file
+
+def draw_afr_time_scatter_plot(
+    afrs: List[float],
+    times: List[float],
+    save_file: str,
+    config: TimelyFreezeConfig,
+    microbatches: List[float] | None = None,
+    title: str | None = None,
+    xlabel: str = 'Freeze Ratio',
+    ylabel: str = 'Time (ms)',
+    figsize: Tuple[float, float] = (3.5, 3.5),
+    line_color: str = default_color_palette["blue"],
+    scatter_color: str = default_color_palette["middle_blue"],
+    microbatch_base_color: str = default_color_palette["light_blue"],
+    scatter_size: int = 10,
+    linewidth: float = 1.1,
+    grid_alpha: float = 0.5,
+    label_fontsize: int = 10,
+    tick_fontsize: int = 10,
+    title_fontsize: int = 10,
+    legend_fontsize: int = 10,
+    xticks: List[float] = [0, 0.25, 0.5, 0.75, 1],
+    yticks: List[float] | None = None,
+) -> Tuple[float, float]:
+    """
+    Draw the trend line for the monitored values and save the plot.
+    Returns slope/intercept of linear fit for later use.
+    Args:
+        afrs (List[float]): List of AFR (Active Freezing Ratio) values.
+        times (List[float]): List of corresponding time measurements.
+        save_file (str): Destination path (relative to config.metrics.image_folder).
+        config (TimelyFreezeConfig): Run configuration.
+        microbatches (List[float] | None): Optional list of microbatch indices for color-coding.
+        title (str | None): Figure title.
+        figsize (Tuple[float, float]): Figure size.
+        line_color (str): Color of the trend line.
+        scatter_color (str): Color of the scatter points.
+        scatter_size (int): Size of the scatter points.
+        linewidth (float): Width of the trend line.
+        grid_alpha (float): Transparency level of the grid lines.
+        label_fontsize (int): Font size for axis labels.
+        tick_fontsize (int): Font size for tick labels.
+        title_fontsize (int): Font size for the figure title.
+        legend_fontsize (int): Font size for the legend.
+        xticks (List[float]): X-axis tick positions.
+        yticks (List[float] | None): Y-axis tick positions.
+        microbatch_base_color (str): Hex color (e.g., '#RRGGBB') used as the base for microbatch gradients.
+    """
+    if len(afrs) == 0 or len(times) == 0:
+        logger.warning("AFR/time data is empty. Skip drawing the scatter plot.")
+        return 0.0, 0.0
+    elif len(afrs) != len(times):
+        logger.warning(f"The length of afrs [{len(afrs)}] and times [{len(times)}] should be the same.")
+        return 0.0, 0.0
+    
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # Linear regression between AFRs and times.
+    afr_buckets = {}
+    for afr, time in zip(afrs, times):
+        afr_buckets.setdefault(afr, []).append(time)
+
+    unique_afrs = np.array(sorted(afr_buckets.keys()), dtype=float)
+    averaged_times = np.array([float(np.mean(afr_buckets[afr])) for afr in unique_afrs], dtype=float)
+
+    if len(unique_afrs) == 1:
+        a, b = 0.0, averaged_times[0]
+    else:
+        a, b = np.polyfit(unique_afrs, averaged_times, 1)
+    trend_fn = lambda r: a * r + b
+
+    # Configure axis ranges.
+    ax.set_xlim(0, 1)
+    y_min, y_max = float(np.min(times)), float(np.max(times))
+    ax.set_ylim(y_min, y_max)
+
+    # Plot regression line.
+    r_range = np.linspace(0, 1, 100)
+    t_range = trend_fn(r_range)
+    ax.plot(r_range, t_range, linestyle='-', color=line_color, linewidth=linewidth, label=f't = {a:.2f}r + {b:.2f}')
+
+    # Scatter AFR/time pairs, optionally color-coded by microbatch.
+    if microbatches is not None and len(microbatches) == len(times):
+        mb_arr = np.array(microbatches, dtype=float)
+        mb_min, mb_max = float(mb_arr.min()), float(mb_arr.max())
+        norm = (mb_arr - mb_min) / (mb_max - mb_min) if mb_max > mb_min else np.zeros_like(mb_arr)
+        base = np.array(matplotlib.colors.to_rgb(microbatch_base_color), dtype=float)
+        factors = 1.0 - 0.6 * norm
+        colors = np.clip(base[None, :] * factors[:, None], 0.0, 1.0)
+        ax.scatter(afrs, times, c=colors, marker='o', s=scatter_size)
+    else:
+        ax.scatter(afrs, times, color=scatter_color, marker='o', s=scatter_size)
+
+    # Cosmetic settings.
+    ax.grid(True, linestyle='--', alpha=grid_alpha)
+    ax.set_xticks(xticks)
+    ax.set_yticks(yticks or [y_min, y_min * 0.75 + y_max * 0.25, (y_min + y_max) / 2, y_min * 0.25 + y_max * 0.75, y_max])
+    ax.tick_params(axis='both', labelsize=tick_fontsize)
+    ax.set_xlabel(xlabel, fontsize=label_fontsize)
+    ax.set_ylabel(ylabel, fontsize=label_fontsize)
+    ax.legend(loc='upper left', fontsize=legend_fontsize)
+    if title:
+        ax.set_title(title, fontsize=title_fontsize)
+
+    # Remove chart borders for a cleaner look.
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    # Persist figure.
+    save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
+    fig.savefig(save_file)
+    plt.close(fig)
+    logger.info(f"{title or 'Scatter Plot'} is saved as: {save_file}")
+    return a, b
+
 
 def draw_elementwise_histogram(
     data,

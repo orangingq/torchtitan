@@ -38,7 +38,7 @@ from timelyfreeze.core.freezer import _Freezer, get_freezer
 from timelyfreeze.core.config import TimelyFreezeConfig
 from timelyfreeze.core.action import ActionType, ActionWithFreezing, ActionWithTime
 from timelyfreeze.core.schedule import gather_pipeline_schedule, schedule_pipeline
-from timelyfreeze.core.util import draw_elementwise_histogram, draw_line_chart, draw_pipeline_schedule
+from timelyfreeze.core.util import draw_afr_time_scatter_plot, draw_elementwise_histogram, draw_line_chart, draw_pipeline_schedule
 from timelyfreeze.core import logger as pplog
 
 class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
@@ -703,6 +703,29 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                     title=f"Histogram of Frozen Parameters in Rank {config.comm.global_rank} (Stage {s})",
                                     xlabel1="Total Freeze Counts Ratio",
                                     xlabel2="Parameter Index")
+
+            if is_final:
+                # 6) Draw AFR-vs-Time scatter plot per stage
+                monitored_values_dict = {stage: [] for stage in freezer.stages.keys()}
+                for a, la in zip(freezer.pipeline_schedule[config.comm.pp_rank], pplog.pipeline_log.log_schedule):
+                    if not a.freezable:
+                        continue
+                    times = la.log_duration[freezer.progressive_freezing_start_step:]
+                    if len(times) == 0:
+                        logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
+                        continue
+                    lo, hi = np.percentile(times, 5), np.percentile(times, 95)
+                    afrs = a.frozen_ratio_history[freezer.progressive_freezing_start_step:freezer.progressive_freezing_start_step + len(times)]
+                    monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in zip(afrs, times) if lo <= t <= hi]
+                for s, monitored_values in monitored_values_dict.items():
+                    draw_afr_time_scatter_plot(
+                                    afrs=[v[0] for v in monitored_values],
+                                    times=[v[1] for v in monitored_values],
+                                    save_file=f'afr_time_plot/{timestamp}_stage{s}.svg',
+                                    microbatches=[v[2] for v in monitored_values],
+                                    config=config,
+                                    title=f"Scatter Plot of Stage {s}",
+                    )
     return
 
 
