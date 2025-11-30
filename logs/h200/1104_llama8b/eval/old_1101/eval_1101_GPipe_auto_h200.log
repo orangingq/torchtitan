@@ -1,0 +1,34 @@
+➡️No .safetensors files found in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1101_GPipe_auto_h200/step-3000. Converting to HuggingFace format...
+➡️Recreating Index file at /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1101_GPipe_auto_h200/step-3000/model.safetensors.index.json.
+
+❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️
+✔️Current Timestamp: Fri Nov  7 16:55:01 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 6
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1104_llama8b/eval/eval.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1104_llama8b/eval/eval_1101_GPipe_auto_h200.log
+✔️RESULT: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1101_GPipe_auto_h200/step-3000/eval_1101_GPipe_auto_h200.json
+✔️Main Table Experiment
+☑️> python3 -m timelyfreeze.evaluation --model_path=/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1101_GPipe_auto_h200/step-3000 --dtype=float16 --model_type=Llama-3.1-8B-Instruct --batch_size=32 --device_map=cuda --tasks=mmlu,hellaswag,arc_challenge,truthfulqa_mc1 --num_fewshot 0 --num_fewshot_task mmlu=5,arc_challenge=10 --output_json=/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1101_GPipe_auto_h200/step-3000/eval_1101_GPipe_auto_h200.json
+❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️
+OSError: [Errno 28] No space left on device
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/evaluation.py", line 151, in <module>
+    main()
+    ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/evaluation.py", line 67, in main
+    cfg.save_pretrained(args.model_path)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/configuration_utils.py", line 490, in save_pretrained
+    self.to_json_file(output_config_file, use_diff=True)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/configuration_utils.py", line 1001, in to_json_file
+    with open(json_file_path, "w", encoding="utf-8") as writer:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 28] No space left on device
+config.json not found in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1101_GPipe_auto_h200/step-3000. Downloading from meta-llama/Llama-3.1-8B-Instruct...
+Config OK: llama

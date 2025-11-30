@@ -1,0 +1,893 @@
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Wed Nov 19 07:36:50 UTC 2025
+✔️SERVER: wbl-kaist-gpu-2 (172.16.131.118),  GPUs: 1,2,3,7
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1104_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1104_llama8b/1109_1F1B_timelyapf_th1e-4.log
+✔️Llama 3.1 8B Experiment
+1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+1116: everything same, but with seed=11
+
+✔️Running with timelyapf x 1F1B ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1104_llama8b/config_1109.toml --job.description="Llama 3.1 8B Experiment
+1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+1116: everything same, but with seed=11
+" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=timelyapf --freezing.threshold=1e-4 --freezing.max_freeze_ratio=0.7 --freezing.percentile=80
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W1119 07:36:51.713000 2745858 site-packages/torch/distributed/run.py:811] 
+W1119 07:36:51.713000 2745858 site-packages/torch/distributed/run.py:811] *****************************************
+W1119 07:36:51.713000 2745858 site-packages/torch/distributed/run.py:811] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1119 07:36:51.713000 2745858 site-packages/torch/distributed/run.py:811] *****************************************
+[rank1]:2025-11-19 07:36:58,715 - INFO - Starting job: "Llama 3.1 8B Experiment
+[rank1]:1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+[rank2]:2025-11-19 07:36:58,737 - INFO - Starting job: "Llama 3.1 8B Experiment
+[rank2]:1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+[rank1]:1116: everything same, but with seed=11
+[rank1]:"
+[rank2]:1116: everything same, but with seed=11
+[rank2]:"
+[rank0]:2025-11-19 07:36:58,847 - INFO - Starting job: "Llama 3.1 8B Experiment
+[rank0]:1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+[rank0]:1116: everything same, but with seed=11
+[rank0]:"
+[rank3]:2025-11-19 07:36:58,928 - INFO - Starting job: "Llama 3.1 8B Experiment
+[rank3]:1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+[rank3]:1116: everything same, but with seed=11
+[rank3]:"
+[rank1]:2025-11-19 07:36:59,558 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-11-19 07:36:59,560 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank2]:2025-11-19 07:36:59,563 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-11-19 07:36:59,565 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-19 07:36:59,700 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-11-19 07:36:59,702 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-19 07:36:59,707 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank0]:2025-11-19 07:36:59,709 - INFO - Loading tokenizer from tokenizer.json
+[rank3]:2025-11-19 07:36:59,722 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-11-19 07:36:59,724 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-19 07:37:00,000 - INFO - Preparing openhermes dataset from teknium/OpenHermes-2.5
+[rank0]:2025-11-19 07:37:01,800 - INFO - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2025-11-19 07:37:02,024 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2025-11-19 07:37:02,053 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank2]:2025-11-19 07:37:02,049 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank1]:2025-11-19 07:37:02,112 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.8', 'layers.9', 'layers.10', 'layers.11', 'layers.12', 'layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank1]:2025-11-19 07:37:02,112 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank0]:2025-11-19 07:37:02,133 - INFO - Model llama3 8B size: 8,030,261,248 total parameters
+[rank0]:2025-11-19 07:37:02,156 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3', 'layers.4', 'layers.5', 'layers.6', 'layers.7']
+[rank0]:2025-11-19 07:37:02,157 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank2]:2025-11-19 07:37:02,155 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20', 'layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank2]:2025-11-19 07:37:02,156 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'repr' attribute with value False was provided to the `Field()` function, which has no effect in the context it was used. 'repr' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank3]:/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py:2249: UnsupportedFieldAttributeWarning: The 'frozen' attribute with value True was provided to the `Field()` function, which has no effect in the context it was used. 'frozen' is field-specific metadata, and can only be attached to a model field using `Annotated` metadata or by assignment. This may have happened because an `Annotated` type alias using the `type` statement was used, or if the `Field()` function was attached to a single member of a union type.
+[rank3]:  warnings.warn(
+[rank1]:2025-11-19 07:37:02,417 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2025-11-19 07:37:02,417 - INFO - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank0]:2025-11-19 07:37:02,468 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2025-11-19 07:37:02,468 - INFO - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank2]:2025-11-19 07:37:02,467 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2025-11-19 07:37:02,467 - INFO - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run 65xls6vv
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1109_1F1B_timelyapf_th1e-4_h200/20251119-0737/wandb/run-20251119_073702-65xls6vv
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/65xls6vv
+[rank3]:2025-11-19 07:37:04,211 - INFO - WandB logging enabled
+[rank3]:2025-11-19 07:37:04,212 - INFO - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2025-11-19 07:37:04,296 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28', 'layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2025-11-19 07:37:04,297 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank2]:2025-11-19 07:37:04,537 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-19 07:37:04,543 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1109_1F1B_timelyapf_th1e-4_h200
+[rank0]:2025-11-19 07:37:04,543 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-19 07:37:04,543 - INFO - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 2000 (warmup 200)
+[rank0]:2025-11-19 07:37:04,543 - INFO - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B/original_dcp.
+[rank1]:2025-11-19 07:37:04,537 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank3]:2025-11-19 07:37:04,524 - INFO - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2025-11-19 07:37:04,525 - INFO - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank3]:2025-11-19 07:37:04,536 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-19 07:37:15,259 - INFO - [GC] GC collection for checkpoint loading. 0.01 seconds
+[rank0]:2025-11-19 07:37:15,259 - INFO - Finished loading the checkpoint in 10.72 seconds.
+[rank0]:2025-11-19 07:37:15,259 - INFO - Training starts at step 1
+[rank1]:2025-11-19 07:37:19,118 - INFO -  step:  1  loss: -4.0000  grad_norm:     inf  memory: 32.41GiB(23.18%)  tps: 962  tflops: 44.87  mfu: 4.54%
+[rank1]:2025-11-19 07:37:19,118 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank3]:2025-11-19 07:37:19,160 - INFO -  step:  1  loss:  8.2933  grad_norm:     inf  memory: 35.49GiB(25.39%)  tps: 1,100  tflops: 51.29  mfu: 5.19%
+[rank3]:2025-11-19 07:37:19,161 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-11-19 07:37:19,137 - INFO -  step:  1  loss: -4.0000  grad_norm:     inf  memory: 37.59GiB(26.89%)  tps: 964  tflops: 44.94  mfu: 4.54%
+[rank0]:2025-11-19 07:37:19,137 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank2]:2025-11-19 07:37:19,128 - INFO -  step:  1  loss: -4.0000  grad_norm:     inf  memory: 27.12GiB(19.40%)  tps: 964  tflops: 44.96  mfu: 4.55%
+[rank2]:2025-11-19 07:37:19,128 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-11-19 07:39:25,845 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:39:28,292 - INFO - Avg. fwd time: 14.7289 / Avg. bwd time: 42.1886 / Avg. batch time: 472.4534 (ms) / GPU bubble ratio: 3.62%
+[rank1]:2025-11-19 07:39:28,368 - INFO - Avg. fwd time: 15.0115 / Avg. bwd time: 40.9440 / Avg. batch time: 584.4425 (ms) / GPU bubble ratio: 23.41%
+[rank2]:2025-11-19 07:39:28,322 - INFO - Avg. fwd time: 13.2849 / Avg. bwd time: 36.2481 / Avg. batch time: 525.3330 (ms) / GPU bubble ratio: 24.57%
+[rank0]:2025-11-19 07:39:28,400 - INFO - Avg. fwd time: 13.2305 / Avg. bwd time: 37.7306 / Avg. batch time: 639.4592 (ms) / GPU bubble ratio: 36.24%
+[rank0]:2025-11-19 07:39:28,525 - INFO -  step: 50  loss: -4.0000  grad_norm: 5238.1123  memory: 54.93GiB(39.29%)  tps: 6,205  tflops: 289.39  mfu: 29.26%
+[rank3]:2025-11-19 07:39:28,523 - INFO -  step: 50  loss:  9.4347  grad_norm: 5238.1123  memory: 46.16GiB(33.01%)  tps: 6,206  tflops: 289.45  mfu: 29.27%
+[rank1]:2025-11-19 07:39:28,522 - INFO -  step: 50  loss: -4.0000  grad_norm: 5238.1123  memory: 47.26GiB(33.80%)  tps: 6,204  tflops: 289.35  mfu: 29.26%
+[rank2]:2025-11-19 07:39:28,519 - INFO -  step: 50  loss: -4.0000  grad_norm: 5238.1123  memory: 38.72GiB(27.69%)  tps: 6,205  tflops: 289.38  mfu: 29.26%
+[rank0]:2025-11-19 07:41:37,860 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:41:40,292 - INFO - Avg. fwd time: 14.7470 / Avg. bwd time: 42.2975 / Avg. batch time: 472.6091 (ms) / GPU bubble ratio: 3.44%
+[rank0]:2025-11-19 07:41:40,400 - INFO - Avg. fwd time: 13.1674 / Avg. bwd time: 37.7993 / Avg. batch time: 638.7493 (ms) / GPU bubble ratio: 36.17%
+[rank2]:2025-11-19 07:41:40,322 - INFO - Avg. fwd time: 13.3007 / Avg. bwd time: 36.3610 / Avg. batch time: 525.2791 (ms) / GPU bubble ratio: 24.37%
+[rank1]:2025-11-19 07:41:40,368 - INFO - Avg. fwd time: 14.9789 / Avg. bwd time: 41.0055 / Avg. batch time: 584.0981 (ms) / GPU bubble ratio: 23.32%
+[rank1]:2025-11-19 07:41:40,522 - INFO -  step: 100  loss: -4.0000  grad_norm: 552.3386  memory: 47.26GiB(33.80%)  tps: 6,206  tflops: 289.45  mfu: 29.27%
+[rank1]:2025-11-19 07:41:40,522 - WARNING - Nothing to draw before the end of warmup.
+[rank3]:2025-11-19 07:41:40,524 - INFO -  step: 100  loss:  4.4840  grad_norm: 552.3386  memory: 46.16GiB(33.01%)  tps: 6,206  tflops: 289.45  mfu: 29.27%
+[rank3]:2025-11-19 07:41:40,524 - WARNING - Nothing to draw before the end of warmup.
+[rank0]:2025-11-19 07:41:40,526 - INFO -  step: 100  loss: -4.0000  grad_norm: 552.3386  memory: 54.93GiB(39.29%)  tps: 6,206  tflops: 289.45  mfu: 29.27%
+[rank0]:2025-11-19 07:41:40,526 - WARNING - Nothing to draw before the end of warmup.
+[rank2]:2025-11-19 07:41:40,519 - INFO -  step: 100  loss: -4.0000  grad_norm: 552.3386  memory: 38.72GiB(27.69%)  tps: 6,206  tflops: 289.45  mfu: 29.27%
+[rank2]:2025-11-19 07:41:40,519 - WARNING - Nothing to draw before the end of warmup.
+[rank0]:2025-11-19 07:43:49,900 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:43:52,425 - INFO - Avg. fwd time: 14.7437 / Avg. bwd time: 42.3344 / Avg. batch time: 472.6212 (ms) / GPU bubble ratio: 3.38%
+[rank2]:2025-11-19 07:43:52,467 - INFO - Avg. fwd time: 13.2960 / Avg. bwd time: 36.4253 / Avg. batch time: 525.2329 (ms) / GPU bubble ratio: 24.27%
+[rank1]:2025-11-19 07:43:52,513 - INFO - Avg. fwd time: 14.9596 / Avg. bwd time: 41.0401 / Avg. batch time: 583.9795 (ms) / GPU bubble ratio: 23.29%
+[rank3]:2025-11-19 07:43:52,589 - INFO -  step: 150  loss:  2.0943  grad_norm: 21.2982  memory: 46.16GiB(33.01%)  tps: 6,203  tflops: 289.31  mfu: 29.25%
+[rank0]:2025-11-19 07:43:52,556 - INFO - Avg. fwd time: 13.1488 / Avg. bwd time: 37.8390 / Avg. batch time: 638.5385 (ms) / GPU bubble ratio: 36.12%
+[rank0]:2025-11-19 07:43:52,591 - INFO -  step: 150  loss: -4.0000  grad_norm: 21.2982  memory: 54.93GiB(39.29%)  tps: 6,203  tflops: 289.31  mfu: 29.25%
+[rank2]:2025-11-19 07:43:52,585 - INFO -  step: 150  loss: -4.0000  grad_norm: 21.2982  memory: 38.72GiB(27.69%)  tps: 6,203  tflops: 289.31  mfu: 29.25%
+[rank1]:2025-11-19 07:43:52,587 - INFO -  step: 150  loss: -4.0000  grad_norm: 21.2982  memory: 47.26GiB(33.80%)  tps: 6,203  tflops: 289.31  mfu: 29.25%
+[rank3]:2025-11-19 07:44:18,784 - INFO - [Step 160] 〰️ Monitoring Upperbound
+[rank3]:2025-11-19 07:44:45,118 - INFO - [Step 170] ✔️  Setting Upperbound
+[rank3]:2025-11-19 07:44:45,338 - INFO - [Step 170] 〰️ Monitoring Lowerbound
+[rank3]:2025-11-19 07:44:45,412 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,436 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,441 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,417 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,448 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,437 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,468 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,491 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,531 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,467 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,538 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,574 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,581 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,577 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,632 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,605 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,615 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,668 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,634 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,677 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,684 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:44:45,738 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,658 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,712 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,712 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,713 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank0]:2025-11-19 07:44:45,713 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,722 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank2]:2025-11-19 07:44:45,754 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,715 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,745 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank1]:2025-11-19 07:44:45,775 - WARNING - Batch index 681 is larger than freeze ratio history length 0. Filling with zeros.
+[rank3]:2025-11-19 07:45:01,449 - INFO - [Step 180] ✔️  Setting Lowerbound
+[rank3]:2025-11-19 07:45:01,653 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0745_max_batch_time.svg
+[rank3]:> Batch Time: 622.16 ms, GPU Bubble Ratio: 34.14%, 27.61%, 35.67%, 26.34%
+[rank3]:2025-11-19 07:45:01,792 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0745_min_batch_time.svg
+[rank3]:> Batch Time: 350.95 ms, GPU Bubble Ratio: 70.07%, 24.07%, 32.41%, 23.48%
+[rank3]:2025-11-19 07:45:01,950 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0745_frozen_pipeline_schedule.svg
+[rank3]:> Batch Time: 407.37 ms, GPU Bubble Ratio: 26.86%, 20.61%, 25.98%, 20.23%
+[rank3]:2025-11-19 07:45:01,950 - INFO - 	> Batch Time: 407.37 ms (Average Freeze Ratio: 0.59, Time Reduction Rate: 0.35)
+[rank0]:2025-11-19 07:45:43,053 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:45:45,247 - INFO - Avg. fwd time: 14.9695 / Avg. bwd time: 40.0756 / Avg. batch time: 456.8888 (ms) / GPU bubble ratio: 3.62%
+[rank2]:2025-11-19 07:45:45,265 - INFO - Avg. fwd time: 13.4953 / Avg. bwd time: 34.4962 / Avg. batch time: 507.8584 (ms) / GPU bubble ratio: 24.40%
+[rank1]:2025-11-19 07:45:45,308 - INFO - Avg. fwd time: 15.1971 / Avg. bwd time: 38.6863 / Avg. batch time: 564.0211 (ms) / GPU bubble ratio: 23.57%
+[rank0]:2025-11-19 07:45:45,338 - INFO - Avg. fwd time: 13.3454 / Avg. bwd time: 34.5567 / Avg. batch time: 615.7264 (ms) / GPU bubble ratio: 37.76%
+[rank0]:2025-11-19 07:45:45,491 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.01/0.03, [MB1] 0.01/0.02, [MB2] 0.15/0.46, [MB3] 0.15/0.46, [MB4] 0.00/0.00, [MB5] 0.15/0.44, [MB6] 0.18/0.53, [MB7] 0.33/1.00
+[rank0]:2025-11-19 07:45:45,492 - INFO -  step: 200  loss: -4.0000  grad_norm:  5.3901  memory: 65.50GiB(46.85%)  tps: 7,256  tflops: 338.42  mfu: 34.22%
+[rank3]:2025-11-19 07:45:45,478 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.00/0.00, [MB1] 0.33/1.00, [MB2] 0.33/1.00, [MB3] 0.00/0.00, [MB4] 0.20/0.60, [MB5] 0.33/1.00, [MB6] 0.33/1.00, [MB7] 0.33/1.00
+[rank3]:2025-11-19 07:45:45,480 - INFO -  step: 200  loss:  0.6111  grad_norm:  5.3901  memory: 55.63GiB(39.79%)  tps: 7,257  tflops: 338.45  mfu: 34.22%
+[rank2]:2025-11-19 07:45:45,467 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.27/0.82, [MB1] 0.27/0.80, [MB2] 0.00/0.00, [MB3] 0.11/0.34, [MB4] 0.27/0.81, [MB5] 0.27/0.81, [MB6] 0.09/0.26, [MB7] 0.33/1.00
+[rank2]:2025-11-19 07:45:45,467 - INFO -  step: 200  loss: -4.0000  grad_norm:  5.3901  memory: 45.36GiB(32.44%)  tps: 7,257  tflops: 338.47  mfu: 34.22%
+[rank1]:2025-11-19 07:45:45,479 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.33/0.98, [MB1] 0.09/0.28, [MB2] 0.09/0.27, [MB3] 0.33/1.00, [MB4] 0.33/1.00, [MB5] 0.00/0.00, [MB6] 0.33/1.00, [MB7] 0.33/1.00
+[rank1]:2025-11-19 07:45:45,479 - INFO -  step: 200  loss: -4.0000  grad_norm:  5.3901  memory: 55.15GiB(39.44%)  tps: 7,257  tflops: 338.45  mfu: 34.22%
+[rank0]:2025-11-19 07:45:45,550 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0745_stage0_step200.svg
+[rank2]:2025-11-19 07:45:45,550 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0745_stage2_step200.svg
+[rank1]:2025-11-19 07:45:45,550 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0745_stage1_step200.svg
+[rank3]:2025-11-19 07:45:45,622 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0745_real_step200_rank3.svg
+[rank3]:> Batch Time: 472.61 ms, GPU Bubble Ratio: 49.70%, 34.83%, 38.57%, 29.77%
+[rank3]:2025-11-19 07:45:45,664 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0745_stage3_step200.svg
+[rank0]:2025-11-19 07:47:35,397 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:47:37,334 - INFO - Avg. fwd time: 15.1135 / Avg. bwd time: 38.6662 / Avg. batch time: 446.8469 (ms) / GPU bubble ratio: 3.72%
+[rank1]:2025-11-19 07:47:37,386 - INFO - Avg. fwd time: 15.3862 / Avg. bwd time: 36.6595 / Avg. batch time: 549.5725 (ms) / GPU bubble ratio: 24.24%
+[rank2]:2025-11-19 07:47:37,365 - INFO - Avg. fwd time: 13.6562 / Avg. bwd time: 32.9662 / Avg. batch time: 495.8440 (ms) / GPU bubble ratio: 24.78%
+[rank0]:2025-11-19 07:47:37,423 - INFO - Avg. fwd time: 13.5082 / Avg. bwd time: 33.1407 / Avg. batch time: 599.7752 (ms) / GPU bubble ratio: 37.78%
+[rank2]:2025-11-19 07:47:37,525 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.54/0.82, [MB1] 0.54/0.80, [MB2] 0.00/0.00, [MB3] 0.23/0.34, [MB4] 0.54/0.81, [MB5] 0.54/0.81, [MB6] 0.17/0.26, [MB7] 0.67/1.00
+[rank2]:2025-11-19 07:47:37,525 - INFO -  step: 250  loss: -4.0000  grad_norm:  0.3171  memory: 45.36GiB(32.44%)  tps: 7,311  tflops: 340.96  mfu: 34.48%
+[rank3]:2025-11-19 07:47:37,531 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.00/0.00, [MB1] 0.67/1.00, [MB2] 0.67/1.00, [MB3] 0.00/0.00, [MB4] 0.40/0.60, [MB5] 0.67/1.00, [MB6] 0.67/1.00, [MB7] 0.67/1.00
+[rank3]:2025-11-19 07:47:37,533 - INFO -  step: 250  loss:  0.2478  grad_norm:  0.3171  memory: 55.73GiB(39.86%)  tps: 7,311  tflops: 340.98  mfu: 34.48%
+[rank0]:2025-11-19 07:47:37,561 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.02/0.03, [MB1] 0.01/0.02, [MB2] 0.31/0.46, [MB3] 0.30/0.46, [MB4] 0.00/0.00, [MB5] 0.29/0.44, [MB6] 0.35/0.53, [MB7] 0.67/1.00
+[rank0]:2025-11-19 07:47:37,562 - INFO -  step: 250  loss: -4.0000  grad_norm:  0.3171  memory: 65.50GiB(46.85%)  tps: 7,310  tflops: 340.93  mfu: 34.47%
+[rank1]:2025-11-19 07:47:37,545 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.65/0.98, [MB1] 0.19/0.28, [MB2] 0.18/0.27, [MB3] 0.67/1.00, [MB4] 0.67/1.00, [MB5] 0.00/0.00, [MB6] 0.67/1.00, [MB7] 0.67/1.00
+[rank1]:2025-11-19 07:47:37,545 - INFO -  step: 250  loss: -4.0000  grad_norm:  0.3171  memory: 55.70GiB(39.84%)  tps: 7,310  tflops: 340.94  mfu: 34.47%
+[rank0]:2025-11-19 07:49:17,088 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 07:49:19,007 - INFO - Avg. fwd time: 13.8503 / Avg. bwd time: 31.2303 / Avg. batch time: 480.2413 (ms) / GPU bubble ratio: 24.90%
+[rank0]:2025-11-19 07:49:19,058 - INFO - Avg. fwd time: 13.6969 / Avg. bwd time: 31.4815 / Avg. batch time: 579.6421 (ms) / GPU bubble ratio: 37.65%
+[rank3]:2025-11-19 07:49:18,983 - INFO - Avg. fwd time: 15.3224 / Avg. bwd time: 36.6336 / Avg. batch time: 433.4364 (ms) / GPU bubble ratio: 4.10%
+[rank1]:2025-11-19 07:49:19,031 - INFO - Avg. fwd time: 15.6157 / Avg. bwd time: 34.3904 / Avg. batch time: 531.2439 (ms) / GPU bubble ratio: 24.70%
+[rank1]:2025-11-19 07:49:19,102 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.98/0.98, [MB1] 0.28/0.28, [MB2] 0.27/0.27, [MB3] 1.00/1.00, [MB4] 1.00/1.00, [MB5] 0.00/0.00, [MB6] 1.00/1.00, [MB7] 1.00/1.00
+[rank1]:2025-11-19 07:49:19,102 - INFO -  step: 300  loss: -4.0000  grad_norm:  0.1886  memory: 55.70GiB(39.84%)  tps: 8,066  tflops: 376.22  mfu: 38.04%
+[rank2]:2025-11-19 07:49:19,094 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.82/0.82, [MB1] 0.80/0.80, [MB2] 0.00/0.00, [MB3] 0.34/0.34, [MB4] 0.81/0.81, [MB5] 0.81/0.81, [MB6] 0.26/0.26, [MB7] 1.00/1.00
+[rank2]:2025-11-19 07:49:19,094 - INFO -  step: 300  loss: -4.0000  grad_norm:  0.1886  memory: 45.36GiB(32.44%)  tps: 8,065  tflops: 376.18  mfu: 38.04%
+[rank0]:2025-11-19 07:49:19,131 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.03/0.03, [MB1] 0.02/0.02, [MB2] 0.46/0.46, [MB3] 0.46/0.46, [MB4] 0.00/0.00, [MB5] 0.44/0.44, [MB6] 0.53/0.53, [MB7] 1.00/1.00
+[rank0]:2025-11-19 07:49:19,132 - INFO -  step: 300  loss: -4.0000  grad_norm:  0.1886  memory: 65.85GiB(47.10%)  tps: 8,065  tflops: 376.17  mfu: 38.04%
+[rank3]:2025-11-19 07:49:19,101 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.00/0.00, [MB1] 1.00/1.00, [MB2] 1.00/1.00, [MB3] 0.00/0.00, [MB4] 0.60/0.60, [MB5] 1.00/1.00, [MB6] 1.00/1.00, [MB7] 1.00/1.00
+[rank3]:2025-11-19 07:49:19,103 - INFO -  step: 300  loss:  0.2818  grad_norm:  0.1886  memory: 55.73GiB(39.86%)  tps: 8,066  tflops: 376.18  mfu: 38.04%
+[rank1]:2025-11-19 07:49:19,179 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0749_stage1_step300.svg
+[rank2]:2025-11-19 07:49:19,180 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0749_stage2_step300.svg
+[rank0]:2025-11-19 07:49:19,179 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0749_stage0_step300.svg
+[rank3]:2025-11-19 07:49:19,266 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0749_real_step300_rank3.svg
+[rank3]:> Batch Time: 466.53 ms, GPU Bubble Ratio: 36.20%, 33.96%, 38.00%, 28.13%
+[rank3]:2025-11-19 07:49:19,306 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0749_stage3_step300.svg
+[rank0]:2025-11-19 07:50:54,521 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:50:56,317 - INFO - Avg. fwd time: 15.4945 / Avg. bwd time: 35.0294 / Avg. batch time: 423.2616 (ms) / GPU bubble ratio: 4.51%
+[rank1]:2025-11-19 07:50:56,358 - INFO - Avg. fwd time: 15.7961 / Avg. bwd time: 32.6872 / Avg. batch time: 517.5510 (ms) / GPU bubble ratio: 25.06%
+[rank2]:2025-11-19 07:50:56,336 - INFO - Avg. fwd time: 14.0091 / Avg. bwd time: 29.8821 / Avg. batch time: 468.5216 (ms) / GPU bubble ratio: 25.06%
+[rank0]:2025-11-19 07:50:56,397 - INFO - Avg. fwd time: 13.8460 / Avg. bwd time: 29.1565 / Avg. batch time: 564.3971 (ms) / GPU bubble ratio: 39.05%
+[rank1]:2025-11-19 07:50:56,499 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.98/0.98, [MB1] 0.28/0.28, [MB2] 0.27/0.27, [MB3] 1.00/1.00, [MB4] 1.00/1.00, [MB5] 0.00/0.00, [MB6] 1.00/1.00, [MB7] 1.00/1.00
+[rank1]:2025-11-19 07:50:56,499 - INFO -  step: 350  loss: -4.0000  grad_norm:  0.2239  memory: 55.70GiB(39.84%)  tps: 8,411  tflops: 392.29  mfu: 39.67%
+[rank2]:2025-11-19 07:50:56,480 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.82/0.82, [MB1] 0.80/0.80, [MB2] 0.00/0.00, [MB3] 0.34/0.34, [MB4] 0.81/0.81, [MB5] 0.81/0.81, [MB6] 0.26/0.26, [MB7] 1.00/1.00
+[rank2]:2025-11-19 07:50:56,481 - INFO -  step: 350  loss: -4.0000  grad_norm:  0.2239  memory: 45.36GiB(32.44%)  tps: 8,412  tflops: 392.33  mfu: 39.67%
+[rank3]:2025-11-19 07:50:56,492 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.00/0.00, [MB1] 1.00/1.00, [MB2] 1.00/1.00, [MB3] 0.00/0.00, [MB4] 0.60/0.60, [MB5] 1.00/1.00, [MB6] 1.00/1.00, [MB7] 1.00/1.00
+[rank3]:2025-11-19 07:50:56,494 - INFO -  step: 350  loss:  0.3321  grad_norm:  0.2239  memory: 55.73GiB(39.86%)  tps: 8,412  tflops: 392.32  mfu: 39.67%
+[rank0]:2025-11-19 07:50:56,523 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.03/0.03, [MB1] 0.02/0.02, [MB2] 0.46/0.46, [MB3] 0.46/0.46, [MB4] 0.00/0.00, [MB5] 0.44/0.44, [MB6] 0.53/0.53, [MB7] 1.00/1.00
+[rank0]:2025-11-19 07:50:56,523 - INFO -  step: 350  loss: -4.0000  grad_norm:  0.2239  memory: 65.85GiB(47.10%)  tps: 8,411  tflops: 392.31  mfu: 39.67%
+[rank0]:2025-11-19 07:52:31,954 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 07:52:33,776 - INFO - Avg. fwd time: 14.1427 / Avg. bwd time: 28.7223 / Avg. batch time: 458.1784 (ms) / GPU bubble ratio: 25.16%
+[rank0]:2025-11-19 07:52:33,839 - INFO - Avg. fwd time: 13.9728 / Avg. bwd time: 27.1345 / Avg. batch time: 551.0375 (ms) / GPU bubble ratio: 40.32%
+[rank3]:2025-11-19 07:52:33,757 - INFO - Avg. fwd time: 15.6450 / Avg. bwd time: 33.6194 / Avg. batch time: 414.2886 (ms) / GPU bubble ratio: 4.87%
+[rank1]:2025-11-19 07:52:33,799 - INFO - Avg. fwd time: 15.9538 / Avg. bwd time: 31.1965 / Avg. batch time: 505.4664 (ms) / GPU bubble ratio: 25.38%
+[rank3]:2025-11-19 07:52:33,918 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.00/0.00, [MB1] 1.00/1.00, [MB2] 1.00/1.00, [MB3] 0.00/0.00, [MB4] 0.60/0.60, [MB5] 1.00/1.00, [MB6] 1.00/1.00, [MB7] 1.00/1.00
+[rank3]:2025-11-19 07:52:33,921 - INFO -  step: 400  loss:  0.2801  grad_norm:  0.1649  memory: 55.73GiB(39.86%)  tps: 8,409  tflops: 392.17  mfu: 39.65%
+[rank1]:2025-11-19 07:52:33,945 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.98/0.98, [MB1] 0.28/0.28, [MB2] 0.27/0.27, [MB3] 1.00/1.00, [MB4] 1.00/1.00, [MB5] 0.00/0.00, [MB6] 1.00/1.00, [MB7] 1.00/1.00
+[rank1]:2025-11-19 07:52:33,946 - INFO -  step: 400  loss: -4.0000  grad_norm:  0.1649  memory: 55.70GiB(39.84%)  tps: 8,407  tflops: 392.09  mfu: 39.64%
+[rank2]:2025-11-19 07:52:33,927 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.82/0.82, [MB1] 0.80/0.80, [MB2] 0.00/0.00, [MB3] 0.34/0.34, [MB4] 0.81/0.81, [MB5] 0.81/0.81, [MB6] 0.26/0.26, [MB7] 1.00/1.00
+[rank2]:2025-11-19 07:52:33,928 - INFO -  step: 400  loss: -4.0000  grad_norm:  0.1649  memory: 45.36GiB(32.44%)  tps: 8,407  tflops: 392.09  mfu: 39.64%
+[rank0]:2025-11-19 07:52:33,967 - INFO - Current/Expected Freeze Ratio per Block: [MB0] 0.03/0.03, [MB1] 0.02/0.02, [MB2] 0.46/0.46, [MB3] 0.46/0.46, [MB4] 0.00/0.00, [MB5] 0.44/0.44, [MB6] 0.53/0.53, [MB7] 1.00/1.00
+[rank0]:2025-11-19 07:52:33,968 - INFO -  step: 400  loss: -4.0000  grad_norm:  0.1649  memory: 65.85GiB(47.10%)  tps: 8,407  tflops: 392.10  mfu: 39.65%
+[rank0]:2025-11-19 07:52:34,019 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0752_stage0_step400.svg
+[rank1]:2025-11-19 07:52:34,016 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0752_stage1_step400.svg
+[rank2]:2025-11-19 07:52:34,018 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0752_stage2_step400.svg
+[rank3]:2025-11-19 07:52:34,100 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0752_real_step400_rank3.svg
+[rank3]:> Batch Time: 463.25 ms, GPU Bubble Ratio: 50.06%, 33.74%, 37.87%, 30.19%
+[rank3]:2025-11-19 07:52:34,144 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0752_stage3_step400.svg
+[rank0]:2025-11-19 07:54:09,282 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 07:54:11,174 - INFO - Avg. fwd time: 14.2490 / Avg. bwd time: 27.8024 / Avg. batch time: 450.1659 (ms) / GPU bubble ratio: 25.27%
+[rank0]:2025-11-19 07:54:11,226 - INFO - Avg. fwd time: 14.0687 / Avg. bwd time: 25.5959 / Avg. batch time: 540.7802 (ms) / GPU bubble ratio: 41.32%
+[rank3]:2025-11-19 07:54:11,149 - INFO - Avg. fwd time: 15.7613 / Avg. bwd time: 32.5205 / Avg. batch time: 407.3809 (ms) / GPU bubble ratio: 5.19%
+[rank1]:2025-11-19 07:54:11,199 - INFO - Avg. fwd time: 16.0778 / Avg. bwd time: 30.0456 / Avg. batch time: 496.1243 (ms) / GPU bubble ratio: 25.63%
+[rank2]:2025-11-19 07:54:11,257 - INFO -  step: 450  loss: -4.0000  grad_norm:  0.2544  memory: 45.36GiB(32.44%)  tps: 8,417  tflops: 392.56  mfu: 39.69%
+[rank0]:2025-11-19 07:54:11,298 - INFO -  step: 450  loss: -4.0000  grad_norm:  0.2544  memory: 65.85GiB(47.10%)  tps: 8,417  tflops: 392.56  mfu: 39.69%
+[rank3]:2025-11-19 07:54:11,256 - INFO -  step: 450  loss:  0.2968  grad_norm:  0.2544  memory: 55.73GiB(39.86%)  tps: 8,416  tflops: 392.54  mfu: 39.69%
+[rank1]:2025-11-19 07:54:11,276 - INFO -  step: 450  loss: -4.0000  grad_norm:  0.2544  memory: 55.70GiB(39.84%)  tps: 8,417  tflops: 392.56  mfu: 39.69%
+[rank0]:2025-11-19 07:55:46,530 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:55:48,315 - INFO - Avg. fwd time: 15.8426 / Avg. bwd time: 31.7366 / Avg. batch time: 402.5229 (ms) / GPU bubble ratio: 5.44%
+[rank2]:2025-11-19 07:55:48,333 - INFO - Avg. fwd time: 14.3207 / Avg. bwd time: 27.1715 / Avg. batch time: 444.5867 (ms) / GPU bubble ratio: 25.34%
+[rank0]:2025-11-19 07:55:48,393 - INFO - Avg. fwd time: 14.1312 / Avg. bwd time: 24.5493 / Avg. batch time: 533.6854 (ms) / GPU bubble ratio: 42.02%
+[rank1]:2025-11-19 07:55:48,356 - INFO - Avg. fwd time: 16.1633 / Avg. bwd time: 29.2510 / Avg. batch time: 489.6277 (ms) / GPU bubble ratio: 25.80%
+[rank3]:2025-11-19 07:55:48,478 - INFO -  step: 500  loss:  0.3086  grad_norm:  0.1455  memory: 55.73GiB(39.86%)  tps: 8,426  tflops: 393.00  mfu: 39.74%
+[rank1]:2025-11-19 07:55:48,499 - INFO -  step: 500  loss: -4.0000  grad_norm:  0.1455  memory: 55.70GiB(39.84%)  tps: 8,426  tflops: 392.99  mfu: 39.74%
+[rank2]:2025-11-19 07:55:48,479 - INFO -  step: 500  loss: -4.0000  grad_norm:  0.1455  memory: 45.36GiB(32.44%)  tps: 8,426  tflops: 393.00  mfu: 39.74%
+[rank2]:2025-11-19 07:55:48,568 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0755_stage2_step500.svg
+[rank0]:2025-11-19 07:55:48,524 - INFO -  step: 500  loss: -4.0000  grad_norm:  0.1455  memory: 65.85GiB(47.10%)  tps: 8,426  tflops: 392.98  mfu: 39.74%
+[rank0]:2025-11-19 07:55:48,568 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0755_stage0_step500.svg
+[rank1]:2025-11-19 07:55:48,570 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0755_stage1_step500.svg
+[rank3]:2025-11-19 07:55:48,651 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0755_real_step500_rank3.svg
+[rank3]:> Batch Time: 460.69 ms, GPU Bubble Ratio: 50.02%, 33.42%, 37.57%, 29.78%
+[rank3]:2025-11-19 07:55:48,689 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0755_stage3_step500.svg
+[rank0]:2025-11-19 07:57:23,603 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 07:57:25,383 - INFO - Avg. fwd time: 15.9180 / Avg. bwd time: 30.9979 / Avg. batch time: 397.8578 (ms) / GPU bubble ratio: 5.66%
+[rank1]:2025-11-19 07:57:25,426 - INFO - Avg. fwd time: 16.2442 / Avg. bwd time: 28.4811 / Avg. batch time: 483.4066 (ms) / GPU bubble ratio: 25.98%
+[rank2]:2025-11-19 07:57:25,402 - INFO - Avg. fwd time: 14.3889 / Avg. bwd time: 26.5760 / Avg. batch time: 439.2501 (ms) / GPU bubble ratio: 25.39%
+[rank0]:2025-11-19 07:57:25,464 - INFO - Avg. fwd time: 14.1911 / Avg. bwd time: 23.5511 / Avg. batch time: 526.8657 (ms) / GPU bubble ratio: 42.69%
+[rank2]:2025-11-19 07:57:25,553 - INFO -  step: 550  loss: -4.0000  grad_norm:  0.1637  memory: 45.36GiB(32.44%)  tps: 8,439  tflops: 393.60  mfu: 39.80%
+[rank0]:2025-11-19 07:57:25,594 - INFO -  step: 550  loss: -4.0000  grad_norm:  0.1637  memory: 65.85GiB(47.10%)  tps: 8,439  tflops: 393.61  mfu: 39.80%
+[rank3]:2025-11-19 07:57:25,549 - INFO -  step: 550  loss:  0.1751  grad_norm:  0.1637  memory: 56.31GiB(40.28%)  tps: 8,439  tflops: 393.61  mfu: 39.80%
+[rank1]:2025-11-19 07:57:25,569 - INFO -  step: 550  loss: -4.0000  grad_norm:  0.1637  memory: 55.70GiB(39.84%)  tps: 8,439  tflops: 393.61  mfu: 39.80%
+[rank0]:2025-11-19 07:59:02,068 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 07:59:04,029 - INFO - Avg. fwd time: 14.4536 / Avg. bwd time: 26.1027 / Avg. batch time: 435.1642 (ms) / GPU bubble ratio: 25.44%
+[rank3]:2025-11-19 07:59:04,001 - INFO - Avg. fwd time: 15.9923 / Avg. bwd time: 30.4263 / Avg. batch time: 394.3292 (ms) / GPU bubble ratio: 5.83%
+[rank1]:2025-11-19 07:59:04,054 - INFO - Avg. fwd time: 16.3232 / Avg. bwd time: 27.8620 / Avg. batch time: 478.6089 (ms) / GPU bubble ratio: 26.14%
+[rank2]:2025-11-19 07:59:04,117 - INFO -  step: 600  loss: -4.0000  grad_norm:  0.2332  memory: 45.36GiB(32.44%)  tps: 8,311  tflops: 387.64  mfu: 39.20%
+[rank3]:2025-11-19 07:59:04,126 - INFO -  step: 600  loss:  0.3986  grad_norm:  0.2332  memory: 56.31GiB(40.28%)  tps: 8,310  tflops: 387.60  mfu: 39.19%
+[rank0]:2025-11-19 07:59:04,083 - INFO - Avg. fwd time: 14.2479 / Avg. bwd time: 22.7594 / Avg. batch time: 521.6963 (ms) / GPU bubble ratio: 43.25%
+[rank0]:2025-11-19 07:59:04,156 - INFO -  step: 600  loss: -4.0000  grad_norm:  0.2332  memory: 65.85GiB(47.10%)  tps: 8,312  tflops: 387.65  mfu: 39.20%
+[rank1]:2025-11-19 07:59:04,130 - INFO -  step: 600  loss: -4.0000  grad_norm:  0.2332  memory: 55.89GiB(39.98%)  tps: 8,312  tflops: 387.66  mfu: 39.20%
+[rank1]:2025-11-19 07:59:04,202 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0759_stage1_step600.svg
+[rank2]:2025-11-19 07:59:04,204 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0759_stage2_step600.svg
+[rank0]:2025-11-19 07:59:04,203 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0759_stage0_step600.svg
+[rank3]:2025-11-19 07:59:04,289 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0759_real_step600_rank3.svg
+[rank3]:> Batch Time: 471.30 ms, GPU Bubble Ratio: 49.50%, 33.92%, 37.13%, 28.87%
+[rank3]:2025-11-19 07:59:04,331 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0759_stage3_step600.svg
+[rank0]:2025-11-19 08:00:41,782 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:00:43,618 - INFO - Avg. fwd time: 14.5103 / Avg. bwd time: 25.7502 / Avg. batch time: 432.4221 (ms) / GPU bubble ratio: 25.52%
+[rank3]:2025-11-19 08:00:43,599 - INFO - Avg. fwd time: 16.0571 / Avg. bwd time: 30.0392 / Avg. batch time: 391.9579 (ms) / GPU bubble ratio: 5.92%
+[rank1]:2025-11-19 08:00:43,641 - INFO - Avg. fwd time: 16.3911 / Avg. bwd time: 27.4200 / Avg. batch time: 475.3635 (ms) / GPU bubble ratio: 26.27%
+[rank0]:2025-11-19 08:00:43,677 - INFO - Avg. fwd time: 14.2971 / Avg. bwd time: 22.1914 / Avg. batch time: 518.1980 (ms) / GPU bubble ratio: 43.67%
+[rank1]:2025-11-19 08:00:43,783 - INFO -  step: 650  loss: -4.0000  grad_norm:  0.1910  memory: 56.07GiB(40.10%)  tps: 8,221  tflops: 383.41  mfu: 38.77%
+[rank2]:2025-11-19 08:00:43,772 - INFO -  step: 650  loss: -4.0000  grad_norm:  0.1910  memory: 45.36GiB(32.44%)  tps: 8,220  tflops: 383.40  mfu: 38.77%
+[rank0]:2025-11-19 08:00:43,813 - INFO -  step: 650  loss: -4.0000  grad_norm:  0.1910  memory: 65.85GiB(47.10%)  tps: 8,220  tflops: 383.39  mfu: 38.77%
+[rank3]:2025-11-19 08:00:43,780 - INFO -  step: 650  loss:  0.2740  grad_norm:  0.1910  memory: 56.31GiB(40.28%)  tps: 8,221  tflops: 383.41  mfu: 38.77%
+[rank0]:2025-11-19 08:02:20,751 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:02:22,604 - INFO - Avg. fwd time: 14.5646 / Avg. bwd time: 25.4007 / Avg. batch time: 429.5062 (ms) / GPU bubble ratio: 25.56%
+[rank3]:2025-11-19 08:02:22,585 - INFO - Avg. fwd time: 16.1226 / Avg. bwd time: 29.6123 / Avg. batch time: 389.4899 (ms) / GPU bubble ratio: 6.06%
+[rank1]:2025-11-19 08:02:22,627 - INFO - Avg. fwd time: 16.4577 / Avg. bwd time: 26.9707 / Avg. batch time: 471.9408 (ms) / GPU bubble ratio: 26.38%
+[rank0]:2025-11-19 08:02:22,664 - INFO - Avg. fwd time: 14.3440 / Avg. bwd time: 21.5898 / Avg. batch time: 514.4230 (ms) / GPU bubble ratio: 44.12%
+[rank3]:2025-11-19 08:02:22,760 - INFO -  step: 700  loss:  0.3568  grad_norm:  0.2342  memory: 56.71GiB(40.56%)  tps: 8,276  tflops: 386.02  mfu: 39.03%
+[rank1]:2025-11-19 08:02:22,770 - INFO -  step: 700  loss: -4.0000  grad_norm:  0.2342  memory: 56.07GiB(40.10%)  tps: 8,276  tflops: 385.99  mfu: 39.03%
+[rank2]:2025-11-19 08:02:22,752 - INFO -  step: 700  loss: -4.0000  grad_norm:  0.2342  memory: 45.36GiB(32.44%)  tps: 8,276  tflops: 386.01  mfu: 39.03%
+[rank0]:2025-11-19 08:02:22,793 - INFO -  step: 700  loss: -4.0000  grad_norm:  0.2342  memory: 65.85GiB(47.10%)  tps: 8,276  tflops: 386.01  mfu: 39.03%
+[rank0]:2025-11-19 08:02:22,841 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0802_stage0_step700.svg
+[rank1]:2025-11-19 08:02:22,842 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0802_stage1_step700.svg
+[rank2]:2025-11-19 08:02:22,841 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0802_stage2_step700.svg
+[rank3]:2025-11-19 08:02:22,927 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0802_real_step700_rank3.svg
+[rank3]:> Batch Time: 468.27 ms, GPU Bubble Ratio: 49.95%, 33.64%, 37.80%, 28.73%
+[rank3]:2025-11-19 08:02:22,969 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0802_stage3_step700.svg
+[rank0]:2025-11-19 08:03:59,823 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:04:01,709 - INFO - Avg. fwd time: 16.1740 / Avg. bwd time: 29.2588 / Avg. batch time: 387.3150 (ms) / GPU bubble ratio: 6.16%
+[rank1]:2025-11-19 08:04:01,760 - INFO - Avg. fwd time: 16.5114 / Avg. bwd time: 26.5865 / Avg. batch time: 469.0087 (ms) / GPU bubble ratio: 26.49%
+[rank2]:2025-11-19 08:04:01,735 - INFO - Avg. fwd time: 14.6087 / Avg. bwd time: 25.1062 / Avg. batch time: 427.0136 (ms) / GPU bubble ratio: 25.60%
+[rank0]:2025-11-19 08:04:01,789 - INFO - Avg. fwd time: 14.3836 / Avg. bwd time: 21.0902 / Avg. batch time: 511.2758 (ms) / GPU bubble ratio: 44.49%
+[rank3]:2025-11-19 08:04:01,828 - INFO -  step: 750  loss:  0.1487  grad_norm:  0.1767  memory: 56.71GiB(40.56%)  tps: 8,269  tflops: 385.68  mfu: 39.00%
+[rank1]:2025-11-19 08:04:01,837 - INFO -  step: 750  loss: -4.0000  grad_norm:  0.1767  memory: 56.07GiB(40.10%)  tps: 8,269  tflops: 385.68  mfu: 39.00%
+[rank2]:2025-11-19 08:04:01,818 - INFO -  step: 750  loss: -4.0000  grad_norm:  0.1767  memory: 45.36GiB(32.44%)  tps: 8,269  tflops: 385.68  mfu: 39.00%
+[rank0]:2025-11-19 08:04:01,863 - INFO -  step: 750  loss: -4.0000  grad_norm:  0.1767  memory: 65.85GiB(47.10%)  tps: 8,269  tflops: 385.66  mfu: 39.00%
+[rank0]:2025-11-19 08:05:37,693 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:05:39,545 - INFO - Avg. fwd time: 14.6342 / Avg. bwd time: 24.8789 / Avg. batch time: 424.9762 (ms) / GPU bubble ratio: 25.62%
+[rank3]:2025-11-19 08:05:39,526 - INFO - Avg. fwd time: 16.2016 / Avg. bwd time: 28.9930 / Avg. batch time: 385.5630 (ms) / GPU bubble ratio: 6.23%
+[rank0]:2025-11-19 08:05:39,606 - INFO - Avg. fwd time: 14.4058 / Avg. bwd time: 20.7106 / Avg. batch time: 508.7049 (ms) / GPU bubble ratio: 44.78%
+[rank1]:2025-11-19 08:05:39,568 - INFO - Avg. fwd time: 16.5433 / Avg. bwd time: 26.2900 / Avg. batch time: 466.6277 (ms) / GPU bubble ratio: 26.57%
+[rank2]:2025-11-19 08:05:39,701 - INFO -  step: 800  loss: -4.0000  grad_norm:  0.1669  memory: 45.36GiB(32.44%)  tps: 8,369  tflops: 390.34  mfu: 39.47%
+[rank3]:2025-11-19 08:05:39,693 - INFO -  step: 800  loss:  0.2663  grad_norm:  0.1669  memory: 56.71GiB(40.56%)  tps: 8,371  tflops: 390.42  mfu: 39.48%
+[rank1]:2025-11-19 08:05:39,714 - INFO -  step: 800  loss: -4.0000  grad_norm:  0.1669  memory: 56.07GiB(40.10%)  tps: 8,370  tflops: 390.37  mfu: 39.47%
+[rank2]:2025-11-19 08:05:39,786 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0805_stage2_step800.svg
+[rank0]:2025-11-19 08:05:39,738 - INFO -  step: 800  loss: -4.0000  grad_norm:  0.1669  memory: 65.85GiB(47.10%)  tps: 8,370  tflops: 390.37  mfu: 39.47%
+[rank0]:2025-11-19 08:05:39,787 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0805_stage0_step800.svg
+[rank1]:2025-11-19 08:05:39,787 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0805_stage1_step800.svg
+[rank3]:2025-11-19 08:05:39,864 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0805_real_step800_rank3.svg
+[rank3]:> Batch Time: 465.69 ms, GPU Bubble Ratio: 49.72%, 33.67%, 38.29%, 29.74%
+[rank3]:2025-11-19 08:05:39,907 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0805_stage3_step800.svg
+[rank0]:2025-11-19 08:07:16,301 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:07:18,100 - INFO - Avg. fwd time: 16.2368 / Avg. bwd time: 28.7155 / Avg. batch time: 383.8145 (ms) / GPU bubble ratio: 6.30%
+[rank1]:2025-11-19 08:07:18,142 - INFO - Avg. fwd time: 16.5838 / Avg. bwd time: 25.9878 / Avg. batch time: 464.3050 (ms) / GPU bubble ratio: 26.65%
+[rank2]:2025-11-19 08:07:18,120 - INFO - Avg. fwd time: 14.6659 / Avg. bwd time: 24.6444 / Avg. batch time: 422.9986 (ms) / GPU bubble ratio: 25.65%
+[rank0]:2025-11-19 08:07:18,178 - INFO - Avg. fwd time: 14.4352 / Avg. bwd time: 20.3337 / Avg. batch time: 506.2427 (ms) / GPU bubble ratio: 45.06%
+[rank2]:2025-11-19 08:07:18,271 - INFO -  step: 850  loss: -4.0000  grad_norm:  0.1084  memory: 45.36GiB(32.44%)  tps: 8,311  tflops: 387.62  mfu: 39.19%
+[rank3]:2025-11-19 08:07:18,280 - INFO -  step: 850  loss:  0.1273  grad_norm:  0.1084  memory: 56.71GiB(40.56%)  tps: 8,310  tflops: 387.56  mfu: 39.19%
+[rank1]:2025-11-19 08:07:18,283 - INFO -  step: 850  loss: -4.0000  grad_norm:  0.1084  memory: 56.07GiB(40.10%)  tps: 8,311  tflops: 387.62  mfu: 39.19%
+[rank0]:2025-11-19 08:07:18,310 - INFO -  step: 850  loss: -4.0000  grad_norm:  0.1084  memory: 65.85GiB(47.10%)  tps: 8,311  tflops: 387.61  mfu: 39.19%
+[rank0]:2025-11-19 08:08:53,362 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:08:55,243 - INFO - Avg. fwd time: 16.2538 / Avg. bwd time: 28.4462 / Avg. batch time: 382.0282 (ms) / GPU bubble ratio: 6.39%
+[rank1]:2025-11-19 08:08:55,295 - INFO - Avg. fwd time: 16.6124 / Avg. bwd time: 25.7170 / Avg. batch time: 461.9374 (ms) / GPU bubble ratio: 26.69%
+[rank2]:2025-11-19 08:08:55,269 - INFO - Avg. fwd time: 14.6839 / Avg. bwd time: 24.4182 / Avg. batch time: 420.9442 (ms) / GPU bubble ratio: 25.69%
+[rank2]:2025-11-19 08:08:55,353 - INFO -  step: 900  loss: -4.0000  grad_norm:  0.1463  memory: 45.36GiB(32.44%)  tps: 8,438  tflops: 393.56  mfu: 39.79%
+[rank0]:2025-11-19 08:08:55,323 - INFO - Avg. fwd time: 14.4555 / Avg. bwd time: 20.0091 / Avg. batch time: 503.8277 (ms) / GPU bubble ratio: 45.28%
+[rank3]:2025-11-19 08:08:55,355 - INFO -  step: 900  loss:  0.1924  grad_norm:  0.1463  memory: 56.71GiB(40.56%)  tps: 8,439  tflops: 393.59  mfu: 39.80%
+[rank1]:2025-11-19 08:08:55,371 - INFO -  step: 900  loss: -4.0000  grad_norm:  0.1463  memory: 56.07GiB(40.10%)  tps: 8,438  tflops: 393.54  mfu: 39.79%
+[rank2]:2025-11-19 08:08:55,442 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0808_stage2_step900.svg
+[rank0]:2025-11-19 08:08:55,397 - INFO -  step: 900  loss: -4.0000  grad_norm:  0.1463  memory: 65.85GiB(47.10%)  tps: 8,438  tflops: 393.54  mfu: 39.79%
+[rank0]:2025-11-19 08:08:55,440 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0808_stage0_step900.svg
+[rank1]:2025-11-19 08:08:55,440 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0808_stage1_step900.svg
+[rank3]:2025-11-19 08:08:55,529 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0808_real_step900_rank3.svg
+[rank3]:> Batch Time: 463.55 ms, GPU Bubble Ratio: 48.68%, 33.35%, 38.38%, 29.87%
+[rank3]:2025-11-19 08:08:55,568 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0808_stage3_step900.svg
+[rank0]:2025-11-19 08:10:31,410 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:10:33,236 - INFO - Avg. fwd time: 16.2736 / Avg. bwd time: 28.2437 / Avg. batch time: 380.7304 (ms) / GPU bubble ratio: 6.46%
+[rank1]:2025-11-19 08:10:33,277 - INFO - Avg. fwd time: 16.6397 / Avg. bwd time: 25.5077 / Avg. batch time: 460.2173 (ms) / GPU bubble ratio: 26.73%
+[rank2]:2025-11-19 08:10:33,255 - INFO - Avg. fwd time: 14.7012 / Avg. bwd time: 24.2557 / Avg. batch time: 419.4594 (ms) / GPU bubble ratio: 25.70%
+[rank0]:2025-11-19 08:10:33,315 - INFO - Avg. fwd time: 14.4746 / Avg. bwd time: 19.7606 / Avg. batch time: 502.0678 (ms) / GPU bubble ratio: 45.45%
+[rank2]:2025-11-19 08:10:33,409 - INFO -  step: 950  loss: -4.0000  grad_norm:  0.1396  memory: 45.36GiB(32.44%)  tps: 8,354  tflops: 389.65  mfu: 39.40%
+[rank0]:2025-11-19 08:10:33,449 - INFO -  step: 950  loss: -4.0000  grad_norm:  0.1396  memory: 65.85GiB(47.10%)  tps: 8,355  tflops: 389.67  mfu: 39.40%
+[rank3]:2025-11-19 08:10:33,421 - INFO -  step: 950  loss:  0.2409  grad_norm:  0.1396  memory: 56.71GiB(40.56%)  tps: 8,354  tflops: 389.62  mfu: 39.39%
+[rank1]:2025-11-19 08:10:33,423 - INFO -  step: 950  loss: -4.0000  grad_norm:  0.1396  memory: 56.07GiB(40.10%)  tps: 8,355  tflops: 389.66  mfu: 39.40%
+[rank0]:2025-11-19 08:12:09,822 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:12:11,622 - INFO - Avg. fwd time: 16.2992 / Avg. bwd time: 28.0405 / Avg. batch time: 379.4483 (ms) / GPU bubble ratio: 6.52%
+[rank1]:2025-11-19 08:12:11,664 - INFO - Avg. fwd time: 16.6708 / Avg. bwd time: 25.2895 / Avg. batch time: 458.4970 (ms) / GPU bubble ratio: 26.79%
+[rank2]:2025-11-19 08:12:11,641 - INFO - Avg. fwd time: 14.7227 / Avg. bwd time: 24.0793 / Avg. batch time: 417.9834 (ms) / GPU bubble ratio: 25.73%
+[rank0]:2025-11-19 08:12:11,701 - INFO - Avg. fwd time: 14.4966 / Avg. bwd time: 19.5018 / Avg. batch time: 500.2988 (ms) / GPU bubble ratio: 45.64%
+[rank2]:2025-11-19 08:12:11,795 - INFO -  step: 1000  loss: -4.0000  grad_norm:  0.0945  memory: 45.36GiB(32.44%)  tps: 8,326  tflops: 388.35  mfu: 39.27%
+[rank2]:2025-11-19 08:12:11,795 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2025-11-19 08:12:11,832 - INFO -  step: 1000  loss: -4.0000  grad_norm:  0.0945  memory: 65.85GiB(47.10%)  tps: 8,327  tflops: 388.36  mfu: 39.27%
+[rank0]:2025-11-19 08:12:11,832 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2025-11-19 08:12:11,832 - INFO - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank3]:2025-11-19 08:12:11,789 - INFO -  step: 1000  loss:  0.1659  grad_norm:  0.0945  memory: 56.71GiB(40.56%)  tps: 8,328  tflops: 388.42  mfu: 39.27%
+[rank3]:2025-11-19 08:12:11,790 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank1]:2025-11-19 08:12:11,807 - INFO -  step: 1000  loss: -4.0000  grad_norm:  0.0945  memory: 56.07GiB(40.10%)  tps: 8,327  tflops: 388.35  mfu: 39.27%
+[rank1]:2025-11-19 08:12:11,807 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank2]:2025-11-19 08:12:22,761 - INFO - Finished saving the checkpoint (or staging if async is enabled)in 10.97 seconds.
+[rank1]:2025-11-19 08:12:24,614 - INFO - Finished saving the checkpoint (or staging if async is enabled)in 12.81 seconds.
+[rank3]:2025-11-19 08:12:25,365 - INFO - Finished saving the checkpoint (or staging if async is enabled)in 13.57 seconds.
+[rank0]:2025-11-19 08:12:25,881 - INFO - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank0]:2025-11-19 08:12:25,886 - INFO - Finished saving the checkpoint (or staging if async is enabled)in 14.05 seconds.
+[rank1]:2025-11-19 08:12:25,939 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0812_stage1_step1000.svg
+[rank2]:2025-11-19 08:12:25,939 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0812_stage2_step1000.svg
+[rank0]:2025-11-19 08:12:25,994 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0812_stage0_step1000.svg
+[rank3]:2025-11-19 08:12:26,100 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0812_real_step1000_rank3.svg
+[rank3]:> Batch Time: 467.77 ms, GPU Bubble Ratio: 48.99%, 33.79%, 38.26%, 30.28%
+[rank3]:2025-11-19 08:12:26,172 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0812_stage3_step1000.svg
+[rank0]:2025-11-19 08:14:04,901 - INFO - [GC] Peforming periodical GC collection 2.10 seconds
+[rank3]:2025-11-19 08:14:06,825 - INFO - Avg. fwd time: 16.3175 / Avg. bwd time: 27.8677 / Avg. batch time: 378.3656 (ms) / GPU bubble ratio: 6.58%
+[rank1]:2025-11-19 08:14:06,879 - INFO - Avg. fwd time: 16.6922 / Avg. bwd time: 25.0941 / Avg. batch time: 457.0123 (ms) / GPU bubble ratio: 26.85%
+[rank2]:2025-11-19 08:14:06,852 - INFO - Avg. fwd time: 14.7365 / Avg. bwd time: 23.9208 / Avg. batch time: 416.7240 (ms) / GPU bubble ratio: 25.79%
+[rank0]:2025-11-19 08:14:06,910 - INFO - Avg. fwd time: 14.5150 / Avg. bwd time: 19.2691 / Avg. batch time: 498.8074 (ms) / GPU bubble ratio: 45.82%
+[rank3]:2025-11-19 08:14:06,939 - INFO -  step: 1050  loss:  0.2627  grad_norm:  0.3113  memory: 56.71GiB(40.56%)  tps: 7,114  tflops: 331.81  mfu: 33.55%
+[rank1]:2025-11-19 08:14:06,958 - INFO -  step: 1050  loss: -4.0000  grad_norm:  0.3113  memory: 56.07GiB(40.10%)  tps: 7,114  tflops: 331.81  mfu: 33.55%
+[rank2]:2025-11-19 08:14:06,943 - INFO -  step: 1050  loss: -4.0000  grad_norm:  0.3113  memory: 45.36GiB(32.44%)  tps: 7,114  tflops: 331.81  mfu: 33.55%
+[rank0]:2025-11-19 08:14:06,984 - INFO -  step: 1050  loss: -4.0000  grad_norm:  0.3113  memory: 65.85GiB(47.10%)  tps: 7,114  tflops: 331.80  mfu: 33.55%
+[rank0]:2025-11-19 08:15:45,051 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:15:46,891 - INFO - Avg. fwd time: 14.7586 / Avg. bwd time: 23.8123 / Avg. batch time: 415.9106 (ms) / GPU bubble ratio: 25.81%
+[rank3]:2025-11-19 08:15:46,872 - INFO - Avg. fwd time: 16.3466 / Avg. bwd time: 27.7487 / Avg. batch time: 377.6763 (ms) / GPU bubble ratio: 6.60%
+[rank1]:2025-11-19 08:15:46,914 - INFO - Avg. fwd time: 16.7226 / Avg. bwd time: 24.9509 / Avg. batch time: 456.0417 (ms) / GPU bubble ratio: 26.90%
+[rank0]:2025-11-19 08:15:46,952 - INFO - Avg. fwd time: 14.5384 / Avg. bwd time: 19.0824 / Avg. batch time: 497.7675 (ms) / GPU bubble ratio: 45.97%
+[rank1]:2025-11-19 08:15:47,059 - INFO -  step: 1100  loss: -4.0000  grad_norm:  0.1316  memory: 56.07GiB(40.10%)  tps: 8,184  tflops: 381.69  mfu: 38.59%
+[rank2]:2025-11-19 08:15:47,047 - INFO -  step: 1100  loss: -4.0000  grad_norm:  0.1316  memory: 45.36GiB(32.44%)  tps: 8,183  tflops: 381.68  mfu: 38.59%
+[rank0]:2025-11-19 08:15:47,082 - INFO -  step: 1100  loss: -4.0000  grad_norm:  0.1316  memory: 65.85GiB(47.10%)  tps: 8,184  tflops: 381.70  mfu: 38.59%
+[rank3]:2025-11-19 08:15:47,043 - INFO -  step: 1100  loss:  0.2266  grad_norm:  0.1316  memory: 56.71GiB(40.56%)  tps: 8,184  tflops: 381.69  mfu: 38.59%
+[rank1]:2025-11-19 08:15:47,131 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0815_stage1_step1100.svg
+[rank2]:2025-11-19 08:15:47,134 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0815_stage2_step1100.svg
+[rank0]:2025-11-19 08:15:47,131 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0815_stage0_step1100.svg
+[rank3]:2025-11-19 08:15:47,215 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0815_real_step1100_rank3.svg
+[rank3]:> Batch Time: 475.31 ms, GPU Bubble Ratio: 49.48%, 34.21%, 38.69%, 29.30%
+[rank3]:2025-11-19 08:15:47,256 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0815_stage3_step1100.svg
+[rank0]:2025-11-19 08:17:23,656 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:17:25,470 - INFO - Avg. fwd time: 16.3676 / Avg. bwd time: 27.5918 / Avg. batch time: 376.7277 (ms) / GPU bubble ratio: 6.65%
+[rank1]:2025-11-19 08:17:25,512 - INFO - Avg. fwd time: 16.7438 / Avg. bwd time: 24.7919 / Avg. batch time: 454.7690 (ms) / GPU bubble ratio: 26.93%
+[rank2]:2025-11-19 08:17:25,489 - INFO - Avg. fwd time: 14.7774 / Avg. bwd time: 23.6831 / Avg. batch time: 414.8233 (ms) / GPU bubble ratio: 25.83%
+[rank0]:2025-11-19 08:17:25,547 - INFO - Avg. fwd time: 14.5547 / Avg. bwd time: 18.8816 / Avg. batch time: 496.4527 (ms) / GPU bubble ratio: 46.12%
+[rank1]:2025-11-19 08:17:25,656 - INFO -  step: 1150  loss: -4.0000  grad_norm:  0.1687  memory: 56.07GiB(40.10%)  tps: 8,309  tflops: 387.52  mfu: 39.18%
+[rank2]:2025-11-19 08:17:25,638 - INFO -  step: 1150  loss: -4.0000  grad_norm:  0.1687  memory: 45.36GiB(32.44%)  tps: 8,309  tflops: 387.54  mfu: 39.18%
+[rank0]:2025-11-19 08:17:25,681 - INFO -  step: 1150  loss: -4.0000  grad_norm:  0.1687  memory: 65.85GiB(47.10%)  tps: 8,308  tflops: 387.51  mfu: 39.18%
+[rank3]:2025-11-19 08:17:25,646 - INFO -  step: 1150  loss:  0.2126  grad_norm:  0.1687  memory: 56.71GiB(40.56%)  tps: 8,308  tflops: 387.49  mfu: 39.18%
+[rank0]:2025-11-19 08:19:02,226 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:19:04,141 - INFO - Avg. fwd time: 16.3846 / Avg. bwd time: 27.4673 / Avg. batch time: 375.9090 (ms) / GPU bubble ratio: 6.68%
+[rank2]:2025-11-19 08:19:04,169 - INFO - Avg. fwd time: 14.7944 / Avg. bwd time: 23.5688 / Avg. batch time: 413.8543 (ms) / GPU bubble ratio: 25.84%
+[rank2]:2025-11-19 08:19:04,261 - INFO -  step: 1200  loss: -4.0000  grad_norm:  0.1464  memory: 45.36GiB(32.44%)  tps: 8,306  tflops: 387.41  mfu: 39.17%
+[rank3]:2025-11-19 08:19:04,270 - INFO -  step: 1200  loss:  0.2750  grad_norm:  0.1464  memory: 56.82GiB(40.64%)  tps: 8,306  tflops: 387.41  mfu: 39.17%
+[rank1]:2025-11-19 08:19:04,196 - INFO - Avg. fwd time: 16.7631 / Avg. bwd time: 24.6481 / Avg. batch time: 453.6323 (ms) / GPU bubble ratio: 26.97%
+[rank1]:2025-11-19 08:19:04,278 - INFO -  step: 1200  loss: -4.0000  grad_norm:  0.1464  memory: 56.07GiB(40.10%)  tps: 8,306  tflops: 387.42  mfu: 39.17%
+[rank0]:2025-11-19 08:19:04,228 - INFO - Avg. fwd time: 14.5688 / Avg. bwd time: 18.6966 / Avg. batch time: 495.2630 (ms) / GPU bubble ratio: 46.27%
+[rank2]:2025-11-19 08:19:04,349 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0819_stage2_step1200.svg
+[rank1]:2025-11-19 08:19:04,348 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0819_stage1_step1200.svg
+[rank0]:2025-11-19 08:19:04,300 - INFO -  step: 1200  loss: -4.0000  grad_norm:  0.1464  memory: 65.85GiB(47.10%)  tps: 8,307  tflops: 387.43  mfu: 39.17%
+[rank0]:2025-11-19 08:19:04,348 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0819_stage0_step1200.svg
+[rank3]:2025-11-19 08:19:04,430 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0819_real_step1200_rank3.svg
+[rank3]:> Batch Time: 470.50 ms, GPU Bubble Ratio: 49.01%, 34.22%, 38.27%, 29.15%
+[rank3]:2025-11-19 08:19:04,472 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0819_stage3_step1200.svg
+[rank0]:2025-11-19 08:20:40,361 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:20:42,191 - INFO - Avg. fwd time: 14.8062 / Avg. bwd time: 23.4783 / Avg. batch time: 413.0314 (ms) / GPU bubble ratio: 25.85%
+[rank3]:2025-11-19 08:20:42,172 - INFO - Avg. fwd time: 16.3969 / Avg. bwd time: 27.3499 / Avg. batch time: 375.1877 (ms) / GPU bubble ratio: 6.72%
+[rank1]:2025-11-19 08:20:42,215 - INFO - Avg. fwd time: 16.7776 / Avg. bwd time: 24.5283 / Avg. batch time: 452.6734 (ms) / GPU bubble ratio: 27.00%
+[rank0]:2025-11-19 08:20:42,252 - INFO - Avg. fwd time: 14.5782 / Avg. bwd time: 18.5497 / Avg. batch time: 494.2439 (ms) / GPU bubble ratio: 46.38%
+[rank2]:2025-11-19 08:20:42,341 - INFO -  step: 1250  loss: -4.0000  grad_norm:  0.1625  memory: 45.36GiB(32.44%)  tps: 8,352  tflops: 389.55  mfu: 39.39%
+[rank3]:2025-11-19 08:20:42,347 - INFO -  step: 1250  loss:  0.2552  grad_norm:  0.1625  memory: 56.82GiB(40.64%)  tps: 8,353  tflops: 389.57  mfu: 39.39%
+[rank1]:2025-11-19 08:20:42,355 - INFO -  step: 1250  loss: -4.0000  grad_norm:  0.1625  memory: 56.07GiB(40.10%)  tps: 8,353  tflops: 389.57  mfu: 39.39%
+[rank0]:2025-11-19 08:20:42,383 - INFO -  step: 1250  loss: -4.0000  grad_norm:  0.1625  memory: 65.85GiB(47.10%)  tps: 8,352  tflops: 389.55  mfu: 39.39%
+[rank0]:2025-11-19 08:22:18,471 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:22:20,291 - INFO - Avg. fwd time: 14.8202 / Avg. bwd time: 23.3769 / Avg. batch time: 412.1503 (ms) / GPU bubble ratio: 25.86%
+[rank3]:2025-11-19 08:22:20,274 - INFO - Avg. fwd time: 16.4111 / Avg. bwd time: 27.2267 / Avg. batch time: 374.4436 (ms) / GPU bubble ratio: 6.77%
+[rank1]:2025-11-19 08:22:20,316 - INFO - Avg. fwd time: 16.7937 / Avg. bwd time: 24.4079 / Avg. batch time: 451.6472 (ms) / GPU bubble ratio: 27.02%
+[rank0]:2025-11-19 08:22:20,354 - INFO - Avg. fwd time: 14.5897 / Avg. bwd time: 18.3865 / Avg. batch time: 493.1628 (ms) / GPU bubble ratio: 46.51%
+[rank3]:2025-11-19 08:22:20,435 - INFO -  step: 1300  loss:  0.1960  grad_norm:  0.1206  memory: 56.82GiB(40.64%)  tps: 8,352  tflops: 389.53  mfu: 39.39%
+[rank1]:2025-11-19 08:22:20,460 - INFO -  step: 1300  loss: -4.0000  grad_norm:  0.1206  memory: 56.07GiB(40.10%)  tps: 8,350  tflops: 389.46  mfu: 39.38%
+[rank0]:2025-11-19 08:22:20,482 - INFO -  step: 1300  loss: -4.0000  grad_norm:  0.1206  memory: 65.85GiB(47.10%)  tps: 8,351  tflops: 389.48  mfu: 39.38%
+[rank2]:2025-11-19 08:22:20,443 - INFO -  step: 1300  loss: -4.0000  grad_norm:  0.1206  memory: 45.36GiB(32.44%)  tps: 8,351  tflops: 389.47  mfu: 39.38%
+[rank1]:2025-11-19 08:22:20,530 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0822_stage1_step1300.svg
+[rank0]:2025-11-19 08:22:20,530 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0822_stage0_step1300.svg
+[rank2]:2025-11-19 08:22:20,531 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0822_stage2_step1300.svg
+[rank3]:2025-11-19 08:22:20,615 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0822_real_step1300_rank3.svg
+[rank3]:> Batch Time: 465.03 ms, GPU Bubble Ratio: 49.45%, 33.52%, 38.25%, 30.74%
+[rank3]:2025-11-19 08:22:20,658 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0822_stage3_step1300.svg
+[rank0]:2025-11-19 08:23:57,725 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:23:59,614 - INFO - Avg. fwd time: 16.4301 / Avg. bwd time: 27.1184 / Avg. batch time: 373.8480 (ms) / GPU bubble ratio: 6.81%
+[rank1]:2025-11-19 08:23:59,671 - INFO - Avg. fwd time: 16.8133 / Avg. bwd time: 24.2925 / Avg. batch time: 450.8480 (ms) / GPU bubble ratio: 27.06%
+[rank2]:2025-11-19 08:23:59,643 - INFO - Avg. fwd time: 14.8369 / Avg. bwd time: 23.2910 / Avg. batch time: 411.4779 (ms) / GPU bubble ratio: 25.87%
+[rank1]:2025-11-19 08:23:59,749 - INFO -  step: 1350  loss: -4.0000  grad_norm:  0.1818  memory: 56.07GiB(40.10%)  tps: 8,251  tflops: 384.81  mfu: 38.91%
+[rank0]:2025-11-19 08:23:59,703 - INFO - Avg. fwd time: 14.6030 / Avg. bwd time: 18.2421 / Avg. batch time: 492.2913 (ms) / GPU bubble ratio: 46.62%
+[rank0]:2025-11-19 08:23:59,776 - INFO -  step: 1350  loss: -4.0000  grad_norm:  0.1818  memory: 65.85GiB(47.10%)  tps: 8,250  tflops: 384.80  mfu: 38.91%
+[rank2]:2025-11-19 08:23:59,734 - INFO -  step: 1350  loss: -4.0000  grad_norm:  0.1818  memory: 45.36GiB(32.44%)  tps: 8,251  tflops: 384.81  mfu: 38.91%
+[rank3]:2025-11-19 08:23:59,733 - INFO -  step: 1350  loss:  0.1355  grad_norm:  0.1818  memory: 56.82GiB(40.64%)  tps: 8,250  tflops: 384.79  mfu: 38.91%
+[rank0]:2025-11-19 08:25:36,236 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:25:38,070 - INFO - Avg. fwd time: 16.4389 / Avg. bwd time: 27.0268 / Avg. batch time: 373.3019 (ms) / GPU bubble ratio: 6.85%
+[rank1]:2025-11-19 08:25:38,113 - INFO - Avg. fwd time: 16.8227 / Avg. bwd time: 24.2048 / Avg. batch time: 450.1084 (ms) / GPU bubble ratio: 27.08%
+[rank0]:2025-11-19 08:25:38,149 - INFO - Avg. fwd time: 14.6106 / Avg. bwd time: 18.1291 / Avg. batch time: 491.5414 (ms) / GPU bubble ratio: 46.72%
+[rank2]:2025-11-19 08:25:38,090 - INFO - Avg. fwd time: 14.8442 / Avg. bwd time: 23.2265 / Avg. batch time: 410.8474 (ms) / GPU bubble ratio: 25.87%
+[rank1]:2025-11-19 08:25:38,250 - INFO -  step: 1400  loss: -4.0000  grad_norm:  0.4231  memory: 56.07GiB(40.10%)  tps: 8,317  tflops: 387.89  mfu: 39.22%
+[rank2]:2025-11-19 08:25:38,240 - INFO -  step: 1400  loss: -4.0000  grad_norm:  0.4231  memory: 45.36GiB(32.44%)  tps: 8,316  tflops: 387.87  mfu: 39.22%
+[rank3]:2025-11-19 08:25:38,230 - INFO -  step: 1400  loss:  0.3702  grad_norm:  0.4231  memory: 56.82GiB(40.64%)  tps: 8,317  tflops: 387.91  mfu: 39.22%
+[rank1]:2025-11-19 08:25:38,328 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0825_stage1_step1400.svg
+[rank0]:2025-11-19 08:25:38,279 - INFO -  step: 1400  loss: -4.0000  grad_norm:  0.4231  memory: 65.85GiB(47.10%)  tps: 8,317  tflops: 387.88  mfu: 39.22%
+[rank0]:2025-11-19 08:25:38,328 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0825_stage0_step1400.svg
+[rank2]:2025-11-19 08:25:38,327 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0825_stage2_step1400.svg
+[rank3]:2025-11-19 08:25:38,409 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0825_real_step1400_rank3.svg
+[rank3]:> Batch Time: 468.94 ms, GPU Bubble Ratio: 49.34%, 34.01%, 38.46%, 29.11%
+[rank3]:2025-11-19 08:25:38,453 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0825_stage3_step1400.svg
+[rank0]:2025-11-19 08:27:16,384 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank1]:2025-11-19 08:27:18,233 - INFO - Avg. fwd time: 16.8436 / Avg. bwd time: 24.1161 / Avg. batch time: 449.4648 (ms) / GPU bubble ratio: 27.10%
+[rank2]:2025-11-19 08:27:18,212 - INFO - Avg. fwd time: 14.8599 / Avg. bwd time: 23.1486 / Avg. batch time: 410.3070 (ms) / GPU bubble ratio: 25.89%
+[rank3]:2025-11-19 08:27:18,192 - INFO - Avg. fwd time: 16.4591 / Avg. bwd time: 26.9353 / Avg. batch time: 372.8467 (ms) / GPU bubble ratio: 6.89%
+[rank0]:2025-11-19 08:27:18,269 - INFO - Avg. fwd time: 14.6267 / Avg. bwd time: 18.0058 / Avg. batch time: 490.8922 (ms) / GPU bubble ratio: 46.82%
+[rank2]:2025-11-19 08:27:18,360 - INFO -  step: 1450  loss: -4.0000  grad_norm:  0.1732  memory: 45.36GiB(32.44%)  tps: 8,182  tflops: 381.62  mfu: 38.59%
+[rank3]:2025-11-19 08:27:18,357 - INFO -  step: 1450  loss:  0.1884  grad_norm:  0.1732  memory: 56.82GiB(40.64%)  tps: 8,182  tflops: 381.60  mfu: 38.58%
+[rank0]:2025-11-19 08:27:18,398 - INFO -  step: 1450  loss: -4.0000  grad_norm:  0.1732  memory: 65.85GiB(47.10%)  tps: 8,182  tflops: 381.62  mfu: 38.59%
+[rank1]:2025-11-19 08:27:18,373 - INFO -  step: 1450  loss: -4.0000  grad_norm:  0.1732  memory: 56.07GiB(40.10%)  tps: 8,182  tflops: 381.61  mfu: 38.59%
+[rank0]:2025-11-19 08:28:56,435 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:28:58,422 - INFO - Avg. fwd time: 14.8755 / Avg. bwd time: 23.0754 / Avg. batch time: 409.8147 (ms) / GPU bubble ratio: 25.92%
+[rank3]:2025-11-19 08:28:58,393 - INFO - Avg. fwd time: 16.4796 / Avg. bwd time: 26.8517 / Avg. batch time: 372.4289 (ms) / GPU bubble ratio: 6.92%
+[rank0]:2025-11-19 08:28:58,485 - INFO - Avg. fwd time: 14.6429 / Avg. bwd time: 17.8916 / Avg. batch time: 490.2640 (ms) / GPU bubble ratio: 46.91%
+[rank1]:2025-11-19 08:28:58,452 - INFO - Avg. fwd time: 16.8640 / Avg. bwd time: 24.0287 / Avg. batch time: 448.8781 (ms) / GPU bubble ratio: 27.12%
+[rank1]:2025-11-19 08:28:58,534 - INFO -  step: 1500  loss: -4.0000  grad_norm:  0.2035  memory: 56.07GiB(40.10%)  tps: 8,179  tflops: 381.46  mfu: 38.57%
+[rank2]:2025-11-19 08:28:58,513 - INFO -  step: 1500  loss: -4.0000  grad_norm:  0.2035  memory: 45.36GiB(32.44%)  tps: 8,179  tflops: 381.49  mfu: 38.57%
+[rank3]:2025-11-19 08:28:58,527 - INFO -  step: 1500  loss:  0.2838  grad_norm:  0.2035  memory: 56.82GiB(40.64%)  tps: 8,178  tflops: 381.44  mfu: 38.57%
+[rank0]:2025-11-19 08:28:58,557 - INFO -  step: 1500  loss: -4.0000  grad_norm:  0.2035  memory: 65.85GiB(47.10%)  tps: 8,179  tflops: 381.47  mfu: 38.57%
+[rank0]:2025-11-19 08:28:58,606 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0828_stage0_step1500.svg
+[rank1]:2025-11-19 08:28:58,606 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0828_stage1_step1500.svg
+[rank2]:2025-11-19 08:28:58,608 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0828_stage2_step1500.svg
+[rank3]:2025-11-19 08:28:58,689 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0828_real_step1500_rank3.svg
+[rank3]:> Batch Time: 476.11 ms, GPU Bubble Ratio: 49.25%, 34.06%, 39.23%, 28.95%
+[rank3]:2025-11-19 08:28:58,733 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0828_stage3_step1500.svg
+[rank0]:2025-11-19 08:30:36,863 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:30:38,715 - INFO - Avg. fwd time: 16.4962 / Avg. bwd time: 26.7899 / Avg. batch time: 372.1137 (ms) / GPU bubble ratio: 6.94%
+[rank2]:2025-11-19 08:30:38,735 - INFO - Avg. fwd time: 14.8881 / Avg. bwd time: 23.0216 / Avg. batch time: 409.4353 (ms) / GPU bubble ratio: 25.93%
+[rank0]:2025-11-19 08:30:38,798 - INFO - Avg. fwd time: 14.6559 / Avg. bwd time: 17.8012 / Avg. batch time: 489.8063 (ms) / GPU bubble ratio: 46.99%
+[rank1]:2025-11-19 08:30:38,761 - INFO - Avg. fwd time: 16.8807 / Avg. bwd time: 23.9607 / Avg. batch time: 448.4219 (ms) / GPU bubble ratio: 27.14%
+[rank1]:2025-11-19 08:30:38,907 - INFO -  step: 1550  loss: -4.0000  grad_norm:  0.2070  memory: 56.07GiB(40.10%)  tps: 8,162  tflops: 380.66  mfu: 38.49%
+[rank3]:2025-11-19 08:30:38,897 - INFO -  step: 1550  loss:  0.2732  grad_norm:  0.2070  memory: 56.82GiB(40.64%)  tps: 8,162  tflops: 380.67  mfu: 38.49%
+[rank2]:2025-11-19 08:30:38,893 - INFO -  step: 1550  loss: -4.0000  grad_norm:  0.2070  memory: 45.36GiB(32.44%)  tps: 8,161  tflops: 380.63  mfu: 38.49%
+[rank0]:2025-11-19 08:30:38,930 - INFO -  step: 1550  loss: -4.0000  grad_norm:  0.2070  memory: 65.85GiB(47.10%)  tps: 8,162  tflops: 380.66  mfu: 38.49%
+[rank0]:2025-11-19 08:32:16,374 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:32:18,228 - INFO - Avg. fwd time: 16.5083 / Avg. bwd time: 26.7249 / Avg. batch time: 371.6857 (ms) / GPU bubble ratio: 6.95%
+[rank2]:2025-11-19 08:32:18,247 - INFO - Avg. fwd time: 14.8975 / Avg. bwd time: 22.9601 / Avg. batch time: 408.9440 (ms) / GPU bubble ratio: 25.94%
+[rank1]:2025-11-19 08:32:18,270 - INFO - Avg. fwd time: 16.8943 / Avg. bwd time: 23.8812 / Avg. batch time: 447.8393 (ms) / GPU bubble ratio: 27.16%
+[rank0]:2025-11-19 08:32:18,307 - INFO - Avg. fwd time: 14.6668 / Avg. bwd time: 17.7001 / Avg. batch time: 489.1981 (ms) / GPU bubble ratio: 47.07%
+[rank1]:2025-11-19 08:32:18,412 - INFO -  step: 1600  loss: -4.0000  grad_norm:  0.2028  memory: 56.07GiB(40.10%)  tps: 8,233  tflops: 383.98  mfu: 38.82%
+[rank3]:2025-11-19 08:32:18,403 - INFO -  step: 1600  loss:  0.3977  grad_norm:  0.2028  memory: 56.82GiB(40.64%)  tps: 8,233  tflops: 383.98  mfu: 38.82%
+[rank2]:2025-11-19 08:32:18,394 - INFO -  step: 1600  loss: -4.0000  grad_norm:  0.2028  memory: 45.36GiB(32.44%)  tps: 8,233  tflops: 383.99  mfu: 38.83%
+[rank0]:2025-11-19 08:32:18,433 - INFO -  step: 1600  loss: -4.0000  grad_norm:  0.2028  memory: 65.85GiB(47.10%)  tps: 8,233  tflops: 383.99  mfu: 38.83%
+[rank0]:2025-11-19 08:32:18,483 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0832_stage0_step1600.svg
+[rank1]:2025-11-19 08:32:18,484 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0832_stage1_step1600.svg
+[rank2]:2025-11-19 08:32:18,489 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0832_stage2_step1600.svg
+[rank3]:2025-11-19 08:32:18,560 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0832_real_step1600_rank3.svg
+[rank3]:> Batch Time: 473.02 ms, GPU Bubble Ratio: 49.50%, 33.82%, 38.69%, 28.83%
+[rank3]:2025-11-19 08:32:18,605 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0832_stage3_step1600.svg
+[rank0]:2025-11-19 08:33:56,412 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank1]:2025-11-19 08:33:58,409 - INFO - Avg. fwd time: 16.9091 / Avg. bwd time: 23.8105 / Avg. batch time: 447.3380 (ms) / GPU bubble ratio: 27.18%
+[rank3]:2025-11-19 08:33:58,348 - INFO - Avg. fwd time: 16.5225 / Avg. bwd time: 26.6528 / Avg. batch time: 371.3128 (ms) / GPU bubble ratio: 6.98%
+[rank2]:2025-11-19 08:33:58,379 - INFO - Avg. fwd time: 14.9074 / Avg. bwd time: 22.9076 / Avg. batch time: 408.5229 (ms) / GPU bubble ratio: 25.95%
+[rank0]:2025-11-19 08:33:58,442 - INFO - Avg. fwd time: 14.6786 / Avg. bwd time: 17.6051 / Avg. batch time: 488.6714 (ms) / GPU bubble ratio: 47.15%
+[rank1]:2025-11-19 08:33:58,492 - INFO -  step: 1650  loss: -4.0000  grad_norm:  0.1876  memory: 56.07GiB(40.10%)  tps: 8,185  tflops: 381.77  mfu: 38.60%
+[rank3]:2025-11-19 08:33:58,468 - INFO -  step: 1650  loss:  0.4031  grad_norm:  0.1876  memory: 56.82GiB(40.64%)  tps: 8,187  tflops: 381.83  mfu: 38.61%
+[rank2]:2025-11-19 08:33:58,476 - INFO -  step: 1650  loss: -4.0000  grad_norm:  0.1876  memory: 45.36GiB(32.44%)  tps: 8,185  tflops: 381.76  mfu: 38.60%
+[rank0]:2025-11-19 08:33:58,514 - INFO -  step: 1650  loss: -4.0000  grad_norm:  0.1876  memory: 65.85GiB(47.10%)  tps: 8,185  tflops: 381.77  mfu: 38.60%
+[rank0]:2025-11-19 08:35:36,532 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:35:38,383 - INFO - Avg. fwd time: 16.5342 / Avg. bwd time: 26.6009 / Avg. batch time: 371.0080 (ms) / GPU bubble ratio: 6.99%
+[rank2]:2025-11-19 08:35:38,403 - INFO - Avg. fwd time: 14.9168 / Avg. bwd time: 22.8562 / Avg. batch time: 408.1558 (ms) / GPU bubble ratio: 25.96%
+[rank1]:2025-11-19 08:35:38,425 - INFO - Avg. fwd time: 16.9211 / Avg. bwd time: 23.7505 / Avg. batch time: 446.9042 (ms) / GPU bubble ratio: 27.19%
+[rank0]:2025-11-19 08:35:38,462 - INFO - Avg. fwd time: 14.6881 / Avg. bwd time: 17.5308 / Avg. batch time: 488.2357 (ms) / GPU bubble ratio: 47.21%
+[rank1]:2025-11-19 08:35:38,567 - INFO -  step: 1700  loss: -4.0000  grad_norm:  0.2095  memory: 56.07GiB(40.10%)  tps: 8,186  tflops: 381.79  mfu: 38.60%
+[rank3]:2025-11-19 08:35:38,562 - INFO -  step: 1700  loss:  0.4010  grad_norm:  0.2095  memory: 56.82GiB(40.64%)  tps: 8,184  tflops: 381.72  mfu: 38.60%
+[rank2]:2025-11-19 08:35:38,553 - INFO -  step: 1700  loss: -4.0000  grad_norm:  0.2095  memory: 45.36GiB(32.44%)  tps: 8,186  tflops: 381.79  mfu: 38.60%
+[rank0]:2025-11-19 08:35:38,590 - INFO -  step: 1700  loss: -4.0000  grad_norm:  0.2095  memory: 65.85GiB(47.10%)  tps: 8,186  tflops: 381.79  mfu: 38.60%
+[rank0]:2025-11-19 08:35:38,638 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0835_stage0_step1700.svg
+[rank1]:2025-11-19 08:35:38,639 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0835_stage1_step1700.svg
+[rank2]:2025-11-19 08:35:38,641 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0835_stage2_step1700.svg
+[rank3]:2025-11-19 08:35:38,720 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0835_real_step1700_rank3.svg
+[rank3]:> Batch Time: 472.88 ms, GPU Bubble Ratio: 49.27%, 33.80%, 39.07%, 29.19%
+[rank3]:2025-11-19 08:35:38,764 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0835_stage3_step1700.svg
+[rank0]:2025-11-19 08:37:16,535 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:37:18,408 - INFO - Avg. fwd time: 14.9261 / Avg. bwd time: 22.8014 / Avg. batch time: 407.7634 (ms) / GPU bubble ratio: 25.98%
+[rank3]:2025-11-19 08:37:18,389 - INFO - Avg. fwd time: 16.5463 / Avg. bwd time: 26.5435 / Avg. batch time: 370.6687 (ms) / GPU bubble ratio: 7.00%
+[rank1]:2025-11-19 08:37:18,429 - INFO - Avg. fwd time: 16.9335 / Avg. bwd time: 23.6846 / Avg. batch time: 446.4383 (ms) / GPU bubble ratio: 27.21%
+[rank0]:2025-11-19 08:37:18,464 - INFO - Avg. fwd time: 14.6980 / Avg. bwd time: 17.4487 / Avg. batch time: 487.7570 (ms) / GPU bubble ratio: 47.27%
+[rank3]:2025-11-19 08:37:18,561 - INFO -  step: 1750  loss:  0.4181  grad_norm:  0.4855  memory: 56.82GiB(40.64%)  tps: 8,192  tflops: 382.08  mfu: 38.63%
+[rank1]:2025-11-19 08:37:18,566 - INFO -  step: 1750  loss: -4.0000  grad_norm:  0.4855  memory: 56.07GiB(40.10%)  tps: 8,192  tflops: 382.08  mfu: 38.63%
+[rank2]:2025-11-19 08:37:18,556 - INFO -  step: 1750  loss: -4.0000  grad_norm:  0.4855  memory: 45.36GiB(32.44%)  tps: 8,192  tflops: 382.07  mfu: 38.63%
+[rank0]:2025-11-19 08:37:18,595 - INFO -  step: 1750  loss: -4.0000  grad_norm:  0.4855  memory: 65.85GiB(47.10%)  tps: 8,192  tflops: 382.05  mfu: 38.63%
+[rank0]:2025-11-19 08:38:54,366 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:38:56,208 - INFO - Avg. fwd time: 16.5481 / Avg. bwd time: 26.4777 / Avg. batch time: 370.2096 (ms) / GPU bubble ratio: 7.02%
+[rank1]:2025-11-19 08:38:56,268 - INFO - Avg. fwd time: 16.9377 / Avg. bwd time: 23.6177 / Avg. batch time: 445.8223 (ms) / GPU bubble ratio: 27.23%
+[rank2]:2025-11-19 08:38:56,238 - INFO - Avg. fwd time: 14.9283 / Avg. bwd time: 22.7431 / Avg. batch time: 407.2247 (ms) / GPU bubble ratio: 25.99%
+[rank0]:2025-11-19 08:38:56,302 - INFO - Avg. fwd time: 14.7017 / Avg. bwd time: 17.3687 / Avg. batch time: 487.1184 (ms) / GPU bubble ratio: 47.33%
+[rank3]:2025-11-19 08:38:56,343 - INFO -  step: 1800  loss:  0.0805  grad_norm:  0.1272  memory: 56.82GiB(40.64%)  tps: 8,378  tflops: 390.75  mfu: 39.51%
+[rank1]:2025-11-19 08:38:56,349 - INFO -  step: 1800  loss: -4.0000  grad_norm:  0.1272  memory: 56.07GiB(40.10%)  tps: 8,378  tflops: 390.74  mfu: 39.51%
+[rank2]:2025-11-19 08:38:56,333 - INFO -  step: 1800  loss: -4.0000  grad_norm:  0.1272  memory: 45.36GiB(32.44%)  tps: 8,378  tflops: 390.76  mfu: 39.51%
+[rank0]:2025-11-19 08:38:56,376 - INFO -  step: 1800  loss: -4.0000  grad_norm:  0.1272  memory: 65.85GiB(47.10%)  tps: 8,378  tflops: 390.75  mfu: 39.51%
+[rank0]:2025-11-19 08:38:56,426 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0838_stage0_step1800.svg
+[rank1]:2025-11-19 08:38:56,426 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0838_stage1_step1800.svg
+[rank2]:2025-11-19 08:38:56,428 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0838_stage2_step1800.svg
+[rank3]:2025-11-19 08:38:56,508 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0838_real_step1800_rank3.svg
+[rank3]:> Batch Time: 460.11 ms, GPU Bubble Ratio: 48.80%, 34.07%, 38.63%, 29.97%
+[rank3]:2025-11-19 08:38:56,552 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0838_stage3_step1800.svg
+[rank0]:2025-11-19 08:40:31,924 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:40:33,711 - INFO - Avg. fwd time: 16.5478 / Avg. bwd time: 26.4237 / Avg. batch time: 369.8163 (ms) / GPU bubble ratio: 7.04%
+[rank1]:2025-11-19 08:40:33,753 - INFO - Avg. fwd time: 16.9400 / Avg. bwd time: 23.5631 / Avg. batch time: 445.3210 (ms) / GPU bubble ratio: 27.24%
+[rank2]:2025-11-19 08:40:33,733 - INFO - Avg. fwd time: 14.9287 / Avg. bwd time: 22.7010 / Avg. batch time: 406.7903 (ms) / GPU bubble ratio: 26.00%
+[rank0]:2025-11-19 08:40:33,789 - INFO - Avg. fwd time: 14.7039 / Avg. bwd time: 17.3004 / Avg. batch time: 486.5907 (ms) / GPU bubble ratio: 47.38%
+[rank2]:2025-11-19 08:40:33,882 - INFO -  step: 1850  loss: -4.0000  grad_norm:  0.2223  memory: 45.36GiB(32.44%)  tps: 8,398  tflops: 391.68  mfu: 39.60%
+[rank0]:2025-11-19 08:40:33,919 - INFO -  step: 1850  loss: -4.0000  grad_norm:  0.2223  memory: 65.85GiB(47.10%)  tps: 8,398  tflops: 391.70  mfu: 39.61%
+[rank3]:2025-11-19 08:40:33,873 - INFO -  step: 1850  loss:  0.3572  grad_norm:  0.2223  memory: 56.82GiB(40.64%)  tps: 8,400  tflops: 391.76  mfu: 39.61%
+[rank1]:2025-11-19 08:40:33,894 - INFO -  step: 1850  loss: -4.0000  grad_norm:  0.2223  memory: 56.07GiB(40.10%)  tps: 8,398  tflops: 391.69  mfu: 39.60%
+[rank0]:2025-11-19 08:42:08,729 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:42:10,533 - INFO - Avg. fwd time: 14.9273 / Avg. bwd time: 22.6502 / Avg. batch time: 406.2322 (ms) / GPU bubble ratio: 26.00%
+[rank0]:2025-11-19 08:42:10,595 - INFO - Avg. fwd time: 14.7039 / Avg. bwd time: 17.2263 / Avg. batch time: 485.9367 (ms) / GPU bubble ratio: 47.43%
+[rank3]:2025-11-19 08:42:10,516 - INFO - Avg. fwd time: 16.5456 / Avg. bwd time: 26.3555 / Avg. batch time: 369.3222 (ms) / GPU bubble ratio: 7.07%
+[rank1]:2025-11-19 08:42:10,558 - INFO - Avg. fwd time: 16.9396 / Avg. bwd time: 23.5014 / Avg. batch time: 444.6847 (ms) / GPU bubble ratio: 27.25%
+[rank2]:2025-11-19 08:42:10,682 - INFO -  step: 1900  loss: -4.0000  grad_norm:  0.1056  memory: 45.36GiB(32.44%)  tps: 8,463  tflops: 394.71  mfu: 39.91%
+[rank3]:2025-11-19 08:42:10,679 - INFO -  step: 1900  loss:  0.2052  grad_norm:  0.1056  memory: 56.82GiB(40.64%)  tps: 8,462  tflops: 394.68  mfu: 39.91%
+[rank1]:2025-11-19 08:42:10,703 - INFO -  step: 1900  loss: -4.0000  grad_norm:  0.1056  memory: 56.07GiB(40.10%)  tps: 8,462  tflops: 394.67  mfu: 39.91%
+[rank2]:2025-11-19 08:42:10,777 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0842_stage2_step1900.svg
+[rank0]:2025-11-19 08:42:10,725 - INFO -  step: 1900  loss: -4.0000  grad_norm:  0.1056  memory: 65.85GiB(47.10%)  tps: 8,462  tflops: 394.69  mfu: 39.91%
+[rank0]:2025-11-19 08:42:10,774 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0842_stage0_step1900.svg
+[rank1]:2025-11-19 08:42:10,775 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0842_stage1_step1900.svg
+[rank3]:2025-11-19 08:42:10,857 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0842_real_step1900_rank3.svg
+[rank3]:> Batch Time: 464.11 ms, GPU Bubble Ratio: 48.98%, 33.95%, 38.84%, 31.05%
+[rank3]:2025-11-19 08:42:10,901 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0842_stage3_step1900.svg
+[rank0]:2025-11-19 08:43:45,214 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-19 08:43:47,064 - INFO - Avg. fwd time: 16.5415 / Avg. bwd time: 26.2899 / Avg. batch time: 368.8311 (ms) / GPU bubble ratio: 7.10%
+[rank1]:2025-11-19 08:43:47,127 - INFO - Avg. fwd time: 16.9385 / Avg. bwd time: 23.4405 / Avg. batch time: 444.0541 (ms) / GPU bubble ratio: 27.25%
+[rank2]:2025-11-19 08:43:47,096 - INFO - Avg. fwd time: 14.9249 / Avg. bwd time: 22.6034 / Avg. batch time: 405.6761 (ms) / GPU bubble ratio: 25.99%
+[rank0]:2025-11-19 08:43:47,160 - INFO - Avg. fwd time: 14.7033 / Avg. bwd time: 17.1564 / Avg. batch time: 485.2994 (ms) / GPU bubble ratio: 47.48%
+[rank1]:2025-11-19 08:43:47,208 - INFO -  step: 1950  loss: -4.0000  grad_norm:  0.1156  memory: 56.07GiB(40.10%)  tps: 8,489  tflops: 395.92  mfu: 40.03%
+[rank2]:2025-11-19 08:43:47,197 - INFO -  step: 1950  loss: -4.0000  grad_norm:  0.1156  memory: 45.36GiB(32.44%)  tps: 8,488  tflops: 395.88  mfu: 40.03%
+[rank0]:2025-11-19 08:43:47,234 - INFO -  step: 1950  loss: -4.0000  grad_norm:  0.1156  memory: 65.85GiB(47.10%)  tps: 8,488  tflops: 395.90  mfu: 40.03%
+[rank3]:2025-11-19 08:43:47,191 - INFO -  step: 1950  loss:  0.1759  grad_norm:  0.1156  memory: 56.82GiB(40.64%)  tps: 8,488  tflops: 395.89  mfu: 40.03%
+[rank0]:2025-11-19 08:45:21,731 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-19 08:45:23,539 - INFO - Avg. fwd time: 14.9227 / Avg. bwd time: 22.5647 / Avg. batch time: 405.2119 (ms) / GPU bubble ratio: 25.99%
+[rank3]:2025-11-19 08:45:23,520 - INFO - Avg. fwd time: 16.5382 / Avg. bwd time: 26.2347 / Avg. batch time: 368.4256 (ms) / GPU bubble ratio: 7.12%
+[rank1]:2025-11-19 08:45:23,561 - INFO - Avg. fwd time: 16.9372 / Avg. bwd time: 23.3915 / Avg. batch time: 443.5278 (ms) / GPU bubble ratio: 27.26%
+[rank0]:2025-11-19 08:45:23,597 - INFO - Avg. fwd time: 14.7025 / Avg. bwd time: 17.1018 / Avg. batch time: 484.7840 (ms) / GPU bubble ratio: 47.52%
+[rank1]:2025-11-19 08:45:23,702 - INFO -  step: 2000  loss: -4.0000  grad_norm:  0.0971  memory: 56.07GiB(40.10%)  tps: 8,490  tflops: 395.96  mfu: 40.04%
+[rank1]:2025-11-19 08:45:23,702 - INFO -  final step: 2000  loss: -4.0000  grad_norm:  0.0971  tps: 8,189  tflops: 381.93  mfu: 37.26%
+[rank1]:2025-11-19 08:45:23,702 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank1]:2025-11-19 08:45:23,707 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank2]:2025-11-19 08:45:23,682 - INFO -  step: 2000  loss: -4.0000  grad_norm:  0.0971  memory: 45.36GiB(32.44%)  tps: 8,490  tflops: 396.00  mfu: 40.04%
+[rank2]:2025-11-19 08:45:23,682 - INFO -  final step: 2000  loss: -4.0000  grad_norm:  0.0971  tps: 8,189  tflops: 381.93  mfu: 37.26%
+[rank2]:2025-11-19 08:45:23,682 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank2]:2025-11-19 08:45:23,685 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank3]:2025-11-19 08:45:23,696 - INFO -  step: 2000  loss:  0.2104  grad_norm:  0.0971  memory: 56.82GiB(40.64%)  tps: 8,489  tflops: 395.92  mfu: 40.03%
+[rank3]:2025-11-19 08:45:23,697 - INFO -  final step: 2000  loss:  0.2104  grad_norm:  0.0971  tps: 8,193  tflops: 382.13  mfu: 37.27%
+[rank3]:2025-11-19 08:45:23,697 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank3]:2025-11-19 08:45:23,701 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank0]:2025-11-19 08:45:23,725 - INFO -  step: 2000  loss: -4.0000  grad_norm:  0.0971  memory: 65.85GiB(47.10%)  tps: 8,490  tflops: 395.97  mfu: 40.04%
+[rank0]:2025-11-19 08:45:23,725 - INFO -  final step: 2000  loss: -4.0000  grad_norm:  0.0971  tps: 8,189  tflops: 381.93  mfu: 37.26%
+[rank0]:2025-11-19 08:45:23,725 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2025-11-19 08:45:23,728 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank0]:2025-11-19 08:45:34,248 - INFO - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank1]:2025-11-19 08:45:34,329 - INFO - Frozen Ratio History of Rank 1 (Stage 1)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank1/251119_0845_stage1_final2000.svg
+[rank2]:2025-11-19 08:45:34,340 - INFO - Frozen Ratio History of Rank 2 (Stage 2)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank2/251119_0845_stage2_final2000.svg
+[rank0]:2025-11-19 08:45:34,340 - INFO - Frozen Ratio History of Rank 0 (Stage 0)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank0/251119_0845_stage0_final2000.svg
+[rank3]:2025-11-19 08:45:34,402 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0845_real_final2000_rank3.svg
+[rank3]:> Batch Time: 468.91 ms, GPU Bubble Ratio: 49.34%, 34.00%, 38.25%, 29.49%
+[rank1]:2025-11-19 08:45:34,522 - INFO - Elementwise Histogram is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/frozen_params_histogram/251119_0845_rank1_stage1.svg
+[rank1]:	> Counts Sum: 1527840, Total Sum: 4743360 (32.21%), Ratio(%) per element: [29.71, 30.53, 34.76, 28.89, 28.62, 27.93, 27.86, 39.41, 39.27, 29.43, 31.96, 29.71, 30.94, 29.43, 28.68, 30.66, 40.16, 39.41, 29.71, 40.23, 32.17, 34.63, 30.94, 26.57, 29.03, 38.72, 39.68, 27.8, 29.5, 29.98, 29.37, 28.41, 28.41, 28.0, 39.68, 40.3, 29.03, 35.79, 31.14, 29.98, 28.62, 28.68, 27.66, 39.82, 39.34, 28.0, 29.37, 29.78, 31.14, 31.69, 27.8, 27.66, 39.13, 39.68, 28.89, 34.01, 38.93, 29.98, 29.57, 28.68, 28.62, 39.95, 39.27, 27.52, 30.19, 29.09, 29.91, 30.05, 28.75, 29.16, 39.34, 39.89, 29.91, 33.74, 29.71, 31.21, 28.89, 28.0, 32.17, 39.41, 39.0]
+[rank1]:2025-11-19 08:45:34,523 - INFO - Destroying the purge thread.
+[rank2]:2025-11-19 08:45:34,537 - INFO - Elementwise Histogram is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/frozen_params_histogram/251119_0845_rank2_stage2.svg
+[rank2]:	> Counts Sum: 1720920, Total Sum: 4216320 (40.82%), Ratio(%) per element: [37.7, 39.34, 37.56, 36.74, 35.99, 35.99, 34.56, 50.34, 47.6, 39.07, 41.32, 51.16, 42.21, 34.42, 35.79, 35.65, 48.83, 50.2, 46.92, 38.66, 39.82, 49.04, 35.79, 35.38, 34.49, 48.22, 50.95, 35.17, 47.74, 41.87, 37.5, 35.24, 35.1, 36.06, 47.95, 49.38, 35.31, 49.38, 39.68, 44.33, 34.08, 34.49, 35.31, 49.79, 49.24, 35.72, 38.59, 39.0, 40.23, 33.87, 35.1, 35.65, 48.08, 51.16, 38.38, 40.3, 42.69, 38.25, 34.9, 35.79, 35.04, 50.47, 48.36, 39.41, 47.13, 36.27, 38.45, 35.17, 34.49, 35.04, 49.45, 50.06]
+[rank2]:2025-11-19 08:45:34,537 - INFO - Destroying the purge thread.
+[rank3]:2025-11-19 08:45:34,532 - INFO - Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/pipeline_schedule/251119_0845_thry_final2000_rank3.svg
+[rank3]:> Batch Time: 525.91 ms, GPU Bubble Ratio: 27.27%, 27.27%, 27.27%, 27.27%
+[rank0]:2025-11-19 08:45:34,645 - INFO - Elementwise Histogram is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/frozen_params_histogram/251119_0845_rank0_stage0.svg
+[rank0]:	> Counts Sum: 2738080, Total Sum: 4274880 (64.05%), Ratio(%) per element: [75.61, 52.45, 59.28, 61.61, 54.16, 68.57, 53.82, 49.79, 86.61, 86.88, 53.27, 64.54, 57.03, 59.22, 53.89, 51.63, 52.25, 86.54, 86.81, 52.45, 86.2, 64.61, 70.28, 59.97, 51.22, 51.22, 86.54, 86.95, 53.55, 55.12, 56.07, 58.87, 49.79, 52.8, 51.7, 86.81, 87.15, 52.45, 72.19, 71.44, 56.89, 52.86, 51.63, 51.22, 86.27, 86.54, 57.65, 53.48, 54.43, 56.62, 49.72, 51.98, 52.45, 86.4, 87.02, 58.53, 54.78, 55.25, 68.98, 51.29, 52.66, 54.57, 86.81, 85.99, 53.14, 53.14, 86.74, 78.34, 53.07, 51.22, 50.81, 86.95, 86.47]
+[rank0]:2025-11-19 08:45:34,646 - INFO - Sleeping 2 seconds for other ranks to complete
+[rank3]:2025-11-19 08:45:34,577 - INFO - Frozen Ratio History of Rank 3 (Stage 3)  is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/freeze_ratio_history/rank3/251119_0845_stage3_final2000.svg
+[rank3]:2025-11-19 08:45:34,737 - INFO - Elementwise Histogram is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200/frozen_params_histogram/251119_0845_rank3_stage3.svg
+[rank3]:	> Counts Sum: 1200080, Total Sum: 3806400 (31.53%), Ratio(%) per element: [29.91, 33.12, 32.03, 33.33, 31.01, 31.14, 30.19, 33.46, 32.78, 31.01, 31.21, 31.83, 29.84, 29.84, 30.39, 29.98, 33.53, 33.6, 31.35, 31.28, 31.48, 33.12, 30.05, 31.07, 30.6, 33.4, 32.44, 30.6, 30.73, 31.76, 31.14, 30.8, 29.78, 29.78, 32.92, 33.33, 30.12, 30.87, 32.92, 33.19, 30.53, 29.91, 29.98, 33.06, 33.6, 30.39, 31.21, 31.01, 30.46, 31.01, 30.6, 30.53, 33.74, 33.26, 30.6, 30.53, 31.21, 33.26, 31.01, 29.91, 30.12, 32.37, 33.19, 33.19, 33.4]
+[rank3]:2025-11-19 08:45:34,738 - INFO - Destroying the purge thread.
+[rank3]:wandb: 
+[rank3]:wandb: Run history:
+[rank3]:wandb:      final/avg_end_to_end(s) ▁
+[rank3]:wandb:               final/avg_loss ▁
+[rank3]:wandb:             final/avg_mfu(%) ▁
+[rank3]:wandb:             final/avg_tflops ▁
+[rank3]:wandb:    final/avg_throughput(tps) ▁
+[rank3]:wandb:              final/grad_norm ▁
+[rank3]:wandb:               final/max_loss ▁
+[rank3]:wandb:                    grad_norm  █▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb: loss_metrics/global_avg_loss ▇█▄▃▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb: loss_metrics/global_max_loss ▇█▄▃▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: Run summary:
+[rank3]:wandb:      final/avg_end_to_end(s) 1.9997
+[rank3]:wandb:               final/avg_loss 0.21035
+[rank3]:wandb:             final/avg_mfu(%) 37.27242
+[rank3]:wandb:             final/avg_tflops 382.13425
+[rank3]:wandb:    final/avg_throughput(tps) 8193.24465
+[rank3]:wandb:              final/grad_norm 0.09711
+[rank3]:wandb:               final/max_loss 0.21035
+[rank3]:wandb:                    grad_norm 0.09711
+[rank3]:wandb: loss_metrics/global_avg_loss 0.21035
+[rank3]:wandb: loss_metrics/global_max_loss 0.21035
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: 🚀 View run 1109_1F1B_timelyapf_th1e-4_h200 at: https://wandb.ai/orangingq/torchtitan/runs/65xls6vv
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/1109_1F1B_timelyapf_th1e-4_h200/20251119-0737/wandb/run-20251119_073702-65xls6vv/logs
+[rank0]:2025-11-19 08:45:36,646 - INFO - Training completed
+[rank0]:2025-11-19 08:45:36,646 - INFO - Destroying the purge thread.
+[rank1]:2025-11-19 08:45:36,906 - INFO - Process group destroyed
+[rank3]:2025-11-19 08:45:36,916 - INFO - Process group destroyed
+[rank2]:2025-11-19 08:45:37,003 - INFO - Process group destroyed
+[rank0]:2025-11-19 08:45:37,007 - INFO - Process group destroyed
+[rank2]:Stage 2: Modules to keep: {'layers.19', 'layers.20', 'layers.23', 'layers.21', 'layers.24', 'layers.18', 'layers.22', 'layers.17'}
+[rank0]:Stage 0: Modules to keep: {'layers.6', 'layers.5', 'layers.1', 'tok_embeddings', 'layers.3', 'layers.4', 'layers.2', 'layers.0', 'layers.7'}
+[rank1]:Stage 1: Modules to keep: {'layers.15', 'layers.8', 'layers.9', 'layers.10', 'layers.13', 'layers.14', 'layers.16', 'layers.11', 'layers.12'}
+[rank3]:Stage 3: Modules to keep: {'output', 'layers.25', 'layers.31', 'layers.30', 'layers.29', 'layers.27', 'layers.26', 'layers.28', 'norm'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/1104_llama8b/config_1109.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Experiment
+[rank3]:1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
+[rank3]:1116: everything same, but with seed=11
+[rank3]:"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 50
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:		- pplog_freq: 200
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 3e-06
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.999
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 200
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: openhermes
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 2000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: 42
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: 1F1B
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:		- interval: 1000
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/1109_1F1B_timelyapf_th1e-4_h200
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: False
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 8
+[rank3]:		- seq_len: 2048
+[rank3]:		- freq: 10
+[rank3]:		- steps: -1
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: timelyapf
+[rank3]:		- phase_unit: 50
+[rank3]:		- stability_check_freq: 10
+[rank3]:		- max_freeze_ratio: 0.7
+[rank3]:		- adjustment: False
+[rank3]:		- threshold: 0.0001
+[rank3]:		- percentile: 80
+[rank3]:
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3

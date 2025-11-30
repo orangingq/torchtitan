@@ -109,6 +109,7 @@ def _process_openhermes_text(sample: dict[str, Any]) -> str:
     else:
         return f"<|user|>\n{question}\n<|assistant|>\n{response}"
 
+
 @dataclass
 class DatasetConfig:
     path: str
