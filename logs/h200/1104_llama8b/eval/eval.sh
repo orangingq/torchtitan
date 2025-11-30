@@ -10,7 +10,7 @@ EXPLAIN="Main Table Experiment"
 EXPERIMENT_TAG="1104_llama8b"
 MODEL_TYPE="Llama-3.1-8B"
 TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1"
-KEYWORD="1109_*" # Pattern to identify log files for evaluation
+KEYWORD="1128_*" # Pattern to identify log files for evaluation
 
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then

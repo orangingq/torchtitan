@@ -4,6 +4,7 @@
 EXPLAIN="Llama 3.1 8B Experiment
 1109: 1) resolved timelyapf issue, 2) seed fixed to 42 for all runs, 3) 3000 steps -> 2000 steps (better benchmark scores!)
 1116: everything same, but with seed=11
+1128: everything same as 1109, but with th=1e-3, and solve DAG with QP. 
 "
 EXPERIMENT_TAG="1104_llama8b"
 TODAY="1109"
@@ -45,8 +46,8 @@ COMMON_ARGS=(
 for PP_SCHEDULER in GPipe 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in apf timelyapf ; do #nofreeze apf auto fullrand7 timelyapf timelyauto 
 
-        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_th3e-3.log"
-        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_th3e-3_h200"
+        OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_th1e-3.log"
+        BASENAME="${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_th1e-3_h200"
 
         # Skip evaluation if result file already exists
         if [ -f "${OUTPUT_FILE}" ]; then
@@ -66,7 +67,7 @@ for PP_SCHEDULER in GPipe 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZer
             FREEZE_ARGS=(
                 "--freezing.freeze"
                 "--freezing.metric_type=${METRIC_TYPE}"
-                "--freezing.threshold=0.003" # 0.05 -> 0.005 (freezing more)
+                "--freezing.threshold=0.001" # 0.05 -> 0.005 (freezing more)
                 "--freezing.max_freeze_ratio=0.7"
                 "--freezing.percentile=80" # 70 -> 80 (freezing more)
             )

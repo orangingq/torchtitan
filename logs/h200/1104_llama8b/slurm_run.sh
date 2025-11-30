@@ -6,4 +6,4 @@
 #SBATCH --time=10:00:00
 #SBATCH --output=logs/h200/1104_llama8b/slurm-%j.out
 
-bash ./logs/h200/1104_llama8b/run_1109_2.sh "$@"
+bash ./logs/h200/1104_llama8b/run_1128.sh "$@"
