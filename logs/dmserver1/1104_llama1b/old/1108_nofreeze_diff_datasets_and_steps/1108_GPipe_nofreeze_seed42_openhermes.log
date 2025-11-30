@@ -1,0 +1,443 @@
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: 2025. 11. 10. (월) 00:00:06 KST
+✔️SERVER: dmserver1 (143.248.135.95),  GPUs: 2,3,4,5
+✔️SCRIPT: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/run.sh
+✔️OUTPUT: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/1108_GPipe_nofreeze_seed42_openhermes.log
+✔️Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+
+✔️Running with nofreeze x GPipe ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/home/shcho/torchtitan/logs/dmserver1/1104_llama1b/config_1108.toml --job.description="Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+" --parallelism.pipeline_parallel_degree=4 --training.dataset=openhermes  --freezing.no-freeze
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+[rank2]:2025-11-10 00:00:12,599 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank2]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank2]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank2]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank2]:"
+[rank3]:2025-11-10 00:00:12,602 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank3]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank3]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank3]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank3]:"
+[rank0]:2025-11-10 00:00:12,708 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank0]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank0]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank0]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank0]:"
+[rank1]:2025-11-10 00:00:12,721 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank1]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank1]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank1]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank1]:"
+[rank2]:2025-11-10 00:00:12,829 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-11-10 00:00:12,832 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-11-10 00:00:12,820 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-11-10 00:00:12,823 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-10 00:00:12,974 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-11-10 00:00:12,976 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-10 00:00:12,980 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank0]:2025-11-10 00:00:12,981 - INFO - Loading tokenizer from tokenizer.json
+[rank1]:2025-11-10 00:00:12,991 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-11-10 00:00:12,994 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-10 00:00:13,400 - INFO - Preparing openhermes dataset from teknium/OpenHermes-2.5
+[rank0]:2025-11-10 00:00:20,102 - INFO - Building llama3 1B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=2048, n_layers=16, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=256, ffn_dim_multiplier=1.5, norm_eps=1e-05, rope_theta=500000, max_seq_len=512, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2025-11-10 00:00:20,250 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank1]:2025-11-10 00:00:20,300 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank2]:2025-11-10 00:00:20,240 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank2]:2025-11-10 00:00:20,288 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-11-10 00:00:20,256 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank0]:2025-11-10 00:00:20,301 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-11-10 00:00:20,303 - INFO - Model llama3 1B size: 1,498,482,688 total parameters
+[rank1]:2025-11-10 00:00:20,325 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.4', 'layers.5', 'layers.6', 'layers.7', 'layers.8']
+[rank1]:2025-11-10 00:00:20,325 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank2]:2025-11-10 00:00:20,317 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.9', 'layers.10', 'layers.11', 'layers.12']
+[rank2]:2025-11-10 00:00:20,317 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank0]:2025-11-10 00:00:20,326 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3']
+[rank0]:2025-11-10 00:00:20,327 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank1]:2025-11-10 00:00:20,538 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank1]:2025-11-10 00:00:20,539 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank1]:2025-11-10 00:00:20,539 - INFO - CUDA memory usage for model: 1.13GiB(2.39%)
+[rank2]:2025-11-10 00:00:20,535 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank2]:2025-11-10 00:00:20,536 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank2]:2025-11-10 00:00:20,536 - INFO - CUDA memory usage for model: 0.92GiB(1.94%)
+[rank0]:2025-11-10 00:00:20,540 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-11-10 00:00:20,540 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank0]:2025-11-10 00:00:20,541 - INFO - CUDA memory usage for model: 1.90GiB(3.99%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run 8poomsnu
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /data2/shcho/torchtitan/tb/1108_GPipe_nofreeze_seed42_openhermes_dm1/20251110-0000/wandb/run-20251110_000021-8poomsnu
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/8poomsnu
+[rank3]:2025-11-10 00:00:22,463 - INFO - WandB logging enabled
+[rank3]:2025-11-10 00:00:22,464 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank3]:2025-11-10 00:00:22,503 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank3]:2025-11-10 00:00:22,531 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.13', 'layers.14', 'layers.15', 'norm', 'output']
+[rank3]:2025-11-10 00:00:22,532 - INFO - Using pipeline schedule GPipe with 8 microbatches and 4 stages.
+[rank0]:2025-11-10 00:00:22,731 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /data2/shcho/torchtitan/checkpoint/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank1]:2025-11-10 00:00:22,737 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-10 00:00:22,731 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-10 00:00:22,731 - INFO - Trainer is initialized with local batch size 32, global batch size 128, gradient accumulation steps 4, sequence length 512, total steps 500 (warmup 100)
+[rank0]:2025-11-10 00:00:22,732 - INFO - Loading the checkpoint from /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp.
+[rank2]:2025-11-10 00:00:22,730 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank3]:2025-11-10 00:00:22,715 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank3]:2025-11-10 00:00:22,715 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank3]:2025-11-10 00:00:22,716 - INFO - CUDA memory usage for model: 1.66GiB(3.50%)
+[rank3]:2025-11-10 00:00:22,730 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-10 00:00:25,079 - INFO - [GC] GC collection for checkpoint loading. 0.01 seconds
+[rank0]:2025-11-10 00:00:25,080 - INFO - Finished loading the checkpoint in 2.35 seconds.
+[rank0]:2025-11-10 00:00:25,080 - INFO - Training starts at step 1
+[rank1]:2025-11-10 00:00:28,206 - INFO -  step:  1  loss: -4.0000  grad_norm: 55.6880  memory: 12.38GiB(26.05%)  tps: 2,072  tflops: 15.78  mfu: 5.06%
+[rank1]:2025-11-10 00:00:28,206 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank2]:2025-11-10 00:00:28,203 - INFO -  step:  1  loss: -4.0000  grad_norm: 55.6880  memory:  9.99GiB(21.03%)  tps: 2,070  tflops: 15.77  mfu: 5.05%
+[rank3]:2025-11-10 00:00:28,214 - INFO -  step:  1  loss:  5.9067  grad_norm: 55.6880  memory: 24.19GiB(50.91%)  tps: 2,870  tflops: 21.86  mfu: 7.01%
+[rank2]:2025-11-10 00:00:28,203 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank3]:2025-11-10 00:00:28,215 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-11-10 00:00:28,243 - INFO -  step:  1  loss: -4.0000  grad_norm: 55.6880  memory: 12.80GiB(26.95%)  tps: 2,063  tflops: 15.71  mfu: 5.04%
+[rank0]:2025-11-10 00:00:28,243 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-11-10 00:02:31,628 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:02:33,911 - INFO - Avg. fwd time: 11.2163 / Avg. bwd time: 43.7378 / Avg. batch time: 499.3157 (ms) / GPU bubble ratio: 11.95%
+[rank2]:2025-11-10 00:02:33,982 - INFO - Avg. fwd time: 7.1819 / Avg. bwd time: 18.7669 / Avg. batch time: 531.2332 (ms) / GPU bubble ratio: 60.92%
+[rank1]:2025-11-10 00:02:34,021 - INFO - Avg. fwd time: 9.2649 / Avg. bwd time: 24.0599 / Avg. batch time: 570.7212 (ms) / GPU bubble ratio: 53.29%
+[rank0]:2025-11-10 00:02:34,029 - INFO - Avg. fwd time: 8.2034 / Avg. bwd time: 23.8905 / Avg. batch time: 608.5493 (ms) / GPU bubble ratio: 57.81%
+[rank3]:2025-11-10 00:02:34,215 - INFO -  step: 50  loss:  5.8933  grad_norm: 13.0018  memory: 26.98GiB(56.79%)  tps: 6,372  tflops: 48.53  mfu: 15.55%
+[rank1]:2025-11-10 00:02:34,206 - INFO -  step: 50  loss: -4.0000  grad_norm: 13.0018  memory: 14.64GiB(30.82%)  tps: 6,372  tflops: 48.53  mfu: 15.55%
+[rank0]:2025-11-10 00:02:34,217 - INFO -  step: 50  loss: -4.0000  grad_norm: 13.0018  memory: 16.57GiB(34.88%)  tps: 6,373  tflops: 48.54  mfu: 15.56%
+[rank2]:2025-11-10 00:02:34,202 - INFO -  step: 50  loss: -4.0000  grad_norm: 13.0018  memory: 11.81GiB(24.85%)  tps: 6,372  tflops: 48.53  mfu: 15.55%
+[rank0]:2025-11-10 00:04:40,872 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:04:43,196 - INFO - Avg. fwd time: 11.2605 / Avg. bwd time: 43.9999 / Avg. batch time: 501.6875 (ms) / GPU bubble ratio: 11.88%
+[rank2]:2025-11-10 00:04:43,271 - INFO - Avg. fwd time: 7.1833 / Avg. bwd time: 18.8434 / Avg. batch time: 533.1727 (ms) / GPU bubble ratio: 60.95%
+[rank0]:2025-11-10 00:04:43,318 - INFO - Avg. fwd time: 8.2256 / Avg. bwd time: 23.9481 / Avg. batch time: 609.7271 (ms) / GPU bubble ratio: 57.79%
+[rank1]:2025-11-10 00:04:43,311 - INFO - Avg. fwd time: 9.2720 / Avg. bwd time: 24.1670 / Avg. batch time: 572.2982 (ms) / GPU bubble ratio: 53.26%
+[rank2]:2025-11-10 00:04:43,494 - INFO -  step: 100  loss: -4.0000  grad_norm: 13.4198  memory: 11.81GiB(24.85%)  tps: 6,336  tflops: 48.26  mfu: 15.47%
+[rank3]:2025-11-10 00:04:43,507 - INFO -  step: 100  loss:  3.5916  grad_norm: 13.4198  memory: 26.98GiB(56.79%)  tps: 6,336  tflops: 48.26  mfu: 15.47%
+[rank0]:2025-11-10 00:04:43,508 - INFO -  step: 100  loss: -4.0000  grad_norm: 13.4198  memory: 16.57GiB(34.88%)  tps: 6,336  tflops: 48.26  mfu: 15.47%
+[rank1]:2025-11-10 00:04:43,498 - INFO -  step: 100  loss: -4.0000  grad_norm: 13.4198  memory: 14.64GiB(30.82%)  tps: 6,336  tflops: 48.26  mfu: 15.47%
+[rank3]:2025-11-10 00:04:43,682 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1/pipeline_schedule/251110_0004_real_step100_rank3.svg
+[rank3]:> Batch Time: 608.64 ms, GPU Bubble Ratio: 57.37%, 55.85%, 65.64%, 27.16%
+[rank0]:2025-11-10 00:06:50,243 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:06:52,720 - INFO - Avg. fwd time: 11.2623 / Avg. bwd time: 44.0437 / Avg. batch time: 502.0248 (ms) / GPU bubble ratio: 11.87%
+[rank2]:2025-11-10 00:06:52,745 - INFO - Avg. fwd time: 7.1796 / Avg. bwd time: 18.8614 / Avg. batch time: 533.5883 (ms) / GPU bubble ratio: 60.96%
+[rank1]:2025-11-10 00:06:52,775 - INFO - Avg. fwd time: 9.2692 / Avg. bwd time: 24.1900 / Avg. batch time: 572.5904 (ms) / GPU bubble ratio: 53.25%
+[rank1]:2025-11-10 00:06:52,830 - INFO -  step: 150  loss: -4.0000  grad_norm:  9.6194  memory: 14.64GiB(30.82%)  tps: 6,334  tflops: 48.24  mfu: 15.46%
+[rank0]:2025-11-10 00:06:52,805 - INFO - Avg. fwd time: 8.2376 / Avg. bwd time: 23.9595 / Avg. batch time: 609.8922 (ms) / GPU bubble ratio: 57.77%
+[rank2]:2025-11-10 00:06:52,827 - INFO -  step: 150  loss: -4.0000  grad_norm:  9.6194  memory: 11.81GiB(24.85%)  tps: 6,334  tflops: 48.24  mfu: 15.46%
+[rank3]:2025-11-10 00:06:52,839 - INFO -  step: 150  loss:  3.3156  grad_norm:  9.6194  memory: 26.98GiB(56.79%)  tps: 6,334  tflops: 48.24  mfu: 15.46%
+[rank0]:2025-11-10 00:06:52,841 - INFO -  step: 150  loss: -4.0000  grad_norm:  9.6194  memory: 16.57GiB(34.88%)  tps: 6,334  tflops: 48.24  mfu: 15.46%
+[rank0]:2025-11-10 00:08:59,587 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-10 00:09:01,962 - INFO - Avg. fwd time: 7.1767 / Avg. bwd time: 18.8704 / Avg. batch time: 533.5402 (ms) / GPU bubble ratio: 60.94%
+[rank3]:2025-11-10 00:09:01,890 - INFO - Avg. fwd time: 11.2606 / Avg. bwd time: 44.0548 / Avg. batch time: 502.0882 (ms) / GPU bubble ratio: 11.86%
+[rank1]:2025-11-10 00:09:02,002 - INFO - Avg. fwd time: 9.2641 / Avg. bwd time: 24.1996 / Avg. batch time: 572.4902 (ms) / GPU bubble ratio: 53.24%
+[rank0]:2025-11-10 00:09:02,009 - INFO - Avg. fwd time: 8.2405 / Avg. bwd time: 23.9632 / Avg. batch time: 609.7395 (ms) / GPU bubble ratio: 57.75%
+[rank2]:2025-11-10 00:09:02,181 - INFO -  step: 200  loss: -4.0000  grad_norm: 30.1797  memory: 11.81GiB(24.85%)  tps: 6,333  tflops: 48.23  mfu: 15.46%
+[rank1]:2025-11-10 00:09:02,185 - INFO -  step: 200  loss: -4.0000  grad_norm: 30.1797  memory: 14.64GiB(30.82%)  tps: 6,333  tflops: 48.23  mfu: 15.46%
+[rank0]:2025-11-10 00:09:02,196 - INFO -  step: 200  loss: -4.0000  grad_norm: 30.1797  memory: 16.57GiB(34.88%)  tps: 6,333  tflops: 48.23  mfu: 15.46%
+[rank3]:2025-11-10 00:09:02,194 - INFO -  step: 200  loss:  1.3534  grad_norm: 30.1797  memory: 26.98GiB(56.79%)  tps: 6,333  tflops: 48.23  mfu: 15.46%
+[rank3]:2025-11-10 00:09:02,345 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1/pipeline_schedule/251110_0009_real_step200_rank3.svg
+[rank3]:> Batch Time: 608.59 ms, GPU Bubble Ratio: 57.38%, 55.91%, 65.64%, 27.18%
+[rank0]:2025-11-10 00:11:09,470 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:11:11,791 - INFO - Avg. fwd time: 11.2668 / Avg. bwd time: 44.1095 / Avg. batch time: 502.5707 (ms) / GPU bubble ratio: 11.85%
+[rank2]:2025-11-10 00:11:11,862 - INFO - Avg. fwd time: 7.1742 / Avg. bwd time: 18.8859 / Avg. batch time: 534.0695 (ms) / GPU bubble ratio: 60.96%
+[rank1]:2025-11-10 00:11:11,902 - INFO - Avg. fwd time: 9.2613 / Avg. bwd time: 24.2172 / Avg. batch time: 572.9907 (ms) / GPU bubble ratio: 53.26%
+[rank0]:2025-11-10 00:11:11,909 - INFO - Avg. fwd time: 8.2400 / Avg. bwd time: 23.9706 / Avg. batch time: 610.2138 (ms) / GPU bubble ratio: 57.77%
+[rank1]:2025-11-10 00:11:12,087 - INFO -  step: 250  loss: -4.0000  grad_norm: 16.8952  memory: 14.64GiB(30.82%)  tps: 6,306  tflops: 48.03  mfu: 15.39%
+[rank3]:2025-11-10 00:11:12,096 - INFO -  step: 250  loss:  0.8928  grad_norm: 16.8952  memory: 26.98GiB(56.79%)  tps: 6,306  tflops: 48.03  mfu: 15.39%
+[rank2]:2025-11-10 00:11:12,083 - INFO -  step: 250  loss: -4.0000  grad_norm: 16.8952  memory: 11.81GiB(24.85%)  tps: 6,306  tflops: 48.03  mfu: 15.39%
+[rank0]:2025-11-10 00:11:12,099 - INFO -  step: 250  loss: -4.0000  grad_norm: 16.8952  memory: 16.57GiB(34.88%)  tps: 6,306  tflops: 48.03  mfu: 15.39%
+[rank0]:2025-11-10 00:13:20,592 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:13:23,220 - INFO - Avg. fwd time: 11.3094 / Avg. bwd time: 44.2529 / Avg. batch time: 504.0721 (ms) / GPU bubble ratio: 11.82%
+[rank2]:2025-11-10 00:13:23,247 - INFO - Avg. fwd time: 7.1812 / Avg. bwd time: 18.9034 / Avg. batch time: 535.5298 (ms) / GPU bubble ratio: 61.03%
+[rank2]:2025-11-10 00:13:23,330 - INFO -  step: 300  loss: -4.0000  grad_norm:  1.2920  memory: 11.81GiB(24.85%)  tps: 6,242  tflops: 47.54  mfu: 15.24%
+[rank1]:2025-11-10 00:13:23,278 - INFO - Avg. fwd time: 9.2733 / Avg. bwd time: 24.2370 / Avg. batch time: 574.4654 (ms) / GPU bubble ratio: 53.33%
+[rank1]:2025-11-10 00:13:23,333 - INFO -  step: 300  loss: -4.0000  grad_norm:  1.2920  memory: 14.64GiB(30.82%)  tps: 6,242  tflops: 47.54  mfu: 15.24%
+[rank0]:2025-11-10 00:13:23,308 - INFO - Avg. fwd time: 8.2496 / Avg. bwd time: 23.9814 / Avg. batch time: 611.6925 (ms) / GPU bubble ratio: 57.85%
+[rank0]:2025-11-10 00:13:23,345 - INFO -  step: 300  loss: -4.0000  grad_norm:  1.2920  memory: 16.57GiB(34.88%)  tps: 6,242  tflops: 47.54  mfu: 15.24%
+[rank3]:2025-11-10 00:13:23,342 - INFO -  step: 300  loss:  1.0453  grad_norm:  1.2920  memory: 26.98GiB(56.79%)  tps: 6,242  tflops: 47.54  mfu: 15.24%
+[rank3]:2025-11-10 00:13:23,494 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1/pipeline_schedule/251110_0013_real_step300_rank3.svg
+[rank3]:> Batch Time: 624.72 ms, GPU Bubble Ratio: 58.16%, 56.57%, 66.20%, 26.82%
+[rank0]:2025-11-10 00:15:34,809 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:15:37,222 - INFO - Avg. fwd time: 11.3760 / Avg. bwd time: 44.3748 / Avg. batch time: 505.5870 (ms) / GPU bubble ratio: 11.78%
+[rank2]:2025-11-10 00:15:37,294 - INFO - Avg. fwd time: 7.1975 / Avg. bwd time: 18.9186 / Avg. batch time: 537.1179 (ms) / GPU bubble ratio: 61.10%
+[rank1]:2025-11-10 00:15:37,334 - INFO - Avg. fwd time: 9.2964 / Avg. bwd time: 24.2548 / Avg. batch time: 576.0833 (ms) / GPU bubble ratio: 53.41%
+[rank0]:2025-11-10 00:15:37,341 - INFO - Avg. fwd time: 8.2761 / Avg. bwd time: 23.9894 / Avg. batch time: 613.3244 (ms) / GPU bubble ratio: 57.91%
+[rank2]:2025-11-10 00:15:37,514 - INFO -  step: 350  loss: -4.0000  grad_norm:  1.4180  memory: 11.81GiB(24.85%)  tps: 6,105  tflops: 46.50  mfu: 14.90%
+[rank1]:2025-11-10 00:15:37,517 - INFO -  step: 350  loss: -4.0000  grad_norm:  1.4180  memory: 14.64GiB(30.82%)  tps: 6,105  tflops: 46.50  mfu: 14.90%
+[rank0]:2025-11-10 00:15:37,528 - INFO -  step: 350  loss: -4.0000  grad_norm:  1.4180  memory: 16.57GiB(34.88%)  tps: 6,105  tflops: 46.50  mfu: 14.90%
+[rank3]:2025-11-10 00:15:37,527 - INFO -  step: 350  loss:  1.0324  grad_norm:  1.4180  memory: 26.98GiB(56.79%)  tps: 6,105  tflops: 46.50  mfu: 14.90%
+[rank0]:2025-11-10 00:17:46,397 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-10 00:17:48,880 - INFO - Avg. fwd time: 7.2044 / Avg. bwd time: 18.9287 / Avg. batch time: 537.8238 (ms) / GPU bubble ratio: 61.13%
+[rank3]:2025-11-10 00:17:48,805 - INFO - Avg. fwd time: 11.4052 / Avg. bwd time: 44.4376 / Avg. batch time: 506.3227 (ms) / GPU bubble ratio: 11.77%
+[rank1]:2025-11-10 00:17:48,920 - INFO - Avg. fwd time: 9.3056 / Avg. bwd time: 24.2649 / Avg. batch time: 576.7976 (ms) / GPU bubble ratio: 53.44%
+[rank0]:2025-11-10 00:17:48,927 - INFO - Avg. fwd time: 8.2908 / Avg. bwd time: 23.9930 / Avg. batch time: 614.0397 (ms) / GPU bubble ratio: 57.94%
+[rank1]:2025-11-10 00:17:49,105 - INFO -  step: 400  loss: -4.0000  grad_norm:  2.6536  memory: 14.64GiB(30.82%)  tps: 6,226  tflops: 47.42  mfu: 15.20%
+[rank0]:2025-11-10 00:17:49,117 - INFO -  step: 400  loss: -4.0000  grad_norm:  2.6536  memory: 16.57GiB(34.88%)  tps: 6,225  tflops: 47.41  mfu: 15.20%
+[rank2]:2025-11-10 00:17:49,101 - INFO -  step: 400  loss: -4.0000  grad_norm:  2.6536  memory: 11.81GiB(24.85%)  tps: 6,226  tflops: 47.42  mfu: 15.20%
+[rank3]:2025-11-10 00:17:49,113 - INFO -  step: 400  loss:  0.8749  grad_norm:  2.6536  memory: 26.98GiB(56.79%)  tps: 6,226  tflops: 47.42  mfu: 15.20%
+[rank3]:2025-11-10 00:17:49,264 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1/pipeline_schedule/251110_0017_real_step400_rank3.svg
+[rank3]:> Batch Time: 611.16 ms, GPU Bubble Ratio: 57.51%, 55.98%, 65.68%, 27.22%
+[rank0]:2025-11-10 00:19:56,164 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-10 00:19:58,718 - INFO - Avg. fwd time: 7.2031 / Avg. bwd time: 18.9357 / Avg. batch time: 537.9442 (ms) / GPU bubble ratio: 61.13%
+[rank3]:2025-11-10 00:19:58,691 - INFO - Avg. fwd time: 11.4029 / Avg. bwd time: 44.4510 / Avg. batch time: 506.4094 (ms) / GPU bubble ratio: 11.76%
+[rank1]:2025-11-10 00:19:58,750 - INFO - Avg. fwd time: 9.3050 / Avg. bwd time: 24.2742 / Avg. batch time: 576.9208 (ms) / GPU bubble ratio: 53.44%
+[rank0]:2025-11-10 00:19:58,781 - INFO - Avg. fwd time: 8.2877 / Avg. bwd time: 23.9957 / Avg. batch time: 614.1556 (ms) / GPU bubble ratio: 57.95%
+[rank2]:2025-11-10 00:19:58,803 - INFO -  step: 450  loss: -4.0000  grad_norm:  1.0676  memory: 11.81GiB(24.85%)  tps: 6,316  tflops: 48.10  mfu: 15.42%
+[rank3]:2025-11-10 00:19:58,816 - INFO -  step: 450  loss:  0.6202  grad_norm:  1.0676  memory: 26.98GiB(56.79%)  tps: 6,316  tflops: 48.11  mfu: 15.42%
+[rank1]:2025-11-10 00:19:58,806 - INFO -  step: 450  loss: -4.0000  grad_norm:  1.0676  memory: 14.64GiB(30.82%)  tps: 6,316  tflops: 48.10  mfu: 15.42%
+[rank0]:2025-11-10 00:19:58,817 - INFO -  step: 450  loss: -4.0000  grad_norm:  1.0676  memory: 16.57GiB(34.88%)  tps: 6,316  tflops: 48.10  mfu: 15.42%
+[rank0]:2025-11-10 00:22:07,390 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-10 00:22:09,713 - INFO - Avg. fwd time: 11.4202 / Avg. bwd time: 44.5017 / Avg. batch time: 506.9590 (ms) / GPU bubble ratio: 11.75%
+[rank2]:2025-11-10 00:22:09,785 - INFO - Avg. fwd time: 7.2064 / Avg. bwd time: 18.9447 / Avg. batch time: 538.4776 (ms) / GPU bubble ratio: 61.15%
+[rank1]:2025-11-10 00:22:09,825 - INFO - Avg. fwd time: 9.3109 / Avg. bwd time: 24.2867 / Avg. batch time: 577.4697 (ms) / GPU bubble ratio: 53.46%
+[rank0]:2025-11-10 00:22:09,833 - INFO - Avg. fwd time: 8.2905 / Avg. bwd time: 24.0002 / Avg. batch time: 614.7071 (ms) / GPU bubble ratio: 57.98%
+[rank3]:2025-11-10 00:22:10,017 - INFO -  step: 500  loss:  0.5395  grad_norm:  6.5377  memory: 26.98GiB(56.79%)  tps: 6,244  tflops: 47.55  mfu: 15.24%
+[rank3]:2025-11-10 00:22:10,018 - INFO -  final step: 500  loss:  0.5395  grad_norm:  6.5377  tps: 6,892  tflops: 52.49  mfu: 14.58%
+[rank3]:2025-11-10 00:22:10,018 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank3]:2025-11-10 00:22:10,019 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 500.
+[rank2]:2025-11-10 00:22:10,005 - INFO -  step: 500  loss: -4.0000  grad_norm:  6.5377  memory: 11.81GiB(24.85%)  tps: 6,244  tflops: 47.55  mfu: 15.24%
+[rank2]:2025-11-10 00:22:10,005 - INFO -  final step: 500  loss: -4.0000  grad_norm:  6.5377  tps: 6,880  tflops: 52.40  mfu: 14.40%
+[rank2]:2025-11-10 00:22:10,005 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank2]:2025-11-10 00:22:10,006 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 500.
+[rank1]:2025-11-10 00:22:10,009 - INFO -  step: 500  loss: -4.0000  grad_norm:  6.5377  memory: 14.64GiB(30.82%)  tps: 6,244  tflops: 47.55  mfu: 15.24%
+[rank1]:2025-11-10 00:22:10,009 - INFO -  final step: 500  loss: -4.0000  grad_norm:  6.5377  tps: 6,880  tflops: 52.40  mfu: 14.40%
+[rank1]:2025-11-10 00:22:10,009 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank1]:2025-11-10 00:22:10,010 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 500.
+[rank0]:2025-11-10 00:22:10,020 - INFO -  step: 500  loss: -4.0000  grad_norm:  6.5377  memory: 16.57GiB(34.88%)  tps: 6,244  tflops: 47.55  mfu: 15.24%
+[rank0]:2025-11-10 00:22:10,021 - INFO -  final step: 500  loss: -4.0000  grad_norm:  6.5377  tps: 6,880  tflops: 52.40  mfu: 14.40%
+[rank0]:2025-11-10 00:22:10,021 - INFO - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2025-11-10 00:22:10,021 - INFO - Saving a model only checkpoint in torch.float16 at last step, step 500.
+[rank0]:2025-11-10 00:22:11,955 - INFO - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank0]:2025-11-10 00:22:11,967 - INFO - Sleeping 2 seconds for other ranks to complete
+[rank2]:2025-11-10 00:22:11,967 - INFO - Destroying the purge thread.
+[rank1]:2025-11-10 00:22:11,967 - INFO - Destroying the purge thread.
+[rank3]:2025-11-10 00:22:12,111 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1/pipeline_schedule/251110_0022_real_final500_rank3.svg
+[rank3]:> Batch Time: 613.66 ms, GPU Bubble Ratio: 57.64%, 56.08%, 65.80%, 27.11%
+[rank3]:2025-11-10 00:22:12,249 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1/pipeline_schedule/251110_0022_thry_final500_rank3.svg
+[rank3]:> Batch Time: 298.79 ms, GPU Bubble Ratio: 27.27%, 27.27%, 27.27%, 27.27%
+[rank3]:2025-11-10 00:22:12,250 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank2]:2025-11-10 00:22:12,392 - INFO - Process group destroyed
+[rank1]:2025-11-10 00:22:12,424 - INFO - Process group destroyed
+[rank3]:wandb: uploading history steps 9-10, summary, console lines 208-217
+[rank3]:wandb: 
+[rank3]:wandb: Run history:
+[rank3]:wandb:      final/avg_end_to_end(s) ▁
+[rank3]:wandb:               final/avg_loss ▁
+[rank3]:wandb:             final/avg_mfu(%) ▁
+[rank3]:wandb:             final/avg_tflops ▁
+[rank3]:wandb:    final/avg_throughput(tps) ▁
+[rank3]:wandb:              final/grad_norm ▁
+[rank3]:wandb:               final/max_loss ▁
+[rank3]:wandb:                    grad_norm █▃▃▂▅▃▁▁▁▁▂
+[rank3]:wandb: loss_metrics/global_avg_loss ██▅▅▂▁▂▂▁▁▁
+[rank3]:wandb: loss_metrics/global_max_loss ██▅▅▂▁▂▂▁▁▁
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: Run summary:
+[rank3]:wandb:      final/avg_end_to_end(s) 2.37725
+[rank3]:wandb:               final/avg_loss 0.5395
+[rank3]:wandb:             final/avg_mfu(%) 14.57655
+[rank3]:wandb:             final/avg_tflops 52.49088
+[rank3]:wandb:    final/avg_throughput(tps) 6891.99149
+[rank3]:wandb:              final/grad_norm 6.53773
+[rank3]:wandb:               final/max_loss 0.5395
+[rank3]:wandb:                    grad_norm 6.53773
+[rank3]:wandb: loss_metrics/global_avg_loss 0.5395
+[rank3]:wandb: loss_metrics/global_max_loss 0.5395
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: 🚀 View run 1108_GPipe_nofreeze_seed42_openhermes_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/8poomsnu
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: /data2/shcho/torchtitan/tb/1108_GPipe_nofreeze_seed42_openhermes_dm1/20251110-0000/wandb/run-20251110_000021-8poomsnu/logs
+[rank3]:2025-11-10 00:22:13,891 - INFO - Process group destroyed
+[rank0]:2025-11-10 00:22:13,968 - INFO - Training completed
+[rank0]:2025-11-10 00:22:13,968 - INFO - Destroying the purge thread.
+[rank0]:2025-11-10 00:22:14,441 - INFO - Process group destroyed
+[rank1]:Stage 1: Modules to keep: {'layers.4', 'layers.6', 'layers.5', 'layers.7', 'layers.8'}
+[rank0]:Stage 0: Modules to keep: {'tok_embeddings', 'layers.1', 'layers.0', 'layers.3', 'layers.2'}
+[rank2]:Stage 2: Modules to keep: {'layers.10', 'layers.12', 'layers.11', 'layers.9'}
+[rank3]:Stage 3: Modules to keep: {'layers.13', 'output', 'layers.14', 'norm', 'layers.15'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/config_1108.toml
+[rank3]:		- dump_folder: /data2/shcho/torchtitan
+[rank3]:		- description: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank3]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank3]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank3]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank3]:"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /data2/shcho/torchtitan/profile_trace/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /data2/shcho/torchtitan/memory_snapshot/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 50
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /data2/shcho/torchtitan/tb/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /data2/shcho/torchtitan/images/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:		- pplog_freq: 200
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 1B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.2-1B
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 5e-06
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.1
+[rank3]:	- training:
+[rank3]:		- dataset: openhermes
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 32
+[rank3]:		- global_batch_size: 128
+[rank3]:		- seq_len: 512
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 500
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: 42
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: GPipe
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 4
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /data2/shcho/torchtitan/checkpoint/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:		- interval: 1200
+[rank3]:		- initial_load_path: /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /data2/shcho/torchtitan/comm_traces/1108_GPipe_nofreeze_seed42_openhermes_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: False
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 32
+[rank3]:		- seq_len: 512
+[rank3]:		- freq: 200
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: False
+[rank3]:		- metric_type: apf
+[rank3]:		- phase_unit: 50
+[rank3]:		- stability_check_freq: 10
+[rank3]:		- max_freeze_ratio: 0.7
+[rank3]:		- adjustment: False
+[rank3]:		- threshold: 0.05
+[rank3]:		- percentile: 70
+[rank3]:
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3

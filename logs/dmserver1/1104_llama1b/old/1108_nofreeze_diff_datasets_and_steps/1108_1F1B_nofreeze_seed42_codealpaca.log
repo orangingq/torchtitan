@@ -1,0 +1,598 @@
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: 2025. 11. 09. (일) 23:29:01 KST
+✔️SERVER: dmserver1 (143.248.135.95),  GPUs: 2,3,4,5
+✔️SCRIPT: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/run.sh
+✔️OUTPUT: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/1108_1F1B_nofreeze_seed42_codealpaca.log
+✔️Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+
+✔️Running with nofreeze x 1F1B ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/home/shcho/torchtitan/logs/dmserver1/1104_llama1b/config_1108.toml --job.description="Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+" --parallelism.pipeline_parallel_degree=4 --training.dataset=codealpaca  --freezing.no-freeze
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+[rank0]:2025-11-09 23:29:07,319 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank0]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank0]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank0]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank0]:"
+[rank3]:2025-11-09 23:29:07,318 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank3]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank3]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank3]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank3]:"
+[rank1]:2025-11-09 23:29:07,479 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank1]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank1]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank1]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank1]:"
+[rank0]:2025-11-09 23:29:07,567 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-11-09 23:29:07,576 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-09 23:29:07,580 - INFO - [GC] Initial GC collection 0.00 seconds
+[rank0]:2025-11-09 23:29:07,581 - INFO - Loading tokenizer from tokenizer.json
+[rank3]:2025-11-09 23:29:07,562 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-11-09 23:29:07,576 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank2]:2025-11-09 23:29:07,576 - INFO - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank2]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank2]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank2]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank2]:"
+[rank1]:2025-11-09 23:29:07,685 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-11-09 23:29:07,688 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank2]:2025-11-09 23:29:07,759 - WARNING - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-11-09 23:29:07,762 - INFO - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-11-09 23:29:07,973 - INFO - Preparing codealpaca dataset from sahil2801/CodeAlpaca-20k
+[rank0]:2025-11-09 23:29:10,846 - INFO - Building llama3 1B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=2048, n_layers=16, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=256, ffn_dim_multiplier=1.5, norm_eps=1e-05, rope_theta=500000, max_seq_len=512, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2025-11-09 23:29:10,931 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank0]:2025-11-09 23:29:10,996 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank0]:2025-11-09 23:29:11,035 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-11-09 23:29:11,036 - INFO - Model llama3 1B size: 1,498,482,688 total parameters
+[rank1]:2025-11-09 23:29:10,956 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank1]:2025-11-09 23:29:10,968 - INFO - PP rank 1 is building stage_idx 1 with modules ['layers.4', 'layers.5', 'layers.6', 'layers.7', 'layers.8']
+[rank1]:2025-11-09 23:29:10,968 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank2]:2025-11-09 23:29:11,029 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank0]:2025-11-09 23:29:11,063 - INFO - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3']
+[rank0]:2025-11-09 23:29:11,063 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank2]:2025-11-09 23:29:11,066 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank2]:2025-11-09 23:29:11,093 - INFO - PP rank 2 is building stage_idx 2 with modules ['layers.9', 'layers.10', 'layers.11', 'layers.12']
+[rank2]:2025-11-09 23:29:11,093 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank1]:2025-11-09 23:29:11,157 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank1]:2025-11-09 23:29:11,157 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank1]:2025-11-09 23:29:11,158 - INFO - CUDA memory usage for model: 1.13GiB(2.39%)
+[rank0]:2025-11-09 23:29:11,255 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-11-09 23:29:11,255 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank0]:2025-11-09 23:29:11,256 - INFO - CUDA memory usage for model: 1.90GiB(3.99%)
+[rank2]:2025-11-09 23:29:11,285 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank2]:2025-11-09 23:29:11,286 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank2]:2025-11-09 23:29:11,287 - INFO - CUDA memory usage for model: 0.92GiB(1.94%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run 7yvkffxf
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /data2/shcho/torchtitan/tb/1108_1F1B_nofreeze_seed42_codealpaca_dm1/20251109-2329/wandb/run-20251109_232911-7yvkffxf
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/7yvkffxf
+[rank3]:2025-11-09 23:29:12,963 - INFO - WandB logging enabled
+[rank3]:2025-11-09 23:29:12,964 - INFO - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank3]:2025-11-09 23:29:13,002 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank3]:2025-11-09 23:29:13,031 - INFO - PP rank 3 is building stage_idx 3 with modules ['layers.13', 'layers.14', 'layers.15', 'norm', 'output']
+[rank3]:2025-11-09 23:29:13,032 - INFO - Using pipeline schedule 1F1B with 8 microbatches and 4 stages.
+[rank0]:2025-11-09 23:29:13,230 - INFO - Checkpointing active. Checkpoints will be loaded from and saved to /data2/shcho/torchtitan/checkpoint/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank0]:2025-11-09 23:29:13,231 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-09 23:29:13,231 - INFO - Trainer is initialized with local batch size 32, global batch size 128, gradient accumulation steps 4, sequence length 512, total steps 500 (warmup 100)
+[rank0]:2025-11-09 23:29:13,231 - INFO - Loading the checkpoint from /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp.
+[rank1]:2025-11-09 23:29:13,231 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank3]:2025-11-09 23:29:13,215 - WARNING - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank3]:2025-11-09 23:29:13,216 - INFO - Peak FLOPS used for computing MFU: 3.120e+14
+[rank3]:2025-11-09 23:29:13,216 - INFO - CUDA memory usage for model: 1.66GiB(3.50%)
+[rank3]:2025-11-09 23:29:13,231 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank2]:2025-11-09 23:29:13,232 - INFO - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-11-09 23:29:15,591 - INFO - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2025-11-09 23:29:15,591 - INFO - Finished loading the checkpoint in 2.36 seconds.
+[rank0]:2025-11-09 23:29:15,591 - INFO - Training starts at step 1
+[rank1]:2025-11-09 23:29:18,637 - INFO -  step:  1  loss: -4.0000  grad_norm: 147.6796  memory:  6.76GiB(14.24%)  tps: 2,133  tflops: 16.25  mfu: 5.21%
+[rank1]:2025-11-09 23:29:18,637 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank3]:2025-11-09 23:29:18,642 - INFO -  step:  1  loss: 10.1253  grad_norm: 147.6796  memory: 12.97GiB(27.30%)  tps: 2,906  tflops: 22.13  mfu: 7.09%
+[rank3]:2025-11-09 23:29:18,643 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank2]:2025-11-09 23:29:18,632 - INFO -  step:  1  loss: -4.0000  grad_norm: 147.6796  memory:  4.63GiB(9.75%)  tps: 2,165  tflops: 16.49  mfu: 5.29%
+[rank2]:2025-11-09 23:29:18,633 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-11-09 23:29:18,671 - INFO -  step:  1  loss: -4.0000  grad_norm: 147.6796  memory:  9.19GiB(19.34%)  tps: 2,146  tflops: 16.34  mfu: 5.24%
+[rank0]:2025-11-09 23:29:18,671 - INFO - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-11-09 23:31:17,716 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-09 23:31:19,900 - INFO - Avg. fwd time: 7.1115 / Avg. bwd time: 18.5622 / Avg. batch time: 524.2172 (ms) / GPU bubble ratio: 60.82%
+[rank3]:2025-11-09 23:31:19,862 - INFO - Avg. fwd time: 12.3549 / Avg. bwd time: 40.2347 / Avg. batch time: 492.7242 (ms) / GPU bubble ratio: 14.61%
+[rank0]:2025-11-09 23:31:19,930 - INFO - Avg. fwd time: 7.4779 / Avg. bwd time: 23.8021 / Avg. batch time: 600.7672 (ms) / GPU bubble ratio: 58.35%
+[rank1]:2025-11-09 23:31:19,935 - INFO - Avg. fwd time: 9.2949 / Avg. bwd time: 23.7716 / Avg. batch time: 563.0515 (ms) / GPU bubble ratio: 53.02%
+[rank0]:2025-11-09 23:31:20,165 - INFO -  step: 50  loss: -4.0000  grad_norm: 24.0644  memory: 12.97GiB(27.31%)  tps: 6,608  tflops: 50.33  mfu: 16.13%
+[rank1]:2025-11-09 23:31:20,154 - INFO -  step: 50  loss: -4.0000  grad_norm: 24.0644  memory:  9.03GiB(19.01%)  tps: 6,607  tflops: 50.32  mfu: 16.13%
+[rank2]:2025-11-09 23:31:20,150 - INFO -  step: 50  loss: -4.0000  grad_norm: 24.0644  memory:  6.43GiB(13.53%)  tps: 6,607  tflops: 50.32  mfu: 16.13%
+[rank3]:2025-11-09 23:31:20,163 - INFO -  step: 50  loss: 10.5031  grad_norm: 24.0644  memory: 16.39GiB(34.50%)  tps: 6,607  tflops: 50.32  mfu: 16.13%
+[rank0]:2025-11-09 23:33:22,303 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-09 23:33:24,552 - INFO - Avg. fwd time: 12.4485 / Avg. bwd time: 40.3949 / Avg. batch time: 494.7146 (ms) / GPU bubble ratio: 14.55%
+[rank0]:2025-11-09 23:33:24,621 - INFO - Avg. fwd time: 7.4827 / Avg. bwd time: 23.8523 / Avg. batch time: 601.5373 (ms) / GPU bubble ratio: 58.33%
+[rank1]:2025-11-09 23:33:24,624 - INFO - Avg. fwd time: 9.2944 / Avg. bwd time: 23.8418 / Avg. batch time: 564.2064 (ms) / GPU bubble ratio: 53.02%
+[rank2]:2025-11-09 23:33:24,590 - INFO - Avg. fwd time: 7.0993 / Avg. bwd time: 18.6268 / Avg. batch time: 525.7839 (ms) / GPU bubble ratio: 60.86%
+[rank0]:2025-11-09 23:33:24,868 - INFO -  step: 100  loss: -4.0000  grad_norm: 24.1234  memory: 12.97GiB(27.31%)  tps: 6,569  tflops: 50.03  mfu: 16.04%
+[rank1]:2025-11-09 23:33:24,857 - INFO -  step: 100  loss: -4.0000  grad_norm: 24.1234  memory:  9.03GiB(19.01%)  tps: 6,569  tflops: 50.03  mfu: 16.04%
+[rank2]:2025-11-09 23:33:24,854 - INFO -  step: 100  loss: -4.0000  grad_norm: 24.1234  memory:  6.43GiB(13.53%)  tps: 6,569  tflops: 50.03  mfu: 16.04%
+[rank3]:2025-11-09 23:33:24,866 - INFO -  step: 100  loss:  4.7195  grad_norm: 24.1234  memory: 16.39GiB(34.50%)  tps: 6,569  tflops: 50.03  mfu: 16.04%
+[rank3]:2025-11-09 23:33:25,046 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_1F1B_nofreeze_seed42_codealpaca_dm1/pipeline_schedule/251109_2333_real_step100_rank3.svg
+[rank3]:> Batch Time: 604.09 ms, GPU Bubble Ratio: 58.15%, 55.88%, 65.78%, 29.50%
+[rank0]:2025-11-09 23:35:27,351 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-09 23:35:29,755 - INFO - Avg. fwd time: 12.5013 / Avg. bwd time: 40.4735 / Avg. batch time: 495.7514 (ms) / GPU bubble ratio: 14.51%
+[rank1]:2025-11-09 23:35:29,810 - INFO - Avg. fwd time: 9.3047 / Avg. bwd time: 23.8746 / Avg. batch time: 565.2260 (ms) / GPU bubble ratio: 53.04%
+[rank2]:2025-11-09 23:35:29,780 - INFO - Avg. fwd time: 7.0924 / Avg. bwd time: 18.6538 / Avg. batch time: 526.9216 (ms) / GPU bubble ratio: 60.91%
+[rank3]:2025-11-09 23:35:29,874 - INFO -  step: 150  loss:  3.5393  grad_norm: 25.2248  memory: 16.39GiB(34.50%)  tps: 6,553  tflops: 49.91  mfu: 16.00%
+[rank0]:2025-11-09 23:35:29,840 - INFO - Avg. fwd time: 7.4868 / Avg. bwd time: 23.8739 / Avg. batch time: 602.4320 (ms) / GPU bubble ratio: 58.35%
+[rank0]:2025-11-09 23:35:29,876 - INFO -  step: 150  loss: -4.0000  grad_norm: 25.2248  memory: 12.97GiB(27.31%)  tps: 6,553  tflops: 49.91  mfu: 16.00%
+[rank1]:2025-11-09 23:35:29,865 - INFO -  step: 150  loss: -4.0000  grad_norm: 25.2248  memory:  9.03GiB(19.01%)  tps: 6,553  tflops: 49.91  mfu: 16.00%
+[rank2]:2025-11-09 23:35:29,861 - INFO -  step: 150  loss: -4.0000  grad_norm: 25.2248  memory:  6.43GiB(13.53%)  tps: 6,553  tflops: 49.91  mfu: 16.00%
+[rank3]:2025-11-09 23:35:44,630 - WARNING - Dataset codealpaca is being re-looped
+[rank2]:2025-11-09 23:35:44,845 - WARNING - Dataset codealpaca is being re-looped
+[rank0]:2025-11-09 23:35:44,899 - WARNING - Dataset codealpaca is being re-looped
+[rank1]:2025-11-09 23:35:44,872 - WARNING - Dataset codealpaca is being re-looped
+[rank0]:2025-11-09 23:37:32,660 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-09 23:37:34,895 - INFO - Avg. fwd time: 12.5784 / Avg. bwd time: 40.5057 / Avg. batch time: 496.6033 (ms) / GPU bubble ratio: 14.48%
+[rank0]:2025-11-09 23:37:34,965 - INFO - Avg. fwd time: 7.4916 / Avg. bwd time: 23.8940 / Avg. batch time: 603.1268 (ms) / GPU bubble ratio: 58.37%
+[rank1]:2025-11-09 23:37:34,969 - INFO - Avg. fwd time: 9.3090 / Avg. bwd time: 23.9074 / Avg. batch time: 565.9529 (ms) / GPU bubble ratio: 53.05%
+[rank2]:2025-11-09 23:37:34,934 - INFO - Avg. fwd time: 7.0890 / Avg. bwd time: 18.6799 / Avg. batch time: 527.6805 (ms) / GPU bubble ratio: 60.93%
+[rank1]:2025-11-09 23:37:35,201 - INFO -  step: 200  loss: -4.0000  grad_norm: 17.4359  memory:  9.03GiB(19.01%)  tps: 6,536  tflops: 49.78  mfu: 15.96%
+[rank2]:2025-11-09 23:37:35,198 - INFO -  step: 200  loss: -4.0000  grad_norm: 17.4359  memory:  6.43GiB(13.53%)  tps: 6,536  tflops: 49.78  mfu: 15.96%
+[rank3]:2025-11-09 23:37:35,210 - INFO -  step: 200  loss:  1.0957  grad_norm: 17.4359  memory: 16.39GiB(34.50%)  tps: 6,536  tflops: 49.78  mfu: 15.96%
+[rank0]:2025-11-09 23:37:35,212 - INFO -  step: 200  loss: -4.0000  grad_norm: 17.4359  memory: 12.97GiB(27.31%)  tps: 6,536  tflops: 49.78  mfu: 15.96%
+[rank3]:2025-11-09 23:37:35,378 - INFO - Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1108_1F1B_nofreeze_seed42_codealpaca_dm1/pipeline_schedule/251109_2337_real_step200_rank3.svg
+[rank3]:> Batch Time: 605.67 ms, GPU Bubble Ratio: 58.15%, 55.84%, 65.70%, 29.35%
+[rank0]:2025-11-09 23:39:38,000 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-11-09 23:39:40,192 - INFO - Avg. fwd time: 12.6223 / Avg. bwd time: 40.5228 / Avg. batch time: 497.1057 (ms) / GPU bubble ratio: 14.47%
+[rank0]:2025-11-09 23:39:40,261 - INFO - Avg. fwd time: 7.4926 / Avg. bwd time: 23.9110 / Avg. batch time: 603.6676 (ms) / GPU bubble ratio: 58.38%
+[rank1]:2025-11-09 23:39:40,266 - INFO - Avg. fwd time: 9.3051 / Avg. bwd time: 23.9381 / Avg. batch time: 566.5182 (ms) / GPU bubble ratio: 53.06%
+[rank2]:2025-11-09 23:39:40,230 - INFO - Avg. fwd time: 7.0864 / Avg. bwd time: 18.7101 / Avg. batch time: 528.2603 (ms) / GPU bubble ratio: 60.93%
+[rank2]:2025-11-09 23:39:40,481 - INFO -  step: 250  loss: -4.0000  grad_norm:  6.0985  memory:  6.43GiB(13.53%)  tps: 6,539  tflops: 49.80  mfu: 15.96%
+[rank3]:2025-11-09 23:39:40,494 - INFO -  step: 250  loss:  0.3990  grad_norm:  6.0985  memory: 16.39GiB(34.50%)  tps: 6,539  tflops: 49.80  mfu: 15.96%
+[rank0]:2025-11-09 23:39:40,495 - INFO -  step: 250  loss: -4.0000  grad_norm:  6.0985  memory: 12.97GiB(27.31%)  tps: 6,539  tflops: 49.80  mfu: 15.96%
+[rank1]:2025-11-09 23:39:40,485 - INFO -  step: 250  loss: -4.0000  grad_norm:  6.0985  memory:  9.03GiB(19.01%)  tps: 6,539  tflops: 49.80  mfu: 15.96%
+[rank0]:2025-11-09 23:41:42,600 - INFO - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2025-11-09 23:41:45,051 - INFO - Avg. fwd time: 7.0830 / Avg. bwd time: 18.7275 / Avg. batch time: 528.0245 (ms) / GPU bubble ratio: 60.89%
+[rank3]:2025-11-09 23:41:45,025 - INFO - Avg. fwd time: 12.6087 / Avg. bwd time: 40.5171 / Avg. batch time: 496.9323 (ms) / GPU bubble ratio: 14.47%
+[rank0]:2025-11-09 23:41:45,112 - INFO - Avg. fwd time: 7.4899 / Avg. bwd time: 23.9180 / Avg. batch time: 603.3864 (ms) / GPU bubble ratio: 58.36%
+[rank2]:2025-11-09 23:41:45,133 - INFO -  step: 300  loss: -4.0000  grad_norm:  2.7731  memory:  6.43GiB(13.53%)  tps: 6,572  tflops: 50.05  mfu: 16.04%
+[rank1]:2025-11-09 23:41:45,081 - INFO - Avg. fwd time: 9.3037 / Avg. bwd time: 23.9540 / Avg. batch time: 566.2664 (ms) / GPU bubble ratio: 53.01%
+[rank1]:2025-11-09 23:41:45,137 - INFO -  step: 300  loss: -4.0000  grad_norm:  2.7731  memory:  9.03GiB(19.01%)  tps: 6,572  tflops: 50.05  mfu: 16.04%
+[rank3]:2025-11-09 23:41:45,146 - INFO -  step: 300  loss:  0.2394  grad_norm:  2.7731  memory: 16.39GiB(34.50%)  tps: 6,572  tflops: 50.05  mfu: 16.04%
+[rank0]:2025-11-09 23:41:45,148 - INFO -  step: 300  loss: -4.0000  grad_norm:  2.7731  memory: 12.97GiB(27.31%)  tps: 6,572  tflops: 50.05  mfu: 16.04%
+[rank3]:2025-11-09 23:41:45,274 - INFO - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: 
+[rank3]:wandb: Run history:
+[rank3]:wandb:                    grad_norm █▂▂▂▂▁▁
+[rank3]:wandb: loss_metrics/global_avg_loss ██▄▃▂▁▁
+[rank3]:wandb: loss_metrics/global_max_loss ██▄▃▂▁▁
+[rank3]:wandb:                           lr ▁▄██▇▆▅
+[rank3]:wandb:         memory/max_active(%) ▁██████
+[rank3]:wandb:       memory/max_active(GiB) ▁██████
+[rank3]:wandb:       memory/max_reserved(%) ▁██████
+[rank3]:wandb:     memory/max_reserved(GiB) ▁██████
+[rank3]:wandb:     memory/num_alloc_retries ▁▁▁▁▁▁▁
+[rank3]:wandb:              memory/num_ooms ▁▁▁▁▁▁▁
+[rank3]:wandb:                           +7 ...
+[rank3]:wandb: 
+[rank3]:wandb: Run summary:
+[rank3]:wandb:                    grad_norm 2.77305
+[rank3]:wandb: loss_metrics/global_avg_loss 0.23942
+[rank3]:wandb: loss_metrics/global_max_loss 0.23942
+[rank3]:wandb:                           lr 0.0
+[rank3]:wandb:         memory/max_active(%) 32.71234
+[rank3]:wandb:       memory/max_active(GiB) 15.54064
+[rank3]:wandb:       memory/max_reserved(%) 34.49741
+[rank3]:wandb:     memory/max_reserved(GiB) 16.38867
+[rank3]:wandb:     memory/num_alloc_retries 0
+[rank3]:wandb:              memory/num_ooms 0
+[rank3]:wandb:                           +7 ...
+[rank3]:wandb: 
+[rank3]:wandb: 🚀 View run 1108_1F1B_nofreeze_seed42_codealpaca_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/7yvkffxf
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 3 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: /data2/shcho/torchtitan/tb/1108_1F1B_nofreeze_seed42_codealpaca_dm1/20251109-2329/wandb/run-20251109_232911-7yvkffxf/logs
+[rank3]:Traceback (most recent call last):
+[rank3]:  File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:  File "<frozen runpy>", line 88, in _run_code
+[rank3]:  File "/home/shcho/torchtitan/timelyfreeze/train.py", line 731, in <module>
+[rank3]:    trainer.train()
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:    return f(*args, **kwargs)
+[rank3]:           ^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/home/shcho/torchtitan/timelyfreeze/train.py", line 620, in train
+[rank3]:    draw_charts(self.freezer, self.step, job_config)
+[rank3]:  File "/home/shcho/torchtitan/timelyfreeze/train.py", line 665, in draw_charts
+[rank3]:    draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
+[rank3]:  File "/home/shcho/torchtitan/timelyfreeze/core/util.py", line 234, in draw_pipeline_schedule
+[rank3]:    fig.savefig(save_file, bbox_inches='tight', pad_inches=0)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/figure.py", line 3490, in savefig
+[rank3]:    self.canvas.print_figure(fname, **kwargs)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2186, in print_figure
+[rank3]:    result = print_method(
+[rank3]:             ^^^^^^^^^^^^^
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2042, in <lambda>
+[rank3]:    print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+[rank3]:                                                                 ^^^^^
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 1351, in print_svg
+[rank3]:    self.figure.draw(renderer)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+[rank3]:    result = draw(artist, renderer, *args, **kwargs)
+[rank3]:             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+[rank3]:    return draw(artist, renderer)
+[rank3]:           ^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/figure.py", line 3257, in draw
+[rank3]:    mimage._draw_list_compositing_images(
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+[rank3]:    a.draw(renderer)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+[rank3]:    return draw(artist, renderer)
+[rank3]:           ^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/axes/_base.py", line 3226, in draw
+[rank3]:    mimage._draw_list_compositing_images(
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+[rank3]:    a.draw(renderer)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+[rank3]:    return draw(artist, renderer)
+[rank3]:           ^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/patches.py", line 642, in draw
+[rank3]:    self._draw_paths_with_artist_properties(
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/patches.py", line 627, in _draw_paths_with_artist_properties
+[rank3]:    renderer.draw_path(gc, *draw_path_args)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 688, in draw_path
+[rank3]:    self.writer.element('path', d=path_data, **self._get_clip_attrs(gc),
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 241, in element
+[rank3]:    self.start(tag, attrib, **extra)
+[rank3]:  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 165, in start
+[rank3]:    self.__write(f' {k}={v}')
+[rank3]:OSError: [Errno 28] No space left on device
+[rank3]:[rank3]: Traceback (most recent call last):
+[rank3]:[rank3]:   File "<frozen runpy>", line 198, in _run_module_as_main
+[rank3]:[rank3]:   File "<frozen runpy>", line 88, in _run_code
+[rank3]:[rank3]:   File "/home/shcho/torchtitan/timelyfreeze/train.py", line 731, in <module>
+[rank3]:[rank3]:     trainer.train()
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+[rank3]:[rank3]:     return f(*args, **kwargs)
+[rank3]:[rank3]:            ^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/home/shcho/torchtitan/timelyfreeze/train.py", line 620, in train
+[rank3]:[rank3]:     draw_charts(self.freezer, self.step, job_config)
+[rank3]:[rank3]:   File "/home/shcho/torchtitan/timelyfreeze/train.py", line 665, in draw_charts
+[rank3]:[rank3]:     draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
+[rank3]:[rank3]:   File "/home/shcho/torchtitan/timelyfreeze/core/util.py", line 234, in draw_pipeline_schedule
+[rank3]:[rank3]:     fig.savefig(save_file, bbox_inches='tight', pad_inches=0)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/figure.py", line 3490, in savefig
+[rank3]:[rank3]:     self.canvas.print_figure(fname, **kwargs)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2186, in print_figure
+[rank3]:[rank3]:     result = print_method(
+[rank3]:[rank3]:              ^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2042, in <lambda>
+[rank3]:[rank3]:     print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+[rank3]:[rank3]:                                                                  ^^^^^
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 1351, in print_svg
+[rank3]:[rank3]:     self.figure.draw(renderer)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+[rank3]:[rank3]:     result = draw(artist, renderer, *args, **kwargs)
+[rank3]:[rank3]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+[rank3]:[rank3]:     return draw(artist, renderer)
+[rank3]:[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/figure.py", line 3257, in draw
+[rank3]:[rank3]:     mimage._draw_list_compositing_images(
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+[rank3]:[rank3]:     a.draw(renderer)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+[rank3]:[rank3]:     return draw(artist, renderer)
+[rank3]:[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/axes/_base.py", line 3226, in draw
+[rank3]:[rank3]:     mimage._draw_list_compositing_images(
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+[rank3]:[rank3]:     a.draw(renderer)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+[rank3]:[rank3]:     return draw(artist, renderer)
+[rank3]:[rank3]:            ^^^^^^^^^^^^^^^^^^^^^^
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/patches.py", line 642, in draw
+[rank3]:[rank3]:     self._draw_paths_with_artist_properties(
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/patches.py", line 627, in _draw_paths_with_artist_properties
+[rank3]:[rank3]:     renderer.draw_path(gc, *draw_path_args)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 688, in draw_path
+[rank3]:[rank3]:     self.writer.element('path', d=path_data, **self._get_clip_attrs(gc),
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 241, in element
+[rank3]:[rank3]:     self.start(tag, attrib, **extra)
+[rank3]:[rank3]:   File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 165, in start
+[rank3]:[rank3]:     self.__write(f' {k}={v}')
+[rank3]:[rank3]: OSError: [Errno 28] No space left on device
+W1109 23:41:48.062000 3006720 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 3006757 closing signal SIGTERM
+W1109 23:41:48.064000 3006720 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 3006758 closing signal SIGTERM
+W1109 23:41:48.064000 3006720 site-packages/torch/distributed/elastic/multiprocessing/api.py:940] Sending process 3006759 closing signal SIGTERM
+E1109 23:41:48.521000 3006720 site-packages/torch/distributed/elastic/multiprocessing/api.py:914] failed (exitcode: 1) local_rank: 3 (pid: 3006760) of binary: /data2/shcho/miniforge3/envs/llm_eval/bin/python3.11
+E1109 23:41:48.540000 3006720 site-packages/torch/distributed/elastic/multiprocessing/errors/error_handler.py:141] no error file defined for parent, to copy child error file (/tmp/torchelastic_wq28t_5n/39efe53f-7a70-480d-82c7-1938b9ff47f4_m46vf4af/attempt_0/3/error.json)
+[rank1]:Stage 1: Modules to keep: {'layers.8', 'layers.4', 'layers.7', 'layers.5', 'layers.6'}
+[rank2]:Stage 2: Modules to keep: {'layers.9', 'layers.11', 'layers.12', 'layers.10'}
+[rank0]:Stage 0: Modules to keep: {'layers.1', 'layers.3', 'layers.2', 'layers.0', 'tok_embeddings'}
+[rank3]:Stage 3: Modules to keep: {'layers.14', 'norm', 'output', 'layers.15', 'layers.13'}
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/config_1108.toml
+[rank3]:		- dump_folder: /data2/shcho/torchtitan
+[rank3]:		- description: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank3]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank3]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank3]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank3]:"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /data2/shcho/torchtitan/profile_trace/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /data2/shcho/torchtitan/memory_snapshot/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 50
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /data2/shcho/torchtitan/tb/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /data2/shcho/torchtitan/images/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:		- pplog_freq: 200
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 1B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.2-1B
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 5e-06
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.1
+[rank3]:	- training:
+[rank3]:		- dataset: codealpaca
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 32
+[rank3]:		- global_batch_size: 128
+[rank3]:		- seq_len: 512
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 500
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: 42
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: 1F1B
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 4
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 1
+[rank3]:		- stages_list: [3]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /data2/shcho/torchtitan/checkpoint/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:		- interval: 1200
+[rank3]:		- initial_load_path: /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /data2/shcho/torchtitan/comm_traces/1108_1F1B_nofreeze_seed42_codealpaca_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: False
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 32
+[rank3]:		- seq_len: 512
+[rank3]:		- freq: 200
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: False
+[rank3]:		- metric_type: apf
+[rank3]:		- phase_unit: 50
+[rank3]:		- stability_check_freq: 10
+[rank3]:		- max_freeze_ratio: 0.7
+[rank3]:		- adjustment: False
+[rank3]:		- threshold: 0.05
+[rank3]:		- percentile: 70
+[rank3]:
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+Traceback (most recent call last):
+  File "/data2/shcho/miniforge3/envs/llm_eval/bin/torchrun", line 7, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/run.py", line 946, in main
+    run(args)
+  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/run.py", line 937, in run
+    elastic_launch(
+  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 159, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/launcher/api.py", line 300, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+timelyfreeze.train FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2025-11-09_23:41:48
+  host      : elga.kaist.ac.kr
+  rank      : 0 (local_rank: 0)
+  exitcode  : -15 (pid: 3006757)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 3006757
+[2]:
+  time      : 2025-11-09_23:41:48
+  host      : elga.kaist.ac.kr
+  rank      : 1 (local_rank: 1)
+  exitcode  : -15 (pid: 3006758)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 3006758
+[3]:
+  time      : 2025-11-09_23:41:48
+  host      : elga.kaist.ac.kr
+  rank      : 2 (local_rank: 2)
+  exitcode  : -15 (pid: 3006759)
+  error_file: <N/A>
+  traceback : Signal 15 (SIGTERM) received by PID 3006759
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-11-09_23:41:45
+  host      : elga.kaist.ac.kr
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 3006760)
+  error_file: /tmp/torchelastic_wq28t_5n/39efe53f-7a70-480d-82c7-1938b9ff47f4_m46vf4af/attempt_0/3/error.json
+  traceback : Traceback (most recent call last):
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 362, in wrapper
+      return f(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^
+    File "/home/shcho/torchtitan/timelyfreeze/train.py", line 620, in train
+      draw_charts(self.freezer, self.step, job_config)
+    File "/home/shcho/torchtitan/timelyfreeze/train.py", line 665, in draw_charts
+      draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
+    File "/home/shcho/torchtitan/timelyfreeze/core/util.py", line 234, in draw_pipeline_schedule
+      fig.savefig(save_file, bbox_inches='tight', pad_inches=0)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/figure.py", line 3490, in savefig
+      self.canvas.print_figure(fname, **kwargs)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2186, in print_figure
+      result = print_method(
+               ^^^^^^^^^^^^^
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backend_bases.py", line 2042, in <lambda>
+      print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+                                                                   ^^^^^
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 1351, in print_svg
+      self.figure.draw(renderer)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 94, in draw_wrapper
+      result = draw(artist, renderer, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+      return draw(artist, renderer)
+             ^^^^^^^^^^^^^^^^^^^^^^
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/figure.py", line 3257, in draw
+      mimage._draw_list_compositing_images(
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+      a.draw(renderer)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+      return draw(artist, renderer)
+             ^^^^^^^^^^^^^^^^^^^^^^
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/axes/_base.py", line 3226, in draw
+      mimage._draw_list_compositing_images(
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/image.py", line 134, in _draw_list_compositing_images
+      a.draw(renderer)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/artist.py", line 71, in draw_wrapper
+      return draw(artist, renderer)
+             ^^^^^^^^^^^^^^^^^^^^^^
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/patches.py", line 642, in draw
+      self._draw_paths_with_artist_properties(
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/patches.py", line 627, in _draw_paths_with_artist_properties
+      renderer.draw_path(gc, *draw_path_args)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 688, in draw_path
+      self.writer.element('path', d=path_data, **self._get_clip_attrs(gc),
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 241, in element
+      self.start(tag, attrib, **extra)
+    File "/data2/shcho/miniforge3/envs/llm_eval/lib/python3.11/site-packages/matplotlib/backends/backend_svg.py", line 165, in start
+      self.__write(f' {k}={v}')
+  OSError: [Errno 28] No space left on device
+  
+============================================================
