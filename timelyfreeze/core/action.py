@@ -316,7 +316,7 @@ class ActionWithFreezing(ActionWithTime):
         if self.freezing_list is None or len(self.freezing_list) != self.num_params:
             raise ValueError("Freezing list is not set. Please set the freezing list before calling freeze().")
         
-        expected_start_batch_idx = len(self.frozen_ratio_history)   
+        expected_start_batch_idx = len(self.frozen_ratio_history)
         if start_batch_idx is None:
             start_batch_idx = expected_start_batch_idx
         elif expected_start_batch_idx < start_batch_idx:
@@ -329,18 +329,19 @@ class ActionWithFreezing(ActionWithTime):
         elif expected_start_batch_idx > start_batch_idx:
             raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
 
+
+        with torch.no_grad():
+            for idx, (name, param) in enumerate(self.module.named_parameters()):
+                param.requires_grad_(not self.freezing_list[idx]) # freeze the parameters by setting requires_grad to False
+
         # append the actual frozen ratio to the freeze ratio history
         actual_ratio = float(sum(self.freezing_list)) / len(self.freezing_list)
         self.frozen_ratio_history.append(actual_ratio)
 
-        with torch.no_grad():
-            for idx, (name, param) in enumerate(self.module.named_parameters()):
-                should_freeze = bool(self.freezing_list[idx])
-                self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
-                param.requires_grad_(not should_freeze) # freeze the parameters by setting requires_grad to False
-
-                self.paramwise_frozen_count[name][0] += int(should_freeze) # count frozen parameters
-                self.paramwise_frozen_count[name][1] += 1
+        for idx, (name, _) in enumerate(self.module.named_parameters()):
+            self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
+            self.paramwise_frozen_count[name][0] += int(self.freezing_list[idx]) # count frozen parameters
+            self.paramwise_frozen_count[name][1] += 1
         return
     
     def unfreeze(self):
@@ -348,28 +349,16 @@ class ActionWithFreezing(ActionWithTime):
         if not self.freeze_flag:
             return
         
-        # expected_start_batch_idx = len(self.frozen_ratio_history)   
-        # if start_batch_idx is None:
-        #     start_batch_idx = expected_start_batch_idx
-        # elif expected_start_batch_idx < start_batch_idx:
-        #     logger.debug(
-        #         "Batch index %s is larger than freeze ratio history length %s. Filling with zeros.",
-        #         start_batch_idx,
-        #         expected_start_batch_idx,
-        #     )
-        #     self.frozen_ratio_history.extend([0.0] * (start_batch_idx - expected_start_batch_idx))
-        # elif expected_start_batch_idx > start_batch_idx:
-        #     raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
+        # if self.microbatch <= 3:
+        # # # append the actual frozen ratio to the freeze ratio history
+        # # actual_ratio = float(sum(self.freezing_list)) / len(self.freezing_list) if len(self.freezing_list) > 0 else 0.0
+        # # self.frozen_ratio_history.append(actual_ratio)
 
-        # # append the actual frozen ratio to the freeze ratio history
-        # actual_ratio = float(sum(self.freezing_list)) / len(self.freezing_list) if len(self.freezing_list) > 0 else 0.0
-        # self.frozen_ratio_history.append(actual_ratio)
-
-        # # restore the requires_grad state of the parameters
-        # for name, param in self.module.named_parameters():
-        # #     self.paramwise_frozen_count[name][0] += int(not param.requires_grad) # count frozen parameters
-        # #     self.paramwise_frozen_count[name][1] += 1
-        #     param.requires_grad_(self.freeze_cache[name]) 
+        #     # restore the requires_grad state of the parameters
+        #     for name, param in self.module.named_parameters():
+        #     # self.paramwise_frozen_count[name][0] += int(not param.requires_grad) # count frozen parameters
+        #     # self.paramwise_frozen_count[name][1] += 1
+        #         param.requires_grad_(self.freeze_cache[name]) 
         return
     
     def to_tensor(self)-> torch.Tensor:

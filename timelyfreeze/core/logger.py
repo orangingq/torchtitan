@@ -91,6 +91,7 @@ class PipelineLog:
     
     def _tmp_timer_flush(self, flush_freq:int=10):
         '''flush the temporary timer for the next logging'''
+        logger.debug(f"[Local Step {self.step_cnt}, Global step {self.global_step_cnt}] [🕒PipelineLog] Logging the time duration for the last {flush_freq} batches...")
         assert len(self.cuda_timer_batch[ActionStatus.START]) == flush_freq, f"the length of batch start should be {flush_freq}. start:{len(self.cuda_timer_batch[ActionStatus.START])}, end:{len(self.cuda_timer_batch[ActionStatus.END])}"
         assert len(self.cuda_timer_schedule[ActionStatus.START]) == flush_freq * len(self.log_schedule), f"the length of fwd start should be {flush_freq} * {len(self.log_schedule)}(=len(self.log_schedule)). start:{len(self.cuda_timer_schedule[ActionStatus.START])}, end:{len(self.cuda_timer_schedule[ActionStatus.END])}"
         assert self.step_cnt % flush_freq == 0 and self.step_cnt >= flush_freq, f"the step count should be a multiple of {flush_freq}. step_cnt: {self.step_cnt}"
@@ -157,7 +158,7 @@ class PipelineLog:
         self.range = range
         self.step_cnt += int(self._is_start_of_batch) # int(step in ActionPhase.START) # count the step
         if (self._is_start_of_batch):
-            logger.debug(f"🚦  Starting local step {self.step_cnt} (in the unit of a batch computation) (global step: {self.step_cnt // (self.config.training.global_batch_size / self.config.training.local_batch_size)}) ")
+            logger.debug(f"[Local Step {self.step_cnt}, Global step {self.global_step_cnt}] [🕒PipelineLog] Start of a new batch.") 
 
         if not self.step in [ActionType.FORWARD, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT] \
             or not self.range in [ActionStatus.START, ActionStatus.END]:
@@ -169,6 +170,11 @@ class PipelineLog:
 
         self.log_timer()
         return self
+    
+    @property
+    def global_step_cnt(self):
+        '''get the global step count'''
+        return self.step_cnt // (self.config.training.global_batch_size // self.config.training.local_batch_size)
     
     # context manager
     def __enter__(self):
@@ -242,7 +248,8 @@ class PipelineLog:
             self.cuda_timer_batch[self.range].append(new_event)
 
         # log the time duration of forward and backward, for every n=30 batches
-        flush_freq = 30
+        # longer_flush_freq = (self.config.training.global_batch_size // self.config.training.local_batch_size) * self.config.metrics.log_freq
+        flush_freq = 20 # 20 if (self.action_dict is None and self.step_cnt <= longer_flush_freq) else longer_flush_freq
         end_of_nth_batch = self._is_end_of_batch and self.step_cnt % flush_freq == 0 and self.step_cnt >= flush_freq
         if end_of_nth_batch:
             self._tmp_timer_flush(flush_freq=flush_freq)

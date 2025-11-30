@@ -539,27 +539,26 @@ class CheckpointManager:
 
         model_only = False
         from_hf = False
-        if not os.path.exists(self.folder):
-            if self.initial_load_path:
-                checkpoint_id = self.initial_load_path
-                if not os.path.isdir(checkpoint_id):
-                    raise ValueError(
-                        "checkpoint.initial_load_path is specified but the path is not valid."
-                    )
-                model_only = self.initial_load_model_only
-                from_hf = self.initial_load_in_hf
-                if from_hf:
-                    assert (
-                        model_only
-                    ), "Only model can be loaded when loading from HF's safetensors checkpoint."
-            else:
-                return False
-        else:
-            if self.initial_load_path:
-                logger.warning(
-                    "checkpoint.initial_load_path is provided but the checkpoint.folder exists. "
-                    f"Checkpointer will use the checkpoints from the checkpoint.folder {self.folder}."
+        
+        if self.initial_load_path:
+            checkpoint_id = self.initial_load_path
+            if not os.path.isdir(checkpoint_id):
+                raise ValueError(
+                    "checkpoint.initial_load_path is specified but the path is not valid."
                 )
+            model_only = self.initial_load_model_only
+            from_hf = self.initial_load_in_hf
+            if from_hf:
+                assert (
+                    model_only
+                ), "Only model can be loaded when loading from HF's safetensors checkpoint."
+        
+        elif not os.path.exists(self.folder):
+            # if self.initial_load_path:
+            #     logger.warning(
+            #         "checkpoint.initial_load_path is provided but the checkpoint.folder exists. "
+            #         f"Checkpointer will use the checkpoints from the checkpoint.folder {self.folder}."
+            #     )
             step = self._find_load_step() if step == -1 else step
             if step == -1:
                 return False
@@ -570,6 +569,8 @@ class CheckpointManager:
                 raise FileNotFoundError(
                     f"--checkpoint.load_step={step} but checkpoint {checkpoint_id} is not found."
                 )
+        else:
+            return False
 
         if torch.distributed.get_rank() == 0:
             logger.info(f"Loading the checkpoint from {checkpoint_id}.")
