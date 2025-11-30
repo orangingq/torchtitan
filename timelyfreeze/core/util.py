@@ -149,7 +149,7 @@ def draw_afr_time_scatter_plot(
     title: str | None = None,
     xlabel: str = 'Freeze Ratio',
     ylabel: str = 'Time (ms)',
-    figsize: Tuple[float, float] = (3.5, 3.5),
+    figsize: Tuple[float, float] = (4,4),
     line_color: str = default_color_palette["blue"],
     scatter_color: str = default_color_palette["middle_blue"],
     microbatch_base_color: str = default_color_palette["light_blue"],
@@ -268,7 +268,7 @@ def draw_elementwise_histogram(
     figsize: tuple[float, float] | None = None,
     fontsize: int = 14,
     ticklabel_fontsize: int = 14,
-    title_fontsize: int = 16,
+    title_fontsize: int = 18,
     color_start: str = default_color_palette["very_light_blue"],
     color_end: str = default_color_palette["dark_blue"],
 ):
@@ -335,7 +335,7 @@ def draw_elementwise_histogram(
     ax1.set_xlim(0, 100)
     ax1.set_xticks(np.arange(0, 101, 10))
     ax1.set_yticks([])
-    ax1.set_xlabel(f"{xlabel1 if xlabel1 else 'Total Counts'} (%)")
+    ax1.set_xlabel(f"{xlabel1 if xlabel1 else 'Total Counts'} (%)", fontsize=ticklabel_fontsize)
 
     ax2.set_xlim(-0.5, num_elements - 0.5)
     ax2.set_ylim(0, 1)
@@ -343,8 +343,8 @@ def draw_elementwise_histogram(
     xticks = range(0, num_elements, xtick_step)
     ax2.set_xticks(xticks)
     ax2.set_xticklabels([f"{i}" for i in xticks], rotation=45, fontsize=ticklabel_fontsize)
-    ax2.set_ylabel("Count/Total Ratio")
-    ax2.set_xlabel(f"{xlabel2 if xlabel2 else 'Element Index'} (#)")
+    ax2.set_ylabel("Count/Total Ratio", fontsize=ticklabel_fontsize)
+    ax2.set_xlabel(f"{xlabel2 if xlabel2 else 'Element Index'} (#)", fontsize=ticklabel_fontsize)
 
     fig.suptitle(
         title if title is not None else f"Elementwise Histogram of Rank {config.comm.global_rank} (Stage {stage})",

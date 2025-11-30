@@ -177,44 +177,6 @@ class FullyRandomFreezer_v7(_Freezer):
             pass
         return
 
-    def _maybe_adjust_freeze_ratio(self):
-        """Adjust freeze ratio using recent logs and accept only if estimated batch time improves.
-        No-op if schedule/logs are insufficient.
-        """
-        if not self.config.freezing.adjustment:
-            return
-        if len(self.pipeline_schedule) == 0 or len(self.pipeline_schedule[self.config.comm.pp_rank]) == 0:
-            logger.error("Pipeline schedule is empty. Cannot adjust freeze ratio.")
-            return
-
-        # Build monitored values per stage from recent logs
-        monitored_values_dict = {stage: [] for stage in self.stages.keys()}
-        for a, la in zip(self.pipeline_schedule[self.config.comm.pp_rank], pplog.pipeline_log.log_schedule):
-            if not a.freezable:
-                continue
-            times = la.log_duration[self.progressive_freezing_start_step:]
-            if len(times) == 0:
-                logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
-                continue
-            lo, hi = np.percentile(times, 5), np.percentile(times, 95)
-            afrs = a.frozen_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
-            monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in zip(afrs, times) if lo <= t <= hi]
-
-        # Propose adjustment and estimate expected batch time from schedule end times
-        prev_batch_time = max(rank_actions[-1].end_time for rank_actions in self.pipeline_schedule)
-        proposed_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
-        if len(proposed_schedule) > 0 and len(proposed_schedule[0]) > 0:
-            new_batch_time = float(max(rank_actions[-1].end_time for rank_actions in proposed_schedule))
-        else:
-            new_batch_time = float('inf')
-
-        if new_batch_time <= prev_batch_time:
-            self.pipeline_schedule = proposed_schedule
-            logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
-            self.freeze_adjust_freq = self.freeze_adjust_freq * 2
-        else:
-            logger.warning(f"Reverted adjustment due to regression risk (est: {new_batch_time:.2f} ms > recent avg: {prev_batch_time:.2f} ms)")
-    
     
     def set_params_to_freeze(self):
         '''Random Selection of parameters to freeze based on the expected freeze ratio.'''
@@ -317,7 +279,9 @@ class FullyRandomFreezer_v7(_Freezer):
         return
 
     def _set_lowerbound(self):
-        '''Set the min_duration of each action block based on the monitored lowerbound of batch time.'''
+        '''Set the min_duration of each action block based on the monitored lowerbound of batch time.
+            and update the pipeline schedule with the monitored min/max duration.
+        '''
         assert self.monitoring_lb and not self.monitored_lb, "Lowerbound monitoring has not been started or has already been finished."
         assert self.monitoring_lb_start_step >= 0, "Lowerbound monitoring start step is not set."
         if self.config.comm.is_master_rank:
@@ -339,6 +303,44 @@ class FullyRandomFreezer_v7(_Freezer):
         self.progressive_freezing_start_step = pplog.pipeline_log.step_cnt
         return
 
+    def _maybe_adjust_freeze_ratio(self):
+        """Adjust freeze ratio using recent logs and accept only if estimated batch time improves.
+        No-op if schedule/logs are insufficient.
+        """
+        if not self.config.freezing.adjustment:
+            return
+        if len(self.pipeline_schedule) == 0 or len(self.pipeline_schedule[self.config.comm.pp_rank]) == 0:
+            logger.error("Pipeline schedule is empty. Cannot adjust freeze ratio.")
+            return
+
+        # Build monitored values per stage from recent logs
+        monitored_values_dict = {stage: [] for stage in self.stages.keys()}
+        for a, la in zip(self.pipeline_schedule[self.config.comm.pp_rank], pplog.pipeline_log.log_schedule):
+            if not a.freezable:
+                continue
+            times = la.log_duration[self.progressive_freezing_start_step:]
+            if len(times) == 0:
+                logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
+                continue
+            lo, hi = np.percentile(times, 5), np.percentile(times, 95)
+            afrs = a.frozen_ratio_history[self.progressive_freezing_start_step:self.progressive_freezing_start_step + len(times)]
+            monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in zip(afrs, times) if lo <= t <= hi]
+
+        # Propose adjustment and estimate expected batch time from schedule end times
+        prev_batch_time = max(rank_actions[-1].end_time for rank_actions in self.pipeline_schedule)
+        proposed_schedule = adjust_freeze_ratio(self.pipeline_schedule, monitored_values_dict, self.config)
+        if len(proposed_schedule) > 0 and len(proposed_schedule[0]) > 0:
+            new_batch_time = float(max(rank_actions[-1].end_time for rank_actions in proposed_schedule))
+        else:
+            new_batch_time = float('inf')
+
+        if new_batch_time <= prev_batch_time:
+            self.pipeline_schedule = proposed_schedule
+            logger.info(f"Adjusted Freeze Ratio per Block: {', '.join([f'[MB{action.microbatch}] {action.actual_freeze_ratio:.2f}/{action.expected_freeze_ratio:.2f}' for action in self.pipeline_schedule[self.config.comm.pp_rank] if action.freezable])}")
+            self.freeze_adjust_freq = self.freeze_adjust_freq * 2
+        else:
+            logger.warning(f"Reverted adjustment due to regression risk (est: {new_batch_time:.2f} ms > recent avg: {prev_batch_time:.2f} ms)")
+    
 
 class APFFreezer(_Freezer):
     '''
