@@ -85,6 +85,8 @@ class PipelineLog:
         self.log_schedule:List[ActionWithLog] = []
         self.action_dict: Dict[Tuple[ActionType, int, int, int], ActionWithFreezing] = None 
         '''the action dict, which is a dict of ActionWithFreezing with key (action_type, pp_rank, microbatch, stage)'''
+        self.action_cache: ActionWithFreezing | None = None
+        '''the action cache for the last accessed action.'''
         return
     
     def _tmp_timer_flush(self, flush_freq:int=10):
@@ -100,14 +102,24 @@ class PipelineLog:
         assert len(self.cuda_timer_batch[ActionStatus.START]) == len(self.cuda_timer_batch[ActionStatus.END]), f"the length of batch start and end should be the same. start:{len(self.cuda_timer_batch[ActionStatus.START])} != end:{len(self.cuda_timer_batch[ActionStatus.END])}"
         assert len(self.cuda_timer_schedule[ActionStatus.START]) == len(self.cuda_timer_schedule[ActionStatus.END]), f"the length of schedule start and end should be the same. start:{len(self.cuda_timer_schedule[ActionStatus.START])} != end:{len(self.cuda_timer_schedule[ActionStatus.END])}"
             
-        # log the time duration
-        self.cuda_timer_schedule[ActionStatus.START] = np.array(self.cuda_timer_schedule[ActionStatus.START]).reshape(flush_freq, len(self.log_schedule))            
-        self.cuda_timer_schedule[ActionStatus.END] = np.array(self.cuda_timer_schedule[ActionStatus.END]).reshape(flush_freq, len(self.log_schedule))
-        for i, action in enumerate(self.log_schedule):
-            action.add_log_time(self.step_cnt-flush_freq, \
-                                start_time=[rank_start.elapsed_time(start) for (rank_start, start) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_schedule[ActionStatus.START][:, i])], \
-                                duration=[start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_schedule[ActionStatus.START][:, i], self.cuda_timer_schedule[ActionStatus.END][:, i])])
-        self.log_batch_time.extend([start.elapsed_time(end) for (start, end) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_batch[ActionStatus.END])])
+        # log the time duration without creating large temporary NumPy arrays
+        num_actions = len(self.log_schedule)
+        schedule_start_chunks = [self.cuda_timer_schedule[ActionStatus.START][i * num_actions:(i + 1) * num_actions] for i in range(flush_freq)]
+        schedule_end_chunks = [self.cuda_timer_schedule[ActionStatus.END][i * num_actions:(i + 1) * num_actions] for i in range(flush_freq)]
+
+        for action_idx, action in enumerate(self.log_schedule):
+            batch_starts = [chunk[action_idx] for chunk in schedule_start_chunks]
+            batch_ends = [chunk[action_idx] for chunk in schedule_end_chunks]
+            action.add_log_time(
+                self.step_cnt - flush_freq,
+                start_time=[rank_start.elapsed_time(start) for (rank_start, start) in zip(self.cuda_timer_batch[ActionStatus.START], batch_starts)],
+                duration=[start.elapsed_time(end) for (start, end) in zip(batch_starts, batch_ends)],
+            )
+
+        self.log_batch_time.extend([
+            start.elapsed_time(end)
+            for (start, end) in zip(self.cuda_timer_batch[ActionStatus.START], self.cuda_timer_batch[ActionStatus.END])
+        ])
     
         # reset the tmp timers
         self.cuda_timer_batch = {ActionStatus.START: [], ActionStatus.END: []}
@@ -124,14 +136,13 @@ class PipelineLog:
         self.disabled = False
         return
 
-    def __call__(self, microbatch:int=-1, stage:int=None, step:ActionType='', range:ActionStatus=ActionStatus.NONE, postfix:str='', timestamp=None)->'PipelineLog':
+    def __call__(self, microbatch:int=-1, stage:int=None, step:ActionType='', range:ActionStatus=ActionStatus.NONE, postfix:str='')->'PipelineLog':
         '''log the time duration of the current pipeline action.
         Args:
             microbatch: int, the microbatch index
             step: Union[ActionType, str], the step name or ActionType number
             range: ['start', 'end', 'None']. If 'start', push the nvtx range. If 'end', pop the nvtx range. If 'None', mark the time point. 
             postfix: str, the postfix of the step
-            timestamp: float, the timestamp of the step
         '''
         if self.disabled:
             return self
@@ -146,7 +157,7 @@ class PipelineLog:
         self.range = range
         self.step_cnt += int(self._is_start_of_batch) # int(step in ActionPhase.START) # count the step
         if (self._is_start_of_batch):
-            logger.debug(f"🚦  Starting local step {self.step_cnt} (in the unit of a batch computation)")
+            logger.debug(f"🚦  Starting local step {self.step_cnt} (in the unit of a batch computation) (global step: {self.step_cnt // (self.config.training.global_batch_size / self.config.training.local_batch_size)}) ")
 
         if not self.step in [ActionType.FORWARD, ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT] \
             or not self.range in [ActionStatus.START, ActionStatus.END]:
@@ -155,7 +166,7 @@ class PipelineLog:
         # Process to identify pipeline schedule cycle (for the first cycle)
         if self.log_schedule_flag:
             self._create_actions_list()
-        # else:
+
         self.log_timer()
         return self
     
@@ -167,6 +178,8 @@ class PipelineLog:
     
     def __exit__(self, exc_type, exc_value, traceback):
         '''exit the context'''
+        if self.step in [ActionType.FULL_BACKWARD, ActionType.BACKWARD_INPUT, ActionType.BACKWARD_WEIGHT]:
+            self.unfreeze(self.microbatch, self.stage, self.step)
         self(self.microbatch, self.stage, self.step, ActionStatus.END)
         return
 
@@ -179,30 +192,39 @@ class PipelineLog:
     def bwd_recv(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.RECV_B, ActionStatus.START, postfix=postfix) 
     def backward(self, microbatch, stage, postfix:str='')->'PipelineLog':
-        if not self.disabled and self.action_dict is not None:
-            if (ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.FULL_BACKWARD, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
-            else:
-                logger.warning(f"The action (FULL_BACKWARD, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
+        self.freeze(microbatch, stage, ActionType.FULL_BACKWARD)
         return self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix) 
     def backward_input(self, microbatch, stage, postfix:str='')->'PipelineLog':
-        if not self.disabled and self.action_dict is not None:
-            if (ActionType.BACKWARD_INPUT, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_INPUT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
-            else:
-                logger.warning(f"The action (BACKWARD_INPUT, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
+        self.freeze(microbatch, stage, ActionType.BACKWARD_INPUT)
         return self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.START, postfix=postfix) 
     def backward_weight(self, microbatch, stage, postfix:str='')->'PipelineLog':
-        if not self.disabled and self.action_dict is not None:
-            if (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
-                self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)].freeze(self.step_cnt)
-            else:
-                logger.warning(f"The action (BACKWARD_WEIGHT, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
+        self.freeze(microbatch, stage, ActionType.BACKWARD_WEIGHT)
         return self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.START, postfix=postfix) 
     def bwd_send(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.SEND_B, ActionStatus.START, postfix=postfix) 
     def sync(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.SYNC, ActionStatus.START, postfix=postfix) 
+    
+    def freeze(self, microbatch:int=-1, stage:int=None, step:ActionType=ActionType.FULL_BACKWARD):
+        '''log the freeze action'''
+        if self.disabled or self.action_dict is None:
+            return 
+
+        if (step, self.pp_rank, microbatch, stage) in self.action_dict:
+            self.action_cache = self.action_dict[(step, self.pp_rank, microbatch, stage)]
+            self.action_cache.freeze(self.step_cnt)
+        else:
+            logger.warning(f"The action ({step.name}, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
+
+    def unfreeze(self, microbatch:int=-1, stage:int=None, step:ActionType=ActionType.FULL_BACKWARD):
+        '''log the unfreeze action'''
+        if self.disabled or self.action_dict is None:
+            return 
+
+        if self.action_cache is not None and (step, self.pp_rank, microbatch, stage) in self.action_dict:
+            self.action_cache.unfreeze()
+        else:
+            logger.warning(f"The action ({step.name}, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
 
     def log_timer(self):
         '''log the timer'''
