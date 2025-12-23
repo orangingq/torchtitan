@@ -608,6 +608,11 @@ class _PipelineStageBase(ABC):
                         bwd_kwargs["stage_output"],
                         bwd_kwargs["output_grads"],
                         bwd_kwargs["input_values"],
+                        ######### CSH Addition #########
+                        self.submod.parameters(),
+                        False,
+                        bwd_kwargs.get("freeze_list", None),
+                        ####### CSH Addition End #######
                     ),
                     None,
                 )
@@ -617,11 +622,19 @@ class _PipelineStageBase(ABC):
                     bwd_kwargs["output_grads"],
                     bwd_kwargs["input_values"],
                     self.submod.parameters(),
+                    ######### CSH Addition #########
+                    bwd_kwargs.get("freeze_list", None),
+                    ####### CSH Addition End #######
                 )
             elif backward_type == "weight":
                 return lambda: (
                     stage_backward_weight(
-                        self.submod.parameters(), bwd_kwargs["param_groups"]
+                        self.submod.parameters(), 
+                        bwd_kwargs["param_groups"],
+                        ######### CSH Addition #########
+                        False,
+                        bwd_kwargs.get("freeze_list", None),
+                        ####### CSH Addition End #######
                     ),
                     None,
                 )
@@ -673,7 +686,9 @@ class _PipelineStageBase(ABC):
           through activation transmission.
         - `kwargs` can be passed to all stages via respective `step` calls.
         """
+        ######### CSH Addition #########
         from timelyfreeze.core import logger as pplog # CSH - to log the forward GPU time
+        ####### CSH Addition End #######
 
         if self.is_first:
             # First stage doesn't need to receive anything
@@ -689,7 +704,9 @@ class _PipelineStageBase(ABC):
 
         # Compute forward
         try:
-            with pplog.pipeline_log.forward(microbatch=fwd_chunk_id, stage=self.stage_index, postfix="stage forward"): # CSH - to log the forward GPU time
+            ######### CSH Addition #########
+            with pplog.pipeline_log.forward(microbatch=fwd_chunk_id, stage=self.stage_index): # CSH - to log the forward GPU time
+            ####### CSH Addition End #######
                 output = self.forward_maybe_with_nosync(*composite_args, **composite_kwargs)
 
         except Exception as e:
@@ -749,7 +766,10 @@ class _PipelineStageBase(ABC):
         last_backward is controlled by the schedule and signals synchronization of gradients across DP groups
         after the last backward.
         """
-        from timelyfreeze.core import logger as pplog # CSH - to log the backward GPU time
+        ######### CSH Addition #########
+        from timelyfreeze.core import logger as pplog # CSH - to log the forward GPU time
+        ####### CSH Addition End #######
+
         # skip backward computation if backward is not enabled
         if not self.has_backward:
             return
@@ -794,12 +814,23 @@ class _PipelineStageBase(ABC):
                 last_backward=last_backward,
             )
             if full_backward:
-                self.dw_builder()()
+                ########## CSH Addition ##########
+                with pplog.pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index) as freeze_list: # CSH - to log the backward GPU time
+                    bwd_kwargs["freeze_list"] = freeze_list # CSH - to set freeze list locally
+                ######## CSH Addition End ########
+                    self.dw_builder()()
             else:
-                self.dw_runner[bwd_chunk_id] = self.dw_builder()
+                ########## CSH Addition ##########
+                with pplog.pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index) as freeze_list: # CSH - to log the backward GPU time
+                    bwd_kwargs["freeze_list"] = freeze_list # CSH - to set freeze list locally
+                ######## CSH Addition End ########
+                    self.dw_runner[bwd_chunk_id] = self.dw_builder()
         else:
             if full_backward:
-                with pplog.pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                ########## CSH Addition ##########
+                with pplog.pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index) as freeze_list: # CSH - to log the backward GPU time
+                    bwd_kwargs["freeze_list"] = freeze_list # CSH - to set freeze list locally
+                ######## CSH Addition End ########
                     grads_input, _ = self.backward_maybe_with_nosync(
                     "full", bwd_kwargs, last_backward=last_backward
                 )
@@ -813,7 +844,10 @@ class _PipelineStageBase(ABC):
 
                     # perform the partial backwards for the inputs with a custom backward function
                     # when the "stage_ouput" is a loss, then it is a tensor, otherwise it is a tuple of tensors
-                    with pplog.pipeline_log.backward_input(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="input backward one chunk"): # CSH - to log the backward GPU time
+                    ########## CSH Addition ##########
+                    with pplog.pipeline_log.backward_input(microbatch=bwd_chunk_id, stage=self.stage_index) as freeze_list: # CSH - to log the backward GPU time
+                        bwd_kwargs["freeze_list"] = freeze_list # CSH - to set freeze list locally
+                    ######## CSH Addition End ########
                         grads_input, param_groups = self.backward_maybe_with_nosync(
                         "input", bwd_kwargs, last_backward=last_backward
                     )
@@ -868,7 +902,10 @@ class _PipelineStageBase(ABC):
                     "stage_output": stage_output,
                     "param_groups": param_groups,
                 }
-                with pplog.pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="weight backward one chunk"): # CSH - to log the backward GPU time
+                ########## CSH Addition ##########
+                with pplog.pipeline_log.backward_weight(microbatch=bwd_chunk_id, stage=self.stage_index) as freeze_list: # CSH - to log the backward GPU time
+                    bwd_kwargs["freeze_list"] = freeze_list # CSH - to set freeze list locally
+                ######## CSH Addition End ########
                     self.backward_maybe_with_nosync(
                         "weight", bwd_kwargs, last_backward=last_backward
                     )
@@ -883,7 +920,10 @@ class _PipelineStageBase(ABC):
                     "output_grads": output_grads,
                     "input_values": input_values,
                 }
-                with pplog.pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index, postfix="full backward one chunk"): # CSH - to log the backward GPU time
+                ########## CSH Addition ##########
+                with pplog.pipeline_log.backward(microbatch=bwd_chunk_id, stage=self.stage_index) as freeze_list: # CSH - to log the backward GPU time
+                    bwd_kwargs["freeze_list"] = freeze_list # CSH - to set freeze list locally
+                ######## CSH Addition End ########
                     self.backward_maybe_with_nosync(
                         "full", bwd_kwargs, last_backward=last_backward
                     )

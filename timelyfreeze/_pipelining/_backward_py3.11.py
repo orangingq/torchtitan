@@ -14,15 +14,18 @@ from ._debug import map_debug_info
 
 logger = logging.getLogger(__name__)
 
-
-def _get_grad_fn_or_grad_acc(t: torch.Tensor) -> Union[Node, None]:
+############ Original Code ############
+# def _get_grad_fn_or_grad_acc(t: torch.Tensor) -> Union[Node, None]:
+########## CSH Modification ###########  
+def _get_grad_fn_or_grad_acc(t: torch.Tensor, requires_grad: bool | None = None) -> Union[Node, None]:
+######### CSH Modification End ########
     """
     Get the grad function or grad accumulator for a tensor.
 
     Accumulate grad nodes are lazily created, so we need to a
     dummy view in order to trigger its creation.
     """
-    ############ Original code ############
+    ########### Original code ############
     # if t.requires_grad and t.grad_fn is None:
     #     # if no grad function (leaf tensors) we use view
     #     viewed_t = t.view_as(t)
@@ -37,16 +40,18 @@ def _get_grad_fn_or_grad_acc(t: torch.Tensor) -> Union[Node, None]:
     # else:
     #     return t.grad_fn
     ############ CSH Modification ############  
-    if t.grad_fn is None: # CSH
-        try:
-            # if no grad function (leaf tensors) we use view
-            viewed_t = t.view_as(t)
-            grad_fn = viewed_t.grad_fn
-            if grad_fn is not None:
-                return grad_fn.next_functions[0][0]
-        except Exception as e:
-            print(f"Error while trying to get grad_fn for tensor {t.shape} (requires_grad: {t.requires_grad}): {e}")
-            return None
+    requires_grad = requires_grad if requires_grad is not None else t.requires_grad
+    if requires_grad and t.grad_fn is None:
+        # if no grad function (leaf tensors) we use view
+        viewed_t = t.view_as(t)
+        grad_fn = viewed_t.grad_fn
+        if grad_fn is not None:
+            return grad_fn.next_functions[0][0]
+        else:
+            raise RuntimeError(
+                "Attempted to get grad_fn, but got None."
+                "Is this being created in a no-grad context?"
+            )
     else:
         return t.grad_fn
 
@@ -159,6 +164,7 @@ def stage_backward_input(
     output_grads: Optional[list[torch.Tensor]],
     input_values: list[torch.Tensor],
     weights: Iterator[Parameter],
+    freeze_list:list[bool]|None=None # CSH: list indicating whether to freeze each weight (rather than global requires_grad)
 ) -> tuple[tuple[Optional[torch.Tensor], ...], list[dict[str, Any]]]:
     """
     Compute the gradients for only the stage inputs with
@@ -170,15 +176,29 @@ def stage_backward_input(
     Detaching the stage_outputs_or_loss at the end of this function is important as
     it frees up the memory that the autograd graph is anticipating to be used later (but doesn't actually need).
     """
+    ######### CSH Addition ############
+    weights = list(weights)  # Convert iterator to list for multiple passes
+    if freeze_list is None: # CSH: default to all False
+        freeze_list = [not w.requires_grad for w in weights]
+    ######### CSH Addition End ########
+
     stage_output_grad_fns: list[Node] = list(
         filter(None, map(_get_grad_fn_or_grad_acc, stage_outputs_or_loss))
     )
     stage_input_grad_fns: list[Node] = list(
         filter(None, map(_get_grad_fn_or_grad_acc, input_values))
     )
-    weight_grad_fns: list[Node] = list(
-        filter(None, map(_get_grad_fn_or_grad_acc, weights))
-    )
+    ######### Original Code ###########
+    # weight_grad_fns: list[Node] = list(
+    #     filter(None, map(_get_grad_fn_or_grad_acc, weights))
+    # )
+    ######## CSH Modification #########
+    weight_grad_fns: list[Node] = []
+    for idx, param in enumerate(weights):
+        grad_fn = _get_grad_fn_or_grad_acc(param, requires_grad=not freeze_list[idx])
+        if grad_fn is not None:
+            weight_grad_fns.append(grad_fn)
+    ###### CSH Modification End #######
 
     reverse_edges_dict = construct_reverse_graph(stage_output_grad_fns)
     param_groups = get_param_groups(
@@ -238,16 +258,21 @@ def stage_backward_input(
 
 
 def stage_backward_weight(
-    weights: Iterator[Parameter], param_groups: list[dict[str, Any]], retain_graph=False,
-    freeze_list:list[bool]=None # CSH: list indicating whether to freeze each weight (rather than global requires_grad)
+    weights: Iterator[Parameter], 
+    param_groups: list[dict[str, Any]], 
+    retain_graph=False,
+    freeze_list:list[bool]|None=None # CSH: list indicating whether to freeze each weight (rather than global requires_grad)
 ) -> tuple[Optional[torch.Tensor], ...]:
     # map weights to param_group_weights
     grad_acc_to_weight = {}
     weight_grads: list[Optional[torch.Tensor]] = []
 
     ######### CSH Addition ############
+    weights = list(weights)  # Convert iterator to list for multiple passes
     if freeze_list is None: # CSH: default to all False
         freeze_list = [not w.requires_grad for w in weights]
+    # else:
+    #     print(f"stage_backward_weight freeze_list: {sum(freeze_list)}/{len(freeze_list)}")
     ######### CSH Addition End ########
 
     for index, weight in enumerate(weights):
@@ -313,6 +338,11 @@ def stage_backward(
     stage_output,
     output_grads,
     input_values,
+    ########## CSH Addition ########### 
+    weights: Iterator[Parameter], 
+    retain_graph=False,
+    freeze_list: Optional[list[bool]] = None, # CSH: list indicating whether to freeze each weight (rather than global requires_grad)
+    ######## CSH Addition End ######### 
     outputs_with_grads_idxs: Optional[list[int]] = None,  # deprecated, not used
 ) -> tuple[Optional[torch.Tensor], ...]:
     """
@@ -376,6 +406,7 @@ def stage_backward(
                 # Output is a non-tensor type; just ignore it
                 pass
 
+
         # Note: ref cycle
         # break a ref cycle that would keep tensors alive until GC runs
         # 1. extract_tensors_with_grads refers to a cell that holds refs to any vars defined in stage_backward
@@ -387,39 +418,102 @@ def stage_backward(
         extract_tensors_with_grads(
             stage_output, output_grads, extract_tensors_with_grads
         )
-        torch.autograd.backward(
-            stage_output_tensors,
-            grad_tensors=output_grad_tensors,  # type: ignore[arg-type]
-        )
+        
+        ############ Original Code ############ 
+        # torch.autograd.backward(
+        #     stage_output_tensors,
+        #     grad_tensors=output_grad_tensors,  # type: ignore[arg-type]
+        # )
 
-        # Extract gradients wrt the input values
-        grad_inputs: list[Optional[torch.Tensor]] = []
-        for val in input_values:
-            if isinstance(val, torch.Tensor):
-                grad_inputs.append(val.grad)
-                # Since gradients that will pass back to previous stages do not require gradient accumulation,
-                # by decrementing the gradients' reference count at this point, the memory of gradients will be
-                # returned to the allocator as soon as the next micro batch's get_bwd_send_ops comes and current
-                # asynchronous send completes.
-                # This prevents the gradients from persisting in GPU memory for the entire duration of step_microbatches
-                # until clear_runtime_states() is called.
-                val.grad = None
-            else:
-                grad_inputs.append(None)
+        # # Extract gradients wrt the input values
+        # grad_inputs: list[Optional[torch.Tensor]] = []
+        # for val in input_values:
+        #     if isinstance(val, torch.Tensor):
+        #         grad_inputs.append(val.grad)
+        #         # Since gradients that will pass back to previous stages do not require gradient accumulation,
+        #         # by decrementing the gradients' reference count at this point, the memory of gradients will be
+        #         # returned to the allocator as soon as the next micro batch's get_bwd_send_ops comes and current
+        #         # asynchronous send completes.
+        #         # This prevents the gradients from persisting in GPU memory for the entire duration of step_microbatches
+        #         # until clear_runtime_states() is called.
+        #         val.grad = None
+        #     else:
+        #         grad_inputs.append(None)
 
-        # Alternative impl: `torch.autograd.grad`.
-        # Note that `torch.autograd.grad` will not accumulate gradients into the
-        # model's parameters.
-        """
-        inputs_with_grad = []
+        # # Alternative impl: `torch.autograd.grad`.
+        # # Note that `torch.autograd.grad` will not accumulate gradients into the
+        # # model's parameters.
+        # """
+        # inputs_with_grad = []
+        # for val in input_values:
+        #     if isinstance(val, torch.Tensor) and val.requires_grad:
+        #         inputs_with_grad.append(val)
+
+        # grad_inputs = torch.autograd.grad(
+        #     stage_output_tensors, inputs_with_grad, output_grad_tensors,  # type: ignore[arg-type]
+        # )
+        # """
+        ########## CSH Modification ########### 
+        # Materialize weights iterator ONCE (important: iterators get consumed)
+        weights_list = list(weights)
+
+        # Default: compute grads for all weights unless freeze_list says otherwise
+        if freeze_list is None: # CSH: default to all False
+            freeze_list = [not w.requires_grad for w in weights_list]
+            
+        # Inputs we want gradients for (only tensors requiring grad)
+        inputs_with_grad: list[torch.Tensor] = []
         for val in input_values:
             if isinstance(val, torch.Tensor) and val.requires_grad:
                 inputs_with_grad.append(val)
 
-        grad_inputs = torch.autograd.grad(
-            stage_output_tensors, inputs_with_grad, output_grad_tensors,  # type: ignore[arg-type]
+        # Params we want gradients for (unfrozen only)
+        trainable_params: list[Parameter] = []
+        for p, frz in zip(weights_list, freeze_list):
+            if not frz:
+                trainable_params.append(p)
+                
+        # If nothing requires grad, return Nones quickly
+        if len(stage_output_tensors) == 0 or (len(inputs_with_grad) == 0 and len(trainable_params) == 0):
+            return tuple(None if not isinstance(v, torch.Tensor) else None for v in input_values)
+
+        # autograd.grad computes grads ONLY for given inputs; it does NOT populate .grad
+        grads = torch.autograd.grad(
+            outputs=stage_output_tensors, 
+            inputs=inputs_with_grad + trainable_params, 
+            grad_outputs=output_grad_tensors,  # type: ignore[arg-type]
+            retain_graph=retain_graph,
+            allow_unused=True
         )
-        """
+        
+        # Split grads into input grads and param grads
+        num_inp = len(inputs_with_grad)
+        input_grads_list = grads[:num_inp]
+        param_grads_list = grads[num_inp:]
+
+        # 1) Accumulate param grads manually
+        for p, g in zip(trainable_params, param_grads_list):
+            if g is None:
+                continue
+            if p.grad is None:
+                p.grad = g
+            else:
+                p.grad.add_(g)
+                
+        # 2) Build grad_inputs aligned to original input_values order
+        # Map input tensor object -> computed grad
+        inp_to_grad = {inp: g for inp, g in zip(inputs_with_grad, input_grads_list)}
+
+        grad_inputs: list[Optional[torch.Tensor]] = []
+        for v in input_values:
+            if isinstance(v, torch.Tensor):
+                grad_inputs.append(inp_to_grad.get(v, None))
+                # Keep behavior similar to original: ensure we don't keep stale .grad on inputs
+                # (autograd.grad doesn't write v.grad, but in case something else did)
+                v.grad = None
+            else:
+                grad_inputs.append(None)
+        ######## CSH Modification End #########
 
     except Exception as e:
         exc_msg = f"""
