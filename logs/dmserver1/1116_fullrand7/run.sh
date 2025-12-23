@@ -4,13 +4,14 @@
 EXPLAIN="1116: TimelyFreeze (fullrand7) configuration experiment on different max_freeze_ratio values.
 1128: fixed a bug in freezing ratio calculation (should be based on total layers, not unfrozen layers), lp solver -> qp solver
 1212: everything same as 1128, but qp solver -> lp solver
+1223: everything same as 1212, but debugged a bug in requires_grad in pytorch pipelining
 "
 
 EXPERIMENT_TAG="1116_fullrand7"
-TODAY="1212"
+TODAY="1223"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=2,3,4,5
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
 export OMP_NUM_THREADS=4

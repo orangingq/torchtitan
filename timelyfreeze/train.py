@@ -652,9 +652,20 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
     is_final = (step == config.training.steps)
     is_warmupend = (config.freezing.freeze and step == freezer.warmup_phase)
     filename_suffix = ('final' if is_final else 'warmupend' if is_warmupend else 'step') + str(step)
+    
+    draw_any_pipeline_schedule :bool    = pplog.pipeline_log is not None \
+                                        and len(pplog.pipeline_log.log_schedule) > 0 \
+                                        and len(pplog.pipeline_log.log_schedule[0].log_duration) > 0
+    draw_real_pipeline_schedule :bool   = draw_any_pipeline_schedule and config.comm.is_last_stage
+    draw_thry_pipeline_schedule :bool   = draw_any_pipeline_schedule and config.comm.is_last_stage and is_final
+    draw_frozen_ratio_history :bool     = config.freezing.freeze and (not is_warmupend)
+    draw_frozen_params_histogram :bool  = config.freezing.freeze and is_final
+    draw_afr_time_plot :bool            = config.freezing.freeze and (not is_warmupend) \
+                                        and hasattr(freezer, 'pipeline_schedule') \
+                                        and len(freezer.pipeline_schedule) > 0 \
+                                        and freezer.progressive_freezing_start_step > 0 
 
-    if pplog.pipeline_log is not None and len(pplog.pipeline_log.log_schedule) > 0 \
-        and len(pplog.pipeline_log.log_schedule[0].log_duration) > 0:
+    if draw_any_pipeline_schedule:
         log_window = config.freezing.phase_unit if not is_final else None
         pipeline_schedule :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=log_window)
         rank_start = 0.0
@@ -662,16 +673,16 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
             for action in rank_schedule:
                 action.start_time = rank_start + action.start_time
             rank_start = rank_schedule[0].end_time
-        if config.comm.is_last_stage:
+
+        if draw_real_pipeline_schedule:
             # 1) Draw the realistic pipeline schedule
-            draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_real_{filename_suffix}_rank{config.comm.global_rank}.svg',
+            draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_{filename_suffix}_rank{config.comm.global_rank}.svg',
                                 pipeline_schedule=pipeline_schedule,
                                 config=config,
                                 # title=f"Realistic Pipeline Schedule", 
                                 xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                                 )
-
-            if is_final:
+        if draw_thry_pipeline_schedule:
                 # 2) Draw the theoretical pipeline schedule
                 fwd_mean = np.mean([action.duration for rank_list in pipeline_schedule for action in rank_list if action.type == ActionType.FORWARD])
                 pipeline_schedule = schedule_pipeline(pipeline_schedule, 
@@ -685,50 +696,48 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 # title=f"Theoretical Pipeline Schedule", 
                                 xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                                 )
-            
 
-    if (not is_warmupend) or is_final: # only draw the pipeline schedule after warmup
-        if config.freezing.freeze:
-            for s in config.parallelism.stages_list:
-                # 4) Draw the frozen ratio history
-                draw_line_chart([freezer.stability_check_freq * k for k in range(len(freezer.frozen_ratio_history[s]))], 
-                                    freezer.frozen_ratio_history[s], 
-                                    config=config,
-                                    save_file=f'frozen_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
-                                    title=f"Frozen Ratio History of Rank {config.comm.global_rank} (Stage {s})", xlabel="Step", ylabel="Frozen Ratio")
-        
-                if is_final:
-                    # 5) Draw the frozen params histogram per stage
-                    draw_elementwise_histogram(data=list(freezer.paramwise_frozen_count[s].values()), stage=s,
-                                    save_file=f'frozen_params_histogram/{timestamp}_rank{config.comm.global_rank}_stage{s}.svg', 
-                                    config=config,
-                                    title=f"Histogram of Frozen Parameters in Rank {config.comm.global_rank} (Stage {s})",
-                                    xlabel1="Total Freeze Counts Ratio",
-                                    xlabel2="Parameter Index")
+    if draw_frozen_ratio_history:
+        for s in config.parallelism.stages_list:
+            # 4) Draw the frozen ratio history
+            draw_line_chart([freezer.stability_check_freq * k for k in range(len(freezer.frozen_ratio_history[s]))], 
+                                freezer.frozen_ratio_history[s], 
+                                config=config,
+                                save_file=f'frozen_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
+                                title=f"Frozen Ratio History of Rank {config.comm.global_rank} (Stage {s})", xlabel="Step", ylabel="Frozen Ratio")
+    
+    if draw_frozen_params_histogram:
+        # 5) Draw the frozen params histogram per stage
+        draw_elementwise_histogram(data=list(freezer.paramwise_frozen_count[s].values()), stage=s,
+                        save_file=f'frozen_params_histogram/{timestamp}_rank{config.comm.global_rank}_stage{s}.svg', 
+                        config=config,
+                        title=f"Histogram of Frozen Parameters in Rank {config.comm.global_rank} (Stage {s})",
+                        xlabel1="Total Freeze Counts Ratio",
+                        xlabel2="Parameter Index")
 
-            if len(freezer.pipeline_schedule) > 0 and freezer.progressive_freezing_start_step > 0:
-                # 6) Draw AFR-vs-Time scatter plot per stage
-                monitored_values_dict = {stage: [] for stage in freezer.stages.keys()}
-                for a, la in zip(freezer.pipeline_schedule[config.comm.pp_rank], pplog.pipeline_log.log_schedule):
-                    if not a.freezable:
-                        continue
-                    times = la.log_duration[freezer.progressive_freezing_start_step:]
-                    if len(times) == 0:
-                        logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
-                        continue
-                    lo, hi = 0, max(times)# np.percentile(times, 5), np.percentile(times, 95)
-                    afrs = a.frozen_ratio_history[freezer.progressive_freezing_start_step:freezer.progressive_freezing_start_step + len(times)]
-                    monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in  zip(afrs, times) if lo <= t <= hi]
-                # print(f"monitored_values_dict[{a.stage}]: {monitored_values_dict[a.stage].sort(key=lambda x: x[2])}")
-                for s, monitored_values in monitored_values_dict.items():
-                    draw_afr_time_scatter_plot(
-                                    afrs=[v[0] for v in monitored_values],
-                                    times=[v[1] for v in monitored_values],
-                                    save_file=f'afr_time_plot/{timestamp}_stage{s}.svg',
-                                    microbatches=[v[2] for v in monitored_values],
-                                    config=config,
-                                    title=f"Scatter Plot of Stage {s}",
-                    )
+    if draw_afr_time_plot:
+        # 6) Draw AFR-vs-Time scatter plot per stage
+        monitored_values_dict = {stage: [] for stage in freezer.stages.keys()}
+        for a, la in zip(freezer.pipeline_schedule[config.comm.pp_rank], pplog.pipeline_log.log_schedule):
+            if not a.freezable:
+                continue
+            times = la.log_duration[freezer.progressive_freezing_start_step:]
+            if len(times) == 0:
+                logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
+                continue
+            lo, hi = np.percentile(times, 5), np.percentile(times, 95)
+            afrs = a.frozen_ratio_history[freezer.progressive_freezing_start_step:freezer.progressive_freezing_start_step + len(times)]
+            monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in  zip(afrs, times) if lo <= t <= hi]
+
+        for s, monitored_values in monitored_values_dict.items():
+            draw_afr_time_scatter_plot(
+                            afrs=[v[0] for v in monitored_values],
+                            times=[v[1] for v in monitored_values],
+                            save_file=f'afr_time_plot/{timestamp}_stage{s}.svg',
+                            microbatches=[v[2] for v in monitored_values],
+                            config=config,
+                            title=f"Scatter Plot of Stage {s}",
+            )
                 # for microbatch in range(config.parallelism.microbatches):
                 #     monitored_values_dict = {stage: [] for stage in freezer.stages.keys()}
                 #     for a, la in zip(freezer.pipeline_schedule[config.comm.pp_rank], pplog.pipeline_log.log_schedule):
