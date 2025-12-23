@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from enum import Enum
 from typing import Dict, List, Tuple, Union
 import numpy as np
@@ -197,30 +198,60 @@ class PipelineLog:
         return self(microbatch, stage, ActionType.SEND_F, ActionStatus.START, postfix=postfix) 
     def bwd_recv(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.RECV_B, ActionStatus.START, postfix=postfix) 
-    def backward(self, microbatch, stage, postfix:str='')->'PipelineLog':
-        self.freeze(microbatch, stage, ActionType.FULL_BACKWARD)
-        return self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix) 
-    def backward_input(self, microbatch, stage, postfix:str='')->'PipelineLog':
-        self.freeze(microbatch, stage, ActionType.BACKWARD_INPUT)
-        return self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.START, postfix=postfix) 
-    def backward_weight(self, microbatch, stage, postfix:str='')->'PipelineLog':
-        self.freeze(microbatch, stage, ActionType.BACKWARD_WEIGHT)
-        return self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.START, postfix=postfix) 
+    
+    @contextmanager
+    def backward(self, microbatch, stage, postfix: str = ""):
+        self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix)
+        freeze_list = self.freeze(microbatch, stage, ActionType.FULL_BACKWARD)
+        try:
+            yield freeze_list
+        finally:
+            self.unfreeze(microbatch, stage, ActionType.FULL_BACKWARD)
+            self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.END)
+
+    # def backward(self, microbatch, stage, postfix:str='')->list[bool]|None:
+    #     self(microbatch, stage, ActionType.FULL_BACKWARD, ActionStatus.START, postfix=postfix)
+    #     return self.freeze(microbatch, stage, ActionType.FULL_BACKWARD)
+
+    @contextmanager
+    def backward_input(self, microbatch, stage, postfix:str=''):
+        self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.START, postfix=postfix)        
+        try:
+            if self.action_dict is not None and (ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage) in self.action_dict:
+                bwd_weight_action = self.action_dict[(ActionType.BACKWARD_WEIGHT, self.pp_rank, microbatch, stage)]
+                yield getattr(bwd_weight_action, "freeze_list", None)
+            else:
+                yield None
+        finally:
+            self(microbatch, stage, ActionType.BACKWARD_INPUT, ActionStatus.END)
+    
+    @contextmanager
+    def backward_weight(self, microbatch, stage, postfix: str = ""):
+        self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.START, postfix=postfix)
+        freeze_list = self.freeze(microbatch, stage, ActionType.BACKWARD_WEIGHT)
+        try:
+            yield freeze_list
+        finally:
+            self.unfreeze(microbatch, stage, ActionType.BACKWARD_WEIGHT)
+            self(microbatch, stage, ActionType.BACKWARD_WEIGHT, ActionStatus.END)
+
     def bwd_send(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.SEND_B, ActionStatus.START, postfix=postfix) 
     def sync(self, microbatch:int=-1, stage:int=None, postfix:str='')->'PipelineLog':
         return self(microbatch, stage, ActionType.SYNC, ActionStatus.START, postfix=postfix) 
     
-    def freeze(self, microbatch:int=-1, stage:int=None, step:ActionType=ActionType.FULL_BACKWARD):
-        '''log the freeze action'''
+    def freeze(self, microbatch:int=-1, stage:int=None, step:ActionType=ActionType.FULL_BACKWARD)->list[bool]|None:
+        '''log the freeze action and return the freeze list'''
         if self.disabled or self.action_dict is None:
-            return 
+            return None
 
+        freeze_list = None
         if (step, self.pp_rank, microbatch, stage) in self.action_dict:
             self.action_cache = self.action_dict[(step, self.pp_rank, microbatch, stage)]
-            self.action_cache.freeze(self.step_cnt)
+            freeze_list = self.action_cache.freeze(self.step_cnt)
         else:
             logger.warning(f"The action ({step.name}, {self.pp_rank}, {microbatch}, {stage}) is not found in the action_dict.")
+        return freeze_list
 
     def unfreeze(self, microbatch:int=-1, stage:int=None, step:ActionType=ActionType.FULL_BACKWARD):
         '''log the unfreeze action'''

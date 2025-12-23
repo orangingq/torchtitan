@@ -518,7 +518,7 @@ def set_freeze_ratio(pipeline_schedule:List[List[ActionWithTime]], config: Timel
         
     # initialize the duration of each action to have a minimum batch time
     pipeline_schedule_freezing = schedule_pipeline(set_expected_freeze_ratio(pipeline_schedule_freezing, ratio=1))
-    min_batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing]) # get the minimum batch time
+    # min_batch_time = max([rank_actions[-1].end_time for rank_actions in pipeline_schedule_freezing]) # get the minimum batch time
     if config.comm.is_last_stage and config.metrics.draw_graph:
         draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_min_batch_time.svg',
                             config=config,

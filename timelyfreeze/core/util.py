@@ -137,7 +137,7 @@ def draw_line_chart(
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
     fig.savefig(save_file)
     plt.close(fig)
-    logger.info(f"{title if title is not None else 'Line Chart'} is saved as: {save_file}")
+    logger.info(f"✅ {title if title is not None else 'Line Chart'} is saved as: {save_file}")
     return save_file
 
 def draw_afr_time_scatter_plot(
@@ -149,7 +149,7 @@ def draw_afr_time_scatter_plot(
     title: str | None = None,
     xlabel: str = 'Freeze Ratio',
     ylabel: str = 'Time (ms)',
-    figsize: Tuple[float, float] = (4,4),
+    figsize: Tuple[float, float] = (5,5),
     line_color: str = default_color_palette["blue"],
     scatter_color: str = default_color_palette["middle_blue"],
     microbatch_base_color: str = default_color_palette["light_blue"],
@@ -235,7 +235,10 @@ def draw_afr_time_scatter_plot(
     # Cosmetic settings.
     ax.grid(True, linestyle='--', alpha=grid_alpha)
     ax.set_xticks(xticks)
-    ax.set_yticks(yticks or [y_min, y_min * 0.75 + y_max * 0.25, (y_min + y_max) / 2, y_min * 0.25 + y_max * 0.75, y_max])
+    default_ticks = [y_min, y_min * 0.75 + y_max * 0.25, (y_min + y_max) / 2, y_min * 0.25 + y_max * 0.75, y_max]
+    yticks_values = yticks if yticks is not None else default_ticks
+    ax.set_yticks(yticks_values)
+    ax.set_yticklabels([f"{tick:.4g}" if tick >=1 else f"{tick:.3f}" for tick in yticks_values])
     ax.tick_params(axis='both', labelsize=tick_fontsize)
     ax.set_xlabel(xlabel, fontsize=label_fontsize)
     ax.set_ylabel(ylabel, fontsize=label_fontsize)
@@ -251,7 +254,7 @@ def draw_afr_time_scatter_plot(
     save_file = get_abs_path(save_file, base_dir=config.metrics.image_folder)
     fig.savefig(save_file)
     plt.close(fig)
-    logger.info(f"{title or 'Scatter Plot'} is saved as: {save_file}")
+    logger.info(f"✅ {title or 'Scatter Plot'} is saved as: {save_file}")
     return a, b
 
 
@@ -356,7 +359,7 @@ def draw_elementwise_histogram(
     fig.savefig(save_file)
     plt.close(fig)
     logger.info(
-        "Elementwise Histogram is saved as: %s\n\t> Counts Sum: %d, Total Sum: %d (%.2f%%), Ratio(%%) per element: %s",
+        "✅ Elementwise Histogram is saved as: %s\n\t> Counts Sum: %d, Total Sum: %d (%.2f%%), Ratio(%%) per element: %s",
         save_file,
         int(past_counts),
         int(total_sum),
@@ -578,7 +581,7 @@ def draw_pipeline_schedule(
         plt.close(fig)
 
         str_info = (
-            f"\nPipeline schedule is saved as: {save_file}"
+            f"✅ Pipeline schedule is saved as: {save_file}"
             + f"\n\t\t\t> Batch Time: {up_time:.2f} ms, GPU Bubble Ratio: "
             + ", ".join([f"{val*100:.2f}%" for val in gpu_bubble_ratio])
             + str_info

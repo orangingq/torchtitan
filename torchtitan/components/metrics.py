@@ -517,6 +517,7 @@ class MetricsProcessor:
 
         color = self.color
         logger.info(
+            f"ℹ️"
             f"{color.red} final step: {step:2} "
             f"{color.green} loss: {global_avg_loss:7.4f} "
             f"{color.orange} grad_norm: {grad_norm:7.4f} "

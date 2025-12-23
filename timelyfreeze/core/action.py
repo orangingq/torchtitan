@@ -55,6 +55,10 @@ class Action:
         else:
             return False
     def to_tensor(self)-> torch.Tensor:
+        '''Convert the action to a tensor representation.
+        Returns:
+            torch.Tensor: the tensor representation of the action. Format: [type, rank, microbatch, stage]
+        '''
         return torch.tensor([int(self.type), self.rank, self.microbatch, self.stage])
 
 
@@ -93,21 +97,43 @@ class ActionWithLog(Action):
     def len_log(self):
         '''get the log time length'''
         return len(self.log_duration)
-    def get_start_time(self, log_window:int|None=None, method:Literal['mean', 'median']='median'):
-        '''get the start time'''
+    def get_start_time(self, log_window:int|None=None, method:Literal['mean', 'median', 'all']='median')->float|List[float]:
+        '''get the start time
+        Args:
+            log_window (int|None): the window size to compute the log time statistics. If None, use all the log time.
+            method (str): the method to compute the log time statistics. Options are 'mean', 'median', 'all'.
+                - 'mean': return the mean of the log time.
+                - 'median': return the median of the log time.
+                - 'all': return the list of log time.
+        Returns:
+            float|List[float]: the computed start time statistics or the list of start times.
+        '''
         if self.len_log > 0:
             if method == 'mean':
                 return np.mean(self.log_start_time[-log_window:]) if log_window is not None else np.mean(self.log_start_time)
             elif method == 'median':
                 return np.median(self.log_start_time[-log_window:]) if log_window is not None else np.median(self.log_start_time)
+            elif method == 'all':
+                return self.log_start_time[-log_window:] if log_window is not None else self.log_start_time
         return 0
-    def get_duration(self, log_window:int|None=None, method:Literal['mean', 'median']='median'):
-        '''get the duration time'''
+    def get_duration(self, log_window:int|None=None, method:Literal['mean', 'median', 'all']='median')->float|List[float]:
+        '''get the duration time
+        Args:
+            log_window (int|None): the window size to compute the log time statistics. If None, use all the log time.
+            method (str): the method to compute the log time statistics. Options are 'mean', 'median', 'all'.
+                - 'mean': return the mean of the log time.
+                - 'median': return the median of the log time.
+                - 'all': return the list of log time.
+        Returns:
+            float|List[float]: the computed duration time statistics or the list of durations.
+        '''
         if self.len_log > 0:
             if method == 'mean':
                 return np.mean(self.log_duration[-log_window:]) if log_window is not None else np.mean(self.log_duration)
             elif method == 'median':
                 return np.median(self.log_duration[-log_window:]) if log_window is not None else np.median(self.log_duration)
+            elif method == 'all':
+                return self.log_duration[-log_window:] if log_window is not None else self.log_duration
         return 0
     def __str__(self):
         return f"ActionWithLog(type={self.type.name}, rank={self.rank}, microbatch={self.microbatch}, stage={self.stage}, start_time[{self.len_log}]={self.get_start_time():.4f}, duration[{self.len_log}]={self.get_duration():.4f})"
@@ -118,11 +144,29 @@ class ActionWithLog(Action):
             return self.type == other.type and self.rank == other.rank and self.microbatch == other.microbatch and self.stage == other.stage
         else:
             return False
-    def to_tensor(self, log_window:int|None=None, method:Literal['mean', 'median', None]='median')->torch.Tensor:
+    def to_tensor(self, log_window:int|None=None, method:Literal['mean', 'median', 'all', None]='median')->torch.Tensor:
+        '''Convert the action to a tensor representation.
+        Args:
+            log_window (int|None): the window size to compute the log time statistics. If None, use all the log time.
+            method (str|None): the method to compute the log time statistics. If None, do not include the log time in the tensor representation.
+                - 'mean': use the mean of the log time.
+                - 'median': use the median of the log time.
+                - 'all': use the list of log time.
+                - None: do not include the log time.
+        Returns:
+            torch.Tensor: the tensor representation of the action. Format: 
+                - if method is None: [type, rank, microbatch, stage] => length 4
+                - elif method in ['mean', 'median']: [type, rank, microbatch, stage, start_time(s), duration(s)] => length 6
+                - elif method == 'all': [type, rank, microbatch, stage, start_time_list..., duration_list...] => length 4 + 2 * len(log_duration)
+        '''
         if method is None:
             return super().to_tensor()
         list_repr = super().to_tensor().tolist() # convert to list
-        list_repr.extend([self.get_start_time(log_window=log_window, method=method), \
+        if method == 'all':
+            list_repr.extend(self.get_start_time(log_window=log_window, method='all'))
+            list_repr.extend(self.get_duration(log_window=log_window, method='all'))
+        else:
+            list_repr.extend([self.get_start_time(log_window=log_window, method=method), \
                               self.get_duration(log_window=log_window, method=method)])
         # convert to tensor
         return torch.tensor(list_repr, dtype=torch.float16)
@@ -199,7 +243,7 @@ class ActionWithFreezing(ActionWithTime):
         self._expected_freeze_ratio : float = 0.0 # expected freeze ratio
         self.progressive_freezing : float = 0 # the rate of progressive freezing, default is 0. actual_fr = expected_fr * progressive_freezing (will grow to 1 during the training)
 
-        self.freezing_list = None # list of freezing actions
+        self.freezing_list :list[bool]|None = None # list of freezing actions
 
         self.frozen_ratio_history = [] # frozen ratio history per stage. self.frozen_ratio_history[batch_idx] = frozen ratio at batch_idx
         self.paramwise_frozen_count = {} # [frozen, total] count for each layer in each stage
@@ -306,8 +350,11 @@ class ActionWithFreezing(ActionWithTime):
             self.paramwise_frozen_count = {name: [0, 0] for name, _ in self.module.named_parameters()} # reset the paramwise frozen count
         self._freeze_flag = freeze_flag
 
-    def freeze(self, start_batch_idx:int|None=None):
-        '''Freeze the module. will be called before the backward pass.'''
+    def freeze(self, start_batch_idx:int|None=None)->list[bool]:
+        '''Freeze the module. will be called before the backward pass.
+        Returns:
+            list[bool]: the freezing list used for freezing the module parameters.
+        '''
         if not self.freeze_flag: # only freeze when the freeze flag is set.
             return
         if self.num_params == 0:
@@ -319,49 +366,46 @@ class ActionWithFreezing(ActionWithTime):
         expected_start_batch_idx = len(self.frozen_ratio_history)
         if start_batch_idx is None:
             start_batch_idx = expected_start_batch_idx
-        elif expected_start_batch_idx < start_batch_idx:
-            logger.debug(
-                "Batch index %s is larger than freeze ratio history length %s. Filling with zeros.",
-                start_batch_idx,
-                expected_start_batch_idx,
-            )
-            self.frozen_ratio_history.extend([0.0] * (start_batch_idx - expected_start_batch_idx))
-        elif expected_start_batch_idx > start_batch_idx:
-            raise ValueError(f"Already have freeze ratio for batch index {start_batch_idx}.")
 
-
-        with torch.no_grad():
-            for idx, (name, param) in enumerate(self.module.named_parameters()):
-                param.requires_grad_(not self.freezing_list[idx]) # freeze the parameters by setting requires_grad to False
+        # with torch.no_grad():
+        #     for idx, (name, param) in enumerate(self.module.named_parameters()):
+        #         param.requires_grad_(not self.freezing_list[idx]) # freeze the parameters by setting requires_grad to False
 
         # append the actual frozen ratio to the freeze ratio history
         actual_ratio = float(sum(self.freezing_list)) / len(self.freezing_list)
-        self.frozen_ratio_history.append(actual_ratio)
+        self._log_afr(start_batch_idx, actual_ratio)
 
-        for idx, (name, _) in enumerate(self.module.named_parameters()):
+        for idx, (name, param) in enumerate(self.module.named_parameters()):
             self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
             self.paramwise_frozen_count[name][0] += int(self.freezing_list[idx]) # count frozen parameters
             self.paramwise_frozen_count[name][1] += 1
+        return self.freezing_list
+    
+    def _log_afr(self, batch_idx:int, ratio:float):
+        '''Add the actual frozen ratio to the freeze ratio history.'''
+        expected_batch_idx = len(self.frozen_ratio_history)
+        if expected_batch_idx < batch_idx:
+            logger.debug(
+                "Batch index %s is larger than freeze ratio history length %s. Filling with zeros.",
+                batch_idx,
+                expected_batch_idx,
+            )
+            self.frozen_ratio_history.extend([0.0] * (batch_idx - expected_batch_idx))
+        elif expected_batch_idx > batch_idx:
+            raise ValueError(f"Already have freeze ratio for batch index {batch_idx}.")
+        self.frozen_ratio_history.append(ratio)
+        assert self.frozen_ratio_history[batch_idx] == ratio, "Freeze ratio history value mismatch."
         return
     
     def unfreeze(self):
         '''Unfreeze the module.'''
-        if not self.freeze_flag:
-            return
-        
-        # if self.microbatch <= 3:
-        # # # append the actual frozen ratio to the freeze ratio history
-        # # actual_ratio = float(sum(self.freezing_list)) / len(self.freezing_list) if len(self.freezing_list) > 0 else 0.0
-        # # self.frozen_ratio_history.append(actual_ratio)
-
-        #     # restore the requires_grad state of the parameters
-        #     for name, param in self.module.named_parameters():
-        #     # self.paramwise_frozen_count[name][0] += int(not param.requires_grad) # count frozen parameters
-        #     # self.paramwise_frozen_count[name][1] += 1
-        #         param.requires_grad_(self.freeze_cache[name]) 
         return
     
     def to_tensor(self)-> torch.Tensor:
+        '''Convert the action to a tensor representation. 
+        Returns:
+            torch.Tensor: the tensor representation of the action. Format: [type, rank, microbatch, stage, max_duration]
+        '''
         return torch.tensor([int(self.type), self.rank, self.microbatch, self.stage, self.max_duration])
 
     def __str__(self):

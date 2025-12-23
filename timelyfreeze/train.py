@@ -473,6 +473,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
     ):
         if self.job_config.parallelism.pp > 1:
             pplog.pipeline_log.enable()  # CSH: enable PP logging for each train step
+        self.freezer.freeze_update(self.step) # this should be called before optmizers.zero_grad() and before train a step
 
         self.optimizers.zero_grad()
         # Save the current step learning rate for logging
@@ -506,7 +507,7 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
         self.checkpointer.maybe_wait_for_staging()
         self.optimizers.step()
         self.lr_schedulers.step()
-        self.freezer.freeze_update(self.step) # this should be called after optimizer.step()
+        # self.freezer.freeze_update(self.step) # this should be called after optimizer.step()
 
         if self.job_config.parallelism.pp > 1:
             pplog.pipeline_log.disable()  # CSH: disable PP logging after each train step
@@ -654,7 +655,8 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
 
     if pplog.pipeline_log is not None and len(pplog.pipeline_log.log_schedule) > 0 \
         and len(pplog.pipeline_log.log_schedule[0].log_duration) > 0:
-        pipeline_schedule :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=config.freezing.phase_unit if not is_final else None)
+        log_window = config.freezing.phase_unit if not is_final else None
+        pipeline_schedule :List[List[ActionWithTime]] = gather_pipeline_schedule(pplog.pipeline_log.log_schedule, config.comm, log_window=log_window)
         rank_start = 0.0
         for rank_schedule in pipeline_schedule:
             for action in rank_schedule:
@@ -704,7 +706,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                     xlabel1="Total Freeze Counts Ratio",
                                     xlabel2="Parameter Index")
 
-            if is_final:
+            if len(freezer.pipeline_schedule) > 0 and freezer.progressive_freezing_start_step > 0:
                 # 6) Draw AFR-vs-Time scatter plot per stage
                 monitored_values_dict = {stage: [] for stage in freezer.stages.keys()}
                 for a, la in zip(freezer.pipeline_schedule[config.comm.pp_rank], pplog.pipeline_log.log_schedule):
@@ -714,9 +716,10 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                     if len(times) == 0:
                         logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
                         continue
-                    lo, hi = np.percentile(times, 5), np.percentile(times, 95)
+                    lo, hi = 0, max(times)# np.percentile(times, 5), np.percentile(times, 95)
                     afrs = a.frozen_ratio_history[freezer.progressive_freezing_start_step:freezer.progressive_freezing_start_step + len(times)]
-                    monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in zip(afrs, times) if lo <= t <= hi]
+                    monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in  zip(afrs, times) if lo <= t <= hi]
+                # print(f"monitored_values_dict[{a.stage}]: {monitored_values_dict[a.stage].sort(key=lambda x: x[2])}")
                 for s, monitored_values in monitored_values_dict.items():
                     draw_afr_time_scatter_plot(
                                     afrs=[v[0] for v in monitored_values],
@@ -726,6 +729,28 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                     config=config,
                                     title=f"Scatter Plot of Stage {s}",
                     )
+                # for microbatch in range(config.parallelism.microbatches):
+                #     monitored_values_dict = {stage: [] for stage in freezer.stages.keys()}
+                #     for a, la in zip(freezer.pipeline_schedule[config.comm.pp_rank], pplog.pipeline_log.log_schedule):
+                #         if not a.freezable or a.microbatch != microbatch:
+                #             continue
+                #         times = la.log_duration[freezer.progressive_freezing_start_step:]
+                #         if len(times) == 0:
+                #             logger.error(f"No log duration found for action {a.microbatch} in stage {a.stage}.")
+                #             continue
+                #         lo, hi = 0, max(times)# np.percentile(times, 5), np.percentile(times, 95)
+                #         afrs = a.frozen_ratio_history[freezer.progressive_freezing_start_step:freezer.progressive_freezing_start_step + len(times)]
+                #         monitored_values_dict[a.stage] += [(afr, t, a.microbatch) for (afr, t) in zip(afrs, times) if lo <= t <= hi]
+                #     print(f"microbatch {microbatch}: {monitored_values_dict[a.stage]}")
+                #     for s, monitored_values in monitored_values_dict.items():
+                #         draw_afr_time_scatter_plot(
+                #                         afrs=[v[0] for v in monitored_values],
+                #                         times=[v[1] for v in monitored_values],
+                #                         save_file=f'afr_time_plot/{timestamp}_stage{s}_mb{microbatch}.svg',
+                #                         microbatches=[v[2] for v in monitored_values],
+                #                         config=config,
+                #                         title=f"Scatter Plot of Stage {s}",
+                #         )
     return
 
 

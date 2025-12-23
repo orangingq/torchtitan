@@ -80,7 +80,7 @@ class PipelineParallelism(BaseParallelism):
         Check if the backward pass is separated into backward_weight and backward_input.
         Returns True if the pipeline_parallel_schedule is 'InterleavedZeroBubble', or 'ZBVZeroBubble'.
         """
-        return self.pipeline_parallel_schedule in ["InterleavedZeroBubble", "ZBVZeroBubble"]
+        return self.pipeline_parallel_schedule in ["InterleavedZeroBubble", "ZBVZeroBubble"] # CSH - for debug
 
     microbatches: int = 4 # number of microbatches for pipeline parallelism
     """Number of microbatches for pipeline parallelism."""

@@ -1,4 +1,5 @@
 
+import random
 from typing import Dict, List
 import numpy as np
 import torch
@@ -102,7 +103,7 @@ class FullyRandomFreezer_v7(_Freezer):
         '''Last step of progressive freezing phase: gradually increase the freezing_params_num to the expected number.'''
         self.progressive_freezing_start_step: int = -1
         '''Starting step of progressive freezing phase for pplog.'''
-        self.monitoring_steps :int = min(self.phase_unit, 30)
+        self.monitoring_steps :int = max(self.phase_unit, 30)
         '''Number of steps for monitoring each of upperbound and lowerbound.'''
         self.freeze_adjust_freq :int = self.phase_unit
         '''Frequency of adjusting the freeze ratio during the stable freezing phase.'''
@@ -202,6 +203,8 @@ class FullyRandomFreezer_v7(_Freezer):
                 freezing_list = torch.zeros(action.num_params, dtype=torch.bool)
                 freezing_list[idx] = True
                 action.freezing_list = freezing_list.tolist()
+            # actual_num_freeze = int(action.num_params * (action.microbatch / 8)) # CSH - Debug
+            # action.freezing_list = [False] * (action.num_params - actual_num_freeze) + [True] * (actual_num_freeze) # CSH - Debug
         return 
     
 

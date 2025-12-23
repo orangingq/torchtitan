@@ -723,12 +723,6 @@ class Schedule1F1B(PipelineScheduleSingle):
             if fuse_work := _batch_p2p(fwd_sends + bwd_recvs, desc="fwd_send_bwd_recv"):
                 fuse_work.wait()
 
-            ### CSH : for debugging purposes
-            if self._stage.stage_idx==0:
-                debug = False
-                if debug:
-                    torch.cuda.reset_peak_memory_stats()
-
             # Backward one chunk
             loss = self._maybe_get_loss(self._stage, bwd_mb_index)
             self._stage.backward_one_chunk(
@@ -736,10 +730,6 @@ class Schedule1F1B(PipelineScheduleSingle):
                 loss=loss,
                 last_backward=bwd_mb_index == self._n_microbatches - 1,
             )
-
-            if self._stage.stage_idx==0: #CSH
-                if debug: 
-                    print(f"[Stage {self._stage.stage_idx}][Microbatch {bwd_mb_index}]BWD Peak memory: {torch.cuda.max_memory_allocated() / 1024**2:.2f} MB")
 
             # Get the bwd send ops, but don't fire, to be fused with the 1F below
             bwd_sends = self._stage.get_bwd_send_ops(bwd_mb_index)
@@ -756,20 +746,8 @@ class Schedule1F1B(PipelineScheduleSingle):
             if fuse_work := _batch_p2p(bwd_sends + fwd_recvs, desc="bwd_send_fwd_recv"):
                 fuse_work.wait()
 
-
-            ### CSH : for debugging purposes
-            if self._stage.stage_idx==0:
-                if debug:
-                    torch.cuda.reset_peak_memory_stats()
-
             # Now do the fwd
             output = self._stage.forward_one_chunk(fwd_mb_index, arg_mbs[fwd_mb_index], kwarg_mbs[fwd_mb_index])  # type: ignore[index]
-
-            
-            if self._stage.stage_idx==0:
-                if debug:
-                    print(f"[Stage {self._stage.stage_idx}][Microbatch {bwd_mb_index}] FWD Peak memory: {torch.cuda.max_memory_allocated() / 1024**2:.2f} MB")
-
 
             # Compute loss
             self._maybe_compute_loss(self._stage, output, target_mbs, fwd_mb_index)
