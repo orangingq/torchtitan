@@ -340,7 +340,7 @@ def stage_backward(
     input_values,
     ########## CSH Addition ########### 
     weights: Iterator[Parameter], 
-    retain_graph=False,
+    retain_graph: bool = False,
     freeze_list: Optional[list[bool]] = None, # CSH: list indicating whether to freeze each weight (rather than global requires_grad)
     ######## CSH Addition End ######### 
     outputs_with_grads_idxs: Optional[list[int]] = None,  # deprecated, not used
@@ -373,39 +373,41 @@ def stage_backward(
             extract_tensors_with_grads,
         ):
             if isinstance(output_val, torch.Tensor):
-                if not output_val.requires_grad and output_val.grad_fn is None:
+                # disconnected outputs: skip
+                if (not output_val.requires_grad) and (output_val.grad_fn is None):
                     return
+                # grad_val can be None (allowed)
                 assert isinstance(grad_val, (torch.Tensor, type(None))), (
                     f"Expected Tensor or None gradient but got {type(grad_val)}"
                 )
                 stage_output_tensors.append(output_val)
                 output_grad_tensors.append(grad_val)
-            elif isinstance(output_val, (tuple, list)):
+                return
+
+            if isinstance(output_val, (tuple, list)):
                 if grad_val is None:
-                    return
+                    return # If grads are missing for a composite output, skip the whole branch
                 assert isinstance(grad_val, (tuple, list)), (
                     f"grad_value expected to have type {type(output_val)} but got {type(grad_val)}"
                 )
                 assert len(output_val) == len(grad_val)
                 for ov, gv in zip(output_val, grad_val):
                     extract_tensors_with_grads(
-                        ov,
-                        gv,
-                        extract_tensors_with_grads,
-                    )
-            elif isinstance(output_val, dict):
+                        ov, gv, extract_tensors_with_grads)
+                return
+            
+            if isinstance(output_val, dict):
                 if grad_val is None:
                     return
                 assert isinstance(grad_val, dict)
                 assert set(output_val.keys()) == set(grad_val.keys())
                 for k in output_val.keys():
                     extract_tensors_with_grads(
-                        output_val[k], grad_val[k], extract_tensors_with_grads
-                    )
-            else:
-                # Output is a non-tensor type; just ignore it
-                pass
+                        output_val[k], grad_val[k], extract_tensors_with_grads)
+                return
 
+            # non-tensor output: ignore
+            return
 
         # Note: ref cycle
         # break a ref cycle that would keep tensors alive until GC runs
@@ -454,45 +456,61 @@ def stage_backward(
         # )
         # """
         ########## CSH Modification ########### 
-        # Materialize weights iterator ONCE (important: iterators get consumed)
-        weights_list = list(weights)
+        # Nothing to backprop from
+        if not stage_output_tensors:
+            return tuple(None for _ in input_values)
 
-        # Default: compute grads for all weights unless freeze_list says otherwise
-        if freeze_list is None: # CSH: default to all False
-            freeze_list = [not w.requires_grad for w in weights_list]
-            
-        # Inputs we want gradients for (only tensors requiring grad)
-        inputs_with_grad: list[torch.Tensor] = []
-        for val in input_values:
-            if isinstance(val, torch.Tensor) and val.requires_grad:
-                inputs_with_grad.append(val)
+        # If user didn't pass output grads (loss-like), seed with ones
+        # NOTE: for composite outputs, your extract() would have early-returned if grad_val is None
+        # but for tensor outputs grad_val can be None. We normalize here.
+        if all(g is None for g in output_grad_tensors):
+            output_grad_tensors = [torch.ones_like(t) for t in stage_output_tensors]
+
+        # --- Weights materialization (avoid consuming iter multiple times)
+        weights_list: list[Parameter] = weights if isinstance(weights, list) else list(weights)
+
+        # Default freeze_list: freeze params that are globally requires_grad=False, otherwise don't freeze
+        if freeze_list is None: # This is cheap and avoids Python getattr
+            freeze_list = [not p.requires_grad for p in weights_list]
+        else:
+            assert len(freeze_list) == len(weights_list), (
+                f"freeze_list length {len(freeze_list)} does not match weights length {len(weights_list)}"
+            )
 
         # Params we want gradients for (unfrozen only)
-        trainable_params: list[Parameter] = []
-        for p, frz in zip(weights_list, freeze_list):
-            if not frz:
-                trainable_params.append(p)
-                
-        # If nothing requires grad, return Nones quickly
-        if len(stage_output_tensors) == 0 or (len(inputs_with_grad) == 0 and len(trainable_params) == 0):
-            return tuple(None if not isinstance(v, torch.Tensor) else None for v in input_values)
+        trainable_params: list[Parameter] = [p for p, frz in zip(weights_list, freeze_list) if not frz]
 
-        # autograd.grad computes grads ONLY for given inputs; it does NOT populate .grad
+        # Inputs that need grads (usually empty for stage0; computing them is pure overhead if empty)
+        inputs_with_grad: list[torch.Tensor] = []
+        input_pos: list[int] = []  # positions in input_values, to avoid dict mapping
+        for i, v in enumerate(input_values):
+            if isinstance(v, torch.Tensor) and v.requires_grad:
+                inputs_with_grad.append(v)
+                input_pos.append(i)
+                
+        # If no grad targets at all: just return None grads for inputs
+        if not inputs_with_grad and not trainable_params:
+            return tuple(None for _ in input_values)
+
+        # --- autograd.grad call
+        grad_targets = inputs_with_grad + trainable_params
+
         grads = torch.autograd.grad(
-            outputs=stage_output_tensors, 
-            inputs=inputs_with_grad + trainable_params, 
+            outputs=stage_output_tensors,
+            inputs=grad_targets,
             grad_outputs=output_grad_tensors,  # type: ignore[arg-type]
             retain_graph=retain_graph,
-            allow_unused=True
+            create_graph=False,
+            allow_unused=True,
         )
         
         # Split grads into input grads and param grads
-        num_inp = len(inputs_with_grad)
-        input_grads_list = grads[:num_inp]
-        param_grads_list = grads[num_inp:]
+        n_inp = len(inputs_with_grad)
+        input_grads = grads[:n_inp]
+        param_grads = grads[n_inp:]
 
-        # 1) Accumulate param grads manually
-        for p, g in zip(trainable_params, param_grads_list):
+        # Accumulate param grads manually
+        for p, g in zip(trainable_params, param_grads):
             if g is None:
                 continue
             if p.grad is None:
@@ -500,19 +518,18 @@ def stage_backward(
             else:
                 p.grad.add_(g)
                 
-        # 2) Build grad_inputs aligned to original input_values order
-        # Map input tensor object -> computed grad
-        inp_to_grad = {inp: g for inp, g in zip(inputs_with_grad, input_grads_list)}
+        
+        # Build return grads aligned to input_values without dict
+        grad_inputs: list[Optional[torch.Tensor]] = [None] * len(input_values)
+        for pos, g in zip(input_pos, input_grads):
+            grad_inputs[pos] = g
 
-        grad_inputs: list[Optional[torch.Tensor]] = []
+        # Keep behavior consistent: clear any accidental .grad on inputs
         for v in input_values:
             if isinstance(v, torch.Tensor):
-                grad_inputs.append(inp_to_grad.get(v, None))
-                # Keep behavior similar to original: ensure we don't keep stale .grad on inputs
-                # (autograd.grad doesn't write v.grad, but in case something else did)
                 v.grad = None
-            else:
-                grad_inputs.append(None)
+
+        return tuple(grad_inputs)
         ######## CSH Modification End #########
 
     except Exception as e:
