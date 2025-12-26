@@ -60,11 +60,14 @@ class PipelineParallelism(BaseParallelism):
         """
         Get the total number of pipeline stages.
         This is calculated as pp * stages_per_rank.
+        For V-shaped pipeline parallelism, though the number of different stages is pp, 
+        each stage is counted twice (forward and backward), so the total number of stages is pp * stages_per_rank.
         """
-        if 'Interleaved' in self.pipeline_parallel_schedule:
-            return self.pp * self.stages_per_rank
-        else:
-            return self.pp
+        return self.pp * self.stages_per_rank
+        # if 'Interleaved' in self.pipeline_parallel_schedule:
+        #     return self.pp * self.stages_per_rank
+        # else:
+        #     return self.pp
 
     @property
     def vshape(self) -> bool:

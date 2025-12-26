@@ -6,7 +6,7 @@ EXPLAIN="Main Table Experiment, without streaming mode, sample-level with trunca
 1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
     - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
 1109: switch to alpaca_gpt4+alpaca_cleaned dataset
-1224: everything same as 1109 but debugged requires_grad bug
+1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
 "
 EXPERIMENT_TAG="1104_llama1b"
 TODAY="1224"
@@ -50,7 +50,7 @@ COMMON_ARGS=(
 
 
 SEED=42
-for PP_SCHEDULER in 1F1B GPipe Interleaved1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+for PP_SCHEDULER in Interleaved1F1B ZBVZeroBubble ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in fullrand7 timelyapf timelyauto nofreeze apf auto ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}.log"

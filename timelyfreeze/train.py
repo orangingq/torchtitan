@@ -659,7 +659,7 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
     draw_real_pipeline_schedule :bool   = draw_any_pipeline_schedule and config.comm.is_last_stage
     draw_thry_pipeline_schedule :bool   = draw_any_pipeline_schedule and config.comm.is_last_stage and is_final
     draw_frozen_ratio_history :bool     = config.freezing.freeze and (not is_warmupend)
-    draw_frozen_params_histogram :bool  = config.freezing.freeze and is_final
+    draw_frozen_params_histogram :bool  = config.freezing.freeze # and is_final
     draw_afr_time_plot :bool            = config.freezing.freeze and (not is_warmupend) \
                                         and hasattr(freezer, 'pipeline_schedule') \
                                         and len(freezer.pipeline_schedule) > 0 \
@@ -683,19 +683,19 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 xlabel="Time (ms)", ylabel="Rank", tick_unit=200
                                 )
         if draw_thry_pipeline_schedule:
-                # 2) Draw the theoretical pipeline schedule
-                fwd_mean = np.mean([action.duration for rank_list in pipeline_schedule for action in rank_list if action.type == ActionType.FORWARD])
-                pipeline_schedule = schedule_pipeline(pipeline_schedule, 
-                                                fwd_time=[fwd_mean] * config.parallelism.num_stages,
-                                                bwd_time=[2*fwd_mean] * config.parallelism.num_stages,
-                                                bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
-                                                bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
-                draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
-                                pipeline_schedule=pipeline_schedule,
-                                config=config,
-                                # title=f"Theoretical Pipeline Schedule", 
-                                xlabel="Time (ms)", ylabel="Rank", tick_unit=200
-                                )
+            # 2) Draw the theoretical pipeline schedule
+            fwd_mean = np.mean([action.duration for rank_list in pipeline_schedule for action in rank_list if action.type == ActionType.FORWARD])
+            pipeline_schedule = schedule_pipeline(pipeline_schedule, 
+                                            fwd_time=[fwd_mean] * config.parallelism.num_stages,
+                                            bwd_time=[2*fwd_mean] * config.parallelism.num_stages,
+                                            bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
+                                            bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
+            draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
+                            pipeline_schedule=pipeline_schedule,
+                            config=config,
+                            # title=f"Theoretical Pipeline Schedule", 
+                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
+                            )
 
     if draw_frozen_ratio_history:
         for s in config.parallelism.stages_list:
@@ -706,9 +706,10 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                 save_file=f'frozen_ratio_history/rank{config.comm.global_rank}/{timestamp}_stage{s}_{filename_suffix}.svg', 
                                 title=f"Frozen Ratio History of Rank {config.comm.global_rank} (Stage {s})", xlabel="Step", ylabel="Frozen Ratio")
     
+    # 5) Draw the frozen params histogram per stage
     if draw_frozen_params_histogram:
-        # 5) Draw the frozen params histogram per stage
-        draw_elementwise_histogram(data=list(freezer.paramwise_frozen_count[s].values()), stage=s,
+        for s in config.parallelism.stages_list:
+            draw_elementwise_histogram(data=list(freezer.paramwise_frozen_count[s].values()), stage=s,
                         save_file=f'frozen_params_histogram/{timestamp}_rank{config.comm.global_rank}_stage{s}.svg', 
                         config=config,
                         title=f"Histogram of Frozen Parameters in Rank {config.comm.global_rank} (Stage {s})",

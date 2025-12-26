@@ -1,13 +1,15 @@
 #!/usr/bin/bash
 
 # Define common environment variables
-EXPLAIN="APF configuration experiment on different threshold values."
+EXPLAIN="APF configuration experiment on different threshold values.
+1226: everything same as 1116, but debugged
+"
 
 EXPERIMENT_TAG="1116_apf"
-TODAY="1116"
+TODAY="1226"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
-export CUDA_VISIBLE_DEVICES=0,1,3,4
+export CUDA_VISIBLE_DEVICES=1,2,3,4
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
 export NCCL_P2P_DISABLE=1 # Not using NVLink
 export OMP_NUM_THREADS=1

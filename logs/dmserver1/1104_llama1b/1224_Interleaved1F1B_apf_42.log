@@ -1,0 +1,945 @@
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: 2025. 12. 25. (목) 05:52:37 KST
+✔️SERVER: dmserver1 (143.248.135.95),  GPUs: 1,2,3,4
+✔️SCRIPT: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/run.sh
+✔️OUTPUT: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/1224_Interleaved1F1B_apf_42.log
+✔️Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+
+✔️Running with apf x Interleaved1F1B ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/home/shcho/torchtitan/logs/dmserver1/1104_llama1b/config_1224.toml --job.description="Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+" --parallelism.pipeline_parallel_degree=4  --freezing.freeze --freezing.metric_type=apf --freezing.threshold=0.01 --freezing.percentile=80 --freezing.max_freeze_ratio=0.8
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+[rank0]:2025-12-25 05:52:43,864 - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank0]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank0]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank0]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank0]:1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+[rank0]:1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+[rank0]:"
+[rank2]:2025-12-25 05:52:43,864 - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank2]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank2]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank2]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank2]:1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+[rank2]:1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+[rank2]:"
+[rank1]:2025-12-25 05:52:44,062 - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank1]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank1]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank1]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank1]:1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+[rank1]:1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+[rank1]:"
+[rank3]:2025-12-25 05:52:43,989 - Starting job: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank3]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank3]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank3]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank3]:1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+[rank3]:1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+[rank3]:"
+[rank0]:2025-12-25 05:52:44,169 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2025-12-25 05:52:44,171 - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-12-25 05:52:44,176 - [GC] Initial GC collection 0.00 seconds
+[rank0]:2025-12-25 05:52:44,177 - Loading tokenizer from tokenizer.json
+[rank2]:2025-12-25 05:52:44,188 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2025-12-25 05:52:44,190 - Building 1-D device mesh with ['pp'], [4]
+[rank1]:2025-12-25 05:52:44,373 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2025-12-25 05:52:44,375 - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2025-12-25 05:52:44,340 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2025-12-25 05:52:44,343 - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2025-12-25 05:52:44,574 - Preparing alpaca_gpt4 dataset from vicgalle/alpaca-gpt4
+[rank2]:2025-12-25 05:52:47,707 - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank2]:2025-12-25 05:52:47,748 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank2]:2025-12-25 05:52:47,775 - PP rank 2 is building stage_idx 2 with modules ['layers.5', 'layers.6']
+[rank2]:2025-12-25 05:52:47,788 - PP rank 2 is building stage_idx 6 with modules ['layers.13', 'layers.14']
+[rank0]:2025-12-25 05:52:47,816 - Building llama3 1B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=2048, n_layers=16, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=256, ffn_dim_multiplier=1.5, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2025-12-25 05:52:47,788 - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank1]:2025-12-25 05:52:47,829 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank1]:2025-12-25 05:52:47,858 - PP rank 1 is building stage_idx 1 with modules ['layers.2', 'layers.3', 'layers.4']
+[rank1]:2025-12-25 05:52:47,871 - PP rank 1 is building stage_idx 5 with modules ['layers.11', 'layers.12']
+[rank1]:2025-12-25 05:52:47,873 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank2]:2025-12-25 05:52:47,789 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank0]:2025-12-25 05:52:47,968 - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank2]:2025-12-25 05:52:47,971 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank2]:2025-12-25 05:52:47,972 - Peak FLOPS used for computing MFU: 3.120e+14
+[rank2]:2025-12-25 05:52:47,972 - CUDA memory usage for model: 0.92GiB(1.94%)
+[rank0]:2025-12-25 05:52:48,007 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-12-25 05:52:48,008 - Model llama3 1B size: 1,498,482,688 total parameters
+[rank0]:2025-12-25 05:52:48,033 - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1']
+[rank0]:2025-12-25 05:52:48,045 - PP rank 0 is building stage_idx 4 with modules ['layers.9', 'layers.10']
+[rank0]:2025-12-25 05:52:48,047 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank1]:2025-12-25 05:52:48,080 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank1]:2025-12-25 05:52:48,081 - Peak FLOPS used for computing MFU: 3.120e+14
+[rank1]:2025-12-25 05:52:48,082 - CUDA memory usage for model: 1.13GiB(2.39%)
+[rank0]:2025-12-25 05:52:48,235 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank0]:2025-12-25 05:52:48,235 - Peak FLOPS used for computing MFU: 3.120e+14
+[rank0]:2025-12-25 05:52:48,236 - CUDA memory usage for model: 1.90GiB(3.99%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run j17d96b1
+[rank3]:wandb: Tracking run with wandb version 0.22.2
+[rank3]:wandb: Run data is saved locally in /data2/shcho/torchtitan/tb/1224_Interleaved1F1B_apf_42_dm1/20251225-0552/wandb/run-20251225_055248-j17d96b1
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 1224_Interleaved1F1B_apf_42_dm1
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/j17d96b1
+[rank3]:2025-12-25 05:52:50,129 - WandB logging enabled
+[rank3]:2025-12-25 05:52:50,129 - CUDA capacity: NVIDIA RTX 6000 Ada Generation with 47.51GiB memory
+[rank3]:2025-12-25 05:52:50,167 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank3]:2025-12-25 05:52:50,194 - PP rank 3 is building stage_idx 3 with modules ['layers.7', 'layers.8']
+[rank3]:2025-12-25 05:52:50,207 - PP rank 3 is building stage_idx 7 with modules ['layers.15', 'norm', 'output']
+[rank3]:2025-12-25 05:52:50,209 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank0]:2025-12-25 05:52:50,417 - Checkpointing active. Checkpoints will be loaded from and saved to /data2/shcho/torchtitan/checkpoint/1224_Interleaved1F1B_apf_42_dm1
+[rank0]:2025-12-25 05:52:50,417 - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-12-25 05:52:50,418 - Trainer is initialized with local batch size 32, global batch size 128, gradient accumulation steps 4, sequence length 1024, total steps 800 (warmup 100)
+[rank0]:2025-12-25 05:52:50,420 - Loading the checkpoint from /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp.
+[rank1]:2025-12-25 05:52:50,418 - Mixed precision training with TP or PP is handled by autocast
+[rank2]:2025-12-25 05:52:50,417 - Mixed precision training with TP or PP is handled by autocast
+[rank3]:2025-12-25 05:52:50,400 - Peak flops undefined for: NVIDIA RTX 6000 Ada Generation, fallback to A100
+[rank3]:2025-12-25 05:52:50,400 - Peak FLOPS used for computing MFU: 3.120e+14
+[rank3]:2025-12-25 05:52:50,401 - CUDA memory usage for model: 1.66GiB(3.50%)
+[rank3]:2025-12-25 05:52:50,417 - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2025-12-25 05:52:52,890 - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2025-12-25 05:52:52,890 - Finished loading the checkpoint in 2.47 seconds.
+[rank0]:2025-12-25 05:52:52,890 - Training starts at step 1
+[rank2]:2025-12-25 05:52:58,573 -  step:  1  loss: -4.0000  grad_norm: 203.0663  memory: 10.24GiB(21.56%)  tps: 3,027  tflops: 23.67  mfu: 7.58%
+[rank2]:2025-12-25 05:52:58,573 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank1]:2025-12-25 05:52:58,582 -  step:  1  loss: -4.0000  grad_norm: 203.0663  memory: 16.23GiB(34.16%)  tps: 3,048  tflops: 23.82  mfu: 7.64%
+[rank1]:2025-12-25 05:52:58,582 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank3]:2025-12-25 05:52:58,585 -  step:  1  loss: 10.6092  grad_norm: 203.0663  memory: 25.52GiB(53.71%)  tps: 3,894  tflops: 30.44  mfu: 9.76%
+[rank3]:2025-12-25 05:52:58,586 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-12-25 05:52:58,610 -  step:  1  loss: -4.0000  grad_norm: 203.0663  memory: 16.58GiB(34.89%)  tps: 3,091  tflops: 24.16  mfu: 7.74%
+[rank0]:2025-12-25 05:52:58,610 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2025-12-25 05:57:09,959 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2025-12-25 05:57:15,030 - Avg. fwd time: 14.8354 / Avg. bwd time: 41.8831 / Avg. batch time: 1123.9371 (ms) / GPU bubble ratio: 19.26%
+[rank2]:2025-12-25 05:57:15,080 - Avg. fwd time: 8.0258 / Avg. bwd time: 19.2504 / Avg. batch time: 1183.7632 (ms) / GPU bubble ratio: 63.13%
+[rank1]:2025-12-25 05:57:15,125 - Avg. fwd time: 9.8176 / Avg. bwd time: 23.8529 / Avg. batch time: 1242.0776 (ms) / GPU bubble ratio: 56.63%
+[rank2]:2025-12-25 05:57:15,179 -  step: 50  loss: -4.0000  grad_norm: 24.2685  memory: 12.06GiB(25.39%)  tps: 6,257  tflops: 48.92  mfu: 15.68%
+[rank0]:2025-12-25 05:57:15,157 - Avg. fwd time: 8.3657 / Avg. bwd time: 21.2977 / Avg. batch time: 1281.0274 (ms) / GPU bubble ratio: 62.95%
+[rank0]:2025-12-25 05:57:15,193 -  step: 50  loss: -4.0000  grad_norm: 24.2685  memory: 20.42GiB(42.99%)  tps: 6,258  tflops: 48.92  mfu: 15.68%
+[rank1]:2025-12-25 05:57:15,182 -  step: 50  loss: -4.0000  grad_norm: 24.2685  memory: 18.49GiB(38.93%)  tps: 6,257  tflops: 48.92  mfu: 15.68%
+[rank3]:2025-12-25 05:57:15,191 -  step: 50  loss:  9.8898  grad_norm: 24.2685  memory: 29.23GiB(61.52%)  tps: 6,257  tflops: 48.92  mfu: 15.68%
+[rank3]:2025-12-25 05:58:02,056 - Freezing Ratio: [Stage3] 0.00, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank0]:2025-12-25 05:58:02,483 - Freezing Ratio: [Stage0] 0.00, [Stage4] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 05:58:02,426 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank1]:2025-12-25 05:58:02,457 - Freezing Ratio: [Stage1] 0.00, [Stage5] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 05:58:55,017 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 05:58:55,043 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 05:58:55,024 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 05:58:55,037 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 05:59:40,415 - Freezing Ratio: [Stage1] 0.04, [Stage5] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 05:59:40,444 - Freezing Ratio: [Stage3] 0.11, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 05:59:40,414 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank0]:2025-12-25 05:59:40,415 - Freezing Ratio: [Stage0] 0.00, [Stage4] 0.06, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:00:33,065 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:00:33,072 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:00:33,088 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:00:33,095 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:01:18,220 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:01:18,222 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:01:18,219 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:01:18,220 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:01:18,249 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:01:22,629 - Avg. fwd time: 14.9920 / Avg. bwd time: 40.1388 / Avg. batch time: 1100.3913 (ms) / GPU bubble ratio: 19.84%
+[rank0]:2025-12-25 06:01:22,705 - Avg. fwd time: 8.5112 / Avg. bwd time: 18.9205 / Avg. batch time: 1247.3265 (ms) / GPU bubble ratio: 64.81%
+[rank0]:2025-12-25 06:01:22,708 -  step: 100  loss: -4.0000  grad_norm: 14.0303  memory: 22.24GiB(46.82%)  tps: 6,619  tflops: 51.75  mfu: 16.59%
+[rank2]:2025-12-25 06:01:22,664 - Avg. fwd time: 8.1437 / Avg. bwd time: 17.4230 / Avg. batch time: 1157.2894 (ms) / GPU bubble ratio: 64.65%
+[rank2]:2025-12-25 06:01:22,707 -  step: 100  loss: -4.0000  grad_norm: 14.0303  memory: 12.98GiB(27.32%)  tps: 6,619  tflops: 51.74  mfu: 16.58%
+[rank1]:2025-12-25 06:01:22,687 - Avg. fwd time: 9.9739 / Avg. bwd time: 21.4580 / Avg. batch time: 1211.3830 (ms) / GPU bubble ratio: 58.48%
+[rank1]:2025-12-25 06:01:22,707 -  step: 100  loss: -4.0000  grad_norm: 14.0303  memory: 19.63GiB(41.31%)  tps: 6,619  tflops: 51.75  mfu: 16.59%
+[rank3]:2025-12-25 06:01:22,723 -  step: 100  loss:  8.7877  grad_norm: 14.0303  memory: 31.20GiB(65.67%)  tps: 6,619  tflops: 51.74  mfu: 16.58%
+[rank0]:2025-12-25 06:01:22,799 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0601_stage0_step100.svg
+[rank2]:2025-12-25 06:01:22,792 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0601_stage2_step100.svg
+[rank2]:2025-12-25 06:01:22,830 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0601_stage6_step100.svg
+[rank1]:2025-12-25 06:01:22,801 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0601_stage1_step100.svg
+[rank1]:2025-12-25 06:01:22,845 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0601_stage5_step100.svg
+[rank0]:2025-12-25 06:01:22,837 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0601_stage4_step100.svg
+[rank3]:2025-12-25 06:01:22,992 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0601_step100_rank3.svg
+[rank3]:			> Batch Time: 1108.20 ms, GPU Bubble Ratio: 72.71%, 67.08%, 72.53%, 29.88%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-26ms      | [S0,MB3,F]  26-8-34ms      | [S4,MB0,F]  49-9-59ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  130-9-140ms    | [S4,MB3,F]  171-9-180ms    | [S0,MB4,F]  181-9-190ms    | [S0,MB5,F]  190-8-198ms    | [S0,MB6,F]  198-9-208ms    | [S4,MB0,B]  374-10-384ms   | [S0,MB7,F]  385-8-393ms    | [S4,MB1,B]  492-10-502ms   | [S4,MB4,F]  550-9-559ms    | [S4,MB2,B]  560-11-571ms   | [S4,MB5,F]  580-9-589ms    | [S4,MB3,B]  590-11-601ms   | [S4,MB6,F]  611-9-620ms    | [S0,MB0,B]  620-11-631ms   | [S4,MB7,F]  640-8-648ms    | [S0,MB1,B]  648-10-659ms   | [S0,MB2,B]  669-9-678ms    | [S0,MB3,B]  732-9-741ms    | [S4,MB4,B]  752-9-761ms    | [S4,MB5,B]  853-9-862ms    | [S4,MB6,B]  941-9-950ms    | [S4,MB7,B]  1010-9-1019ms  | [S0,MB4,B]  1031-9-1040ms  | [S0,MB5,B]  1056-9-1065ms  | [S0,MB6,B]  1077-9-1086ms  | [S0,MB7,B]  1099-9-1108ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-11-61ms     | [S1,MB2,F]  90-12-102ms    | [S1,MB3,F]  130-12-142ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  186-7-194ms    | [S5,MB2,F]  200-8-208ms    | [S5,MB3,F]  279-7-287ms    | [S1,MB4,F]  303-11-315ms   | [S5,MB0,B]  314-9-324ms    | [S1,MB5,F]  366-14-381ms   | [S5,MB1,B]  381-9-391ms    | [S1,MB6,F]  391-12-403ms   | [S5,MB2,B]  491-9-501ms    | [S1,MB7,F]  501-12-513ms   | [S5,MB3,B]  558-11-569ms   | [S5,MB4,F]  569-8-578ms    | [S1,MB0,B]  588-15-604ms   | [S5,MB5,F]  604-8-613ms    | [S1,MB1,B]  618-16-635ms   | [S5,MB6,F]  634-9-644ms    | [S1,MB2,B]  644-16-661ms   | [S5,MB7,F]  661-10-671ms   | [S1,MB3,B]  671-14-686ms   | [S5,MB4,B]  735-9-745ms    | [S5,MB5,B]  819-9-829ms    | [S5,MB6,B]  906-9-916ms    | [S5,MB7,B]  993-9-1003ms   | [S1,MB4,B]  1009-14-1023ms | [S1,MB5,B]  1035-14-1049ms | [S1,MB6,B]  1056-14-1070ms | [S1,MB7,B]  1076-14-1090ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  142-8-150ms    | [S6,MB0,F]  179-8-187ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  273-8-281ms    | [S6,MB0,B]  281-10-292ms   | [S6,MB3,F]  292-9-302ms    | [S6,MB1,B]  354-12-367ms   | [S2,MB4,F]  367-9-376ms    | [S6,MB2,B]  442-10-452ms   | [S2,MB5,F]  452-8-461ms    | [S6,MB3,B]  530-10-541ms   | [S2,MB6,F]  540-8-549ms    | [S2,MB0,B]  560-10-571ms   | [S2,MB7,F]  571-8-579ms    | [S2,MB1,B]  590-10-601ms   | [S6,MB4,F]  601-8-609ms    | [S2,MB2,B]  620-10-631ms   | [S6,MB5,F]  631-8-640ms    | [S2,MB3,B]  646-10-656ms   | [S6,MB6,F]  656-9-666ms    | [S6,MB4,B]  716-12-728ms   | [S6,MB7,F]  728-9-738ms    | [S6,MB5,B]  802-10-813ms   | [S6,MB6,B]  891-9-900ms    | [S6,MB7,B]  977-9-987ms    | [S2,MB4,B]  993-9-1003ms   | [S2,MB5,B]  1019-9-1029ms  | [S2,MB6,B]  1035-9-1044ms  | [S2,MB7,B]  1055-9-1064ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-7-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  150-7-158ms    | [S7,MB0,F]  187-15-203ms   | [S7,MB0,B]  215-49-264ms   | [S7,MB1,F]  264-20-284ms   | [S7,MB1,B]  296-52-348ms   | [S7,MB2,F]  348-22-370ms   | [S7,MB2,B]  382-53-436ms   | [S7,MB3,F]  436-22-458ms   | [S7,MB3,B]  470-54-524ms   | [S3,MB4,F]  524-13-537ms   | [S3,MB0,B]  537-14-551ms   | [S3,MB5,F]  551-11-563ms   | [S3,MB1,B]  563-13-576ms   | [S3,MB6,F]  577-11-588ms   | [S3,MB2,B]  588-13-601ms   | [S3,MB7,F]  601-11-612ms   | [S3,MB3,B]  612-12-625ms   | [S7,MB4,F]  627-19-646ms   | [S7,MB4,B]  659-51-710ms   | [S7,MB5,F]  710-22-732ms   | [S7,MB5,B]  744-53-797ms   | [S7,MB6,F]  797-22-819ms   | [S7,MB6,B]  831-53-884ms   | [S7,MB7,F]  885-22-907ms   | [S7,MB7,B]  919-53-972ms   | [S3,MB4,B]  971-14-986ms   | [S3,MB5,B]  986-13-999ms   | [S3,MB6,B]  1000-13-1013ms | [S3,MB7,B]  1013-13-1027ms
+[rank3]:2025-12-25 06:01:23,040 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0601_stage3_step100.svg
+[rank3]:2025-12-25 06:01:23,080 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0601_stage7_step100.svg
+[rank0]:2025-12-25 06:02:03,740 - Freezing Ratio: [Stage0] 0.05, [Stage4] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:02:03,738 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:02:03,739 - Freezing Ratio: [Stage1] 0.00, [Stage5] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:02:03,768 - Freezing Ratio: [Stage3] 0.00, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:02:56,341 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:02:56,364 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:02:56,349 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:02:56,371 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:03:41,696 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:03:41,697 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:03:41,726 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:03:41,697 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:04:26,837 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:04:26,838 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:04:26,867 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:04:26,838 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:05:11,891 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:05:11,896 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:05:11,898 - Freezing Ratio: [Stage0] 0.00, [Stage4] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:05:11,922 - Freezing Ratio: [Stage3] 0.00, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:05:11,891 - Freezing Ratio: [Stage1] 0.00, [Stage5] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:05:17,039 - Avg. fwd time: 15.0997 / Avg. bwd time: 38.4852 / Avg. batch time: 1077.3801 (ms) / GPU bubble ratio: 20.42%
+[rank2]:2025-12-25 06:05:17,086 - Avg. fwd time: 8.2502 / Avg. bwd time: 15.7518 / Avg. batch time: 1132.0271 (ms) / GPU bubble ratio: 66.08%
+[rank1]:2025-12-25 06:05:17,129 - Avg. fwd time: 10.1174 / Avg. bwd time: 19.2595 / Avg. batch time: 1182.1294 (ms) / GPU bubble ratio: 60.24%
+[rank2]:2025-12-25 06:05:17,183 -  step: 150  loss: -4.0000  grad_norm: 19.0997  memory: 13.00GiB(27.36%)  tps: 6,988  tflops: 54.63  mfu: 17.51%
+[rank0]:2025-12-25 06:05:17,162 - Avg. fwd time: 8.6393 / Avg. bwd time: 16.6434 / Avg. batch time: 1215.1303 (ms) / GPU bubble ratio: 66.71%
+[rank0]:2025-12-25 06:05:17,198 -  step: 150  loss: -4.0000  grad_norm: 19.0997  memory: 22.28GiB(46.90%)  tps: 6,987  tflops: 54.62  mfu: 17.51%
+[rank3]:2025-12-25 06:05:17,195 -  step: 150  loss:  5.3685  grad_norm: 19.0997  memory: 31.20GiB(65.67%)  tps: 6,988  tflops: 54.63  mfu: 17.51%
+[rank1]:2025-12-25 06:05:17,187 -  step: 150  loss: -4.0000  grad_norm: 19.0997  memory: 19.63GiB(41.31%)  tps: 6,987  tflops: 54.62  mfu: 17.51%
+[rank2]:2025-12-25 06:06:04,458 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:06:04,488 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:06:04,465 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:06:04,481 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:06:49,803 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:06:49,804 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:06:49,803 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:06:49,833 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:07:34,960 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:07:34,961 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.89, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:07:34,960 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:07:34,989 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:08:20,075 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:08:20,105 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:08:20,075 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:08:20,075 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:09:05,249 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:09:05,251 - Freezing Ratio: [Stage0] 0.00, [Stage4] 0.06, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:09:05,249 - Freezing Ratio: [Stage1] 0.00, [Stage5] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:09:05,248 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:09:05,278 - Freezing Ratio: [Stage3] 0.06, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:09:10,432 - Avg. fwd time: 15.1557 / Avg. bwd time: 37.6034 / Avg. batch time: 1065.0974 (ms) / GPU bubble ratio: 20.74%
+[rank2]:2025-12-25 06:09:10,479 - Avg. fwd time: 8.3058 / Avg. bwd time: 14.8707 / Avg. batch time: 1118.3184 (ms) / GPU bubble ratio: 66.84%
+[rank1]:2025-12-25 06:09:10,525 - Avg. fwd time: 10.1912 / Avg. bwd time: 18.0978 / Avg. batch time: 1166.2785 (ms) / GPU bubble ratio: 61.19%
+[rank2]:2025-12-25 06:09:10,580 -  step: 200  loss: -4.0000  grad_norm: 15.1660  memory: 13.00GiB(27.36%)  tps: 7,020  tflops: 54.88  mfu: 17.59%
+[rank0]:2025-12-25 06:09:10,559 - Avg. fwd time: 8.7070 / Avg. bwd time: 15.4824 / Avg. batch time: 1197.8196 (ms) / GPU bubble ratio: 67.69%
+[rank0]:2025-12-25 06:09:10,595 -  step: 200  loss: -4.0000  grad_norm: 15.1660  memory: 22.28GiB(46.90%)  tps: 7,020  tflops: 54.88  mfu: 17.59%
+[rank0]:2025-12-25 06:09:10,644 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0609_stage0_step200.svg
+[rank3]:2025-12-25 06:09:10,592 -  step: 200  loss:  1.6058  grad_norm: 15.1660  memory: 31.20GiB(65.67%)  tps: 7,020  tflops: 54.88  mfu: 17.59%
+[rank1]:2025-12-25 06:09:10,584 -  step: 200  loss: -4.0000  grad_norm: 15.1660  memory: 19.63GiB(41.31%)  tps: 7,020  tflops: 54.88  mfu: 17.59%
+[rank1]:2025-12-25 06:09:10,650 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0609_stage1_step200.svg
+[rank2]:2025-12-25 06:09:10,644 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0609_stage2_step200.svg
+[rank2]:2025-12-25 06:09:10,685 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0609_stage6_step200.svg
+[rank0]:2025-12-25 06:09:10,685 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0609_stage4_step200.svg
+[rank1]:2025-12-25 06:09:10,698 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0609_stage5_step200.svg
+[rank3]:2025-12-25 06:09:10,841 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0609_step200_rank3.svg
+[rank3]:			> Batch Time: 1111.23 ms, GPU Bubble Ratio: 72.80%, 67.12%, 72.56%, 30.06%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-26ms      | [S0,MB3,F]  26-8-34ms      | [S4,MB0,F]  49-9-59ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  131-9-140ms    | [S4,MB3,F]  171-9-181ms    | [S0,MB4,F]  181-9-190ms    | [S0,MB5,F]  190-8-199ms    | [S0,MB6,F]  199-9-208ms    | [S4,MB0,B]  374-10-384ms   | [S0,MB7,F]  384-8-393ms    | [S4,MB1,B]  493-10-503ms   | [S4,MB4,F]  552-9-561ms    | [S4,MB2,B]  561-11-572ms   | [S4,MB5,F]  581-9-590ms    | [S4,MB3,B]  591-11-602ms   | [S4,MB6,F]  612-9-622ms    | [S0,MB0,B]  622-11-633ms   | [S4,MB7,F]  641-8-649ms    | [S0,MB1,B]  650-10-660ms   | [S0,MB2,B]  670-9-679ms    | [S0,MB3,B]  733-9-742ms    | [S4,MB4,B]  753-9-762ms    | [S4,MB5,B]  855-9-864ms    | [S4,MB6,B]  944-9-953ms    | [S4,MB7,B]  1014-9-1023ms  | [S0,MB4,B]  1034-9-1043ms  | [S0,MB5,B]  1061-9-1070ms  | [S0,MB6,B]  1081-9-1090ms  | [S0,MB7,B]  1102-9-1111ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-12-61ms     | [S1,MB2,F]  90-12-102ms    | [S1,MB3,F]  131-12-143ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  186-7-194ms    | [S5,MB2,F]  201-8-209ms    | [S5,MB3,F]  280-8-288ms    | [S1,MB4,F]  303-12-315ms   | [S5,MB0,B]  315-9-325ms    | [S1,MB5,F]  366-14-381ms   | [S5,MB1,B]  381-9-391ms    | [S1,MB6,F]  391-12-403ms   | [S5,MB2,B]  492-9-502ms    | [S1,MB7,F]  502-12-514ms   | [S5,MB3,B]  559-11-571ms   | [S5,MB4,F]  570-8-579ms    | [S1,MB0,B]  589-15-605ms   | [S5,MB5,F]  605-8-614ms    | [S1,MB1,B]  620-16-636ms   | [S5,MB6,F]  636-9-646ms    | [S1,MB2,B]  646-16-662ms   | [S5,MB7,F]  662-10-672ms   | [S1,MB3,B]  672-14-687ms   | [S5,MB4,B]  736-9-746ms    | [S5,MB5,B]  821-9-831ms    | [S5,MB6,B]  908-9-918ms    | [S5,MB7,B]  997-9-1007ms   | [S1,MB4,B]  1013-14-1027ms | [S1,MB5,B]  1040-14-1054ms | [S1,MB6,B]  1060-14-1074ms | [S1,MB7,B]  1080-14-1094ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  143-8-151ms    | [S6,MB0,F]  180-8-188ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  274-8-282ms    | [S6,MB0,B]  282-10-293ms   | [S6,MB3,F]  293-9-303ms    | [S6,MB1,B]  354-12-367ms   | [S2,MB4,F]  367-9-376ms    | [S6,MB2,B]  443-10-453ms   | [S2,MB5,F]  453-8-462ms    | [S6,MB3,B]  531-10-542ms   | [S2,MB6,F]  542-8-550ms    | [S2,MB0,B]  561-10-572ms   | [S2,MB7,F]  572-8-580ms    | [S2,MB1,B]  591-10-602ms   | [S6,MB4,F]  602-8-610ms    | [S2,MB2,B]  621-10-632ms   | [S6,MB5,F]  632-9-641ms    | [S2,MB3,B]  647-10-658ms   | [S6,MB6,F]  657-9-667ms    | [S6,MB4,B]  717-12-730ms   | [S6,MB7,F]  730-9-739ms    | [S6,MB5,B]  805-10-815ms   | [S6,MB6,B]  892-9-902ms    | [S6,MB7,B]  981-9-991ms    | [S2,MB4,B]  997-9-1007ms   | [S2,MB5,B]  1023-9-1033ms  | [S2,MB6,B]  1039-9-1049ms  | [S2,MB7,B]  1060-9-1069ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-7-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  151-7-159ms    | [S7,MB0,F]  188-15-203ms   | [S7,MB0,B]  215-49-265ms   | [S7,MB1,F]  264-19-284ms   | [S7,MB1,B]  296-51-348ms   | [S7,MB2,F]  348-22-371ms   | [S7,MB2,B]  383-53-436ms   | [S7,MB3,F]  437-22-459ms   | [S7,MB3,B]  471-54-525ms   | [S3,MB4,F]  525-13-539ms   | [S3,MB0,B]  539-13-553ms   | [S3,MB5,F]  553-11-564ms   | [S3,MB1,B]  564-13-578ms   | [S3,MB6,F]  578-11-589ms   | [S3,MB2,B]  589-13-602ms   | [S3,MB7,F]  602-11-613ms   | [S3,MB3,B]  613-12-626ms   | [S7,MB4,F]  628-19-647ms   | [S7,MB4,B]  660-51-711ms   | [S7,MB5,F]  711-22-733ms   | [S7,MB5,B]  745-53-798ms   | [S7,MB6,F]  799-22-821ms   | [S7,MB6,B]  833-54-887ms   | [S7,MB7,F]  887-22-909ms   | [S7,MB7,B]  922-54-976ms   | [S3,MB4,B]  975-14-990ms   | [S3,MB5,B]  990-13-1004ms  | [S3,MB6,B]  1004-13-1017ms | [S3,MB7,B]  1018-13-1031ms
+[rank3]:2025-12-25 06:09:10,884 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0609_stage3_step200.svg
+[rank3]:2025-12-25 06:09:10,930 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0609_stage7_step200.svg
+[rank2]:2025-12-25 06:09:58,150 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:09:58,180 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.89, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:09:58,157 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:09:58,172 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:10:43,323 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:10:43,323 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:10:43,323 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:10:43,353 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:11:28,476 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:11:28,476 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:11:28,476 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.94, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:11:28,505 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:12:13,721 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:12:13,722 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:12:13,722 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:12:13,751 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:12:59,002 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:12:59,007 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:12:59,009 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.94, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:12:59,002 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:12:59,032 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:13:03,414 - Avg. fwd time: 15.1905 / Avg. bwd time: 37.0347 / Avg. batch time: 1057.1400 (ms) / GPU bubble ratio: 20.96%
+[rank2]:2025-12-25 06:13:03,449 - Avg. fwd time: 8.3403 / Avg. bwd time: 14.3088 / Avg. batch time: 1109.6534 (ms) / GPU bubble ratio: 67.34%
+[rank2]:2025-12-25 06:13:03,495 -  step: 250  loss: -4.0000  grad_norm: 11.5325  memory: 13.00GiB(27.36%)  tps: 7,034  tflops: 54.99  mfu: 17.63%
+[rank0]:2025-12-25 06:13:03,493 - Avg. fwd time: 8.7488 / Avg. bwd time: 14.7633 / Avg. batch time: 1186.9038 (ms) / GPU bubble ratio: 68.30%
+[rank0]:2025-12-25 06:13:03,496 -  step: 250  loss: -4.0000  grad_norm: 11.5325  memory: 22.28GiB(46.90%)  tps: 7,035  tflops: 54.99  mfu: 17.63%
+[rank1]:2025-12-25 06:13:03,474 - Avg. fwd time: 10.2371 / Avg. bwd time: 17.3489 / Avg. batch time: 1156.2237 (ms) / GPU bubble ratio: 61.83%
+[rank1]:2025-12-25 06:13:03,495 -  step: 250  loss: -4.0000  grad_norm: 11.5325  memory: 19.63GiB(41.31%)  tps: 7,034  tflops: 54.99  mfu: 17.63%
+[rank3]:2025-12-25 06:13:03,511 -  step: 250  loss:  5.0858  grad_norm: 11.5325  memory: 31.20GiB(65.67%)  tps: 7,034  tflops: 54.99  mfu: 17.63%
+[rank0]:2025-12-25 06:13:44,112 - Freezing Ratio: [Stage0] 0.00, [Stage4] 0.11, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:13:44,112 - Freezing Ratio: [Stage1] 0.00, [Stage5] 0.11, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:13:44,112 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:13:44,141 - Freezing Ratio: [Stage3] 0.00, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:14:36,523 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:14:36,530 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:14:36,553 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.89, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:14:36,546 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:15:21,735 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.94, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:15:21,765 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:15:21,735 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:15:21,735 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:16:07,048 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:16:07,048 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:16:07,049 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.89, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:16:07,078 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:16:52,183 - Freezing Ratio: [Stage1] 0.78, [Stage5] 1.00, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:16:52,183 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:16:52,185 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.94, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:16:52,183 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:16:52,213 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:16:56,640 - Avg. fwd time: 8.3603 / Avg. bwd time: 13.9600 / Avg. batch time: 1104.0479 (ms) / GPU bubble ratio: 67.65%
+[rank3]:2025-12-25 06:16:56,604 - Avg. fwd time: 15.2091 / Avg. bwd time: 36.6868 / Avg. batch time: 1052.1806 (ms) / GPU bubble ratio: 21.08%
+[rank1]:2025-12-25 06:16:56,665 - Avg. fwd time: 10.2637 / Avg. bwd time: 16.8786 / Avg. batch time: 1149.7675 (ms) / GPU bubble ratio: 62.23%
+[rank1]:2025-12-25 06:16:56,687 -  step: 300  loss: -4.0000  grad_norm: 13.1702  memory: 19.63GiB(41.31%)  tps: 7,026  tflops: 54.93  mfu: 17.60%
+[rank0]:2025-12-25 06:16:56,685 - Avg. fwd time: 8.7741 / Avg. bwd time: 14.3165 / Avg. batch time: 1179.9166 (ms) / GPU bubble ratio: 68.69%
+[rank0]:2025-12-25 06:16:56,687 -  step: 300  loss: -4.0000  grad_norm: 13.1702  memory: 22.28GiB(46.90%)  tps: 7,026  tflops: 54.93  mfu: 17.60%
+[rank2]:2025-12-25 06:16:56,687 -  step: 300  loss: -4.0000  grad_norm: 13.1702  memory: 13.00GiB(27.36%)  tps: 7,026  tflops: 54.93  mfu: 17.60%
+[rank3]:2025-12-25 06:16:56,702 -  step: 300  loss:  3.7865  grad_norm: 13.1702  memory: 31.20GiB(65.67%)  tps: 7,026  tflops: 54.93  mfu: 17.60%
+[rank1]:2025-12-25 06:16:56,757 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0616_stage1_step300.svg
+[rank1]:2025-12-25 06:16:56,798 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0616_stage5_step300.svg
+[rank0]:2025-12-25 06:16:56,750 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0616_stage0_step300.svg
+[rank0]:2025-12-25 06:16:56,791 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0616_stage4_step300.svg
+[rank2]:2025-12-25 06:16:56,750 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0616_stage2_step300.svg
+[rank2]:2025-12-25 06:16:56,791 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0616_stage6_step300.svg
+[rank3]:2025-12-25 06:16:56,943 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0616_step300_rank3.svg
+[rank3]:			> Batch Time: 1110.25 ms, GPU Bubble Ratio: 72.87%, 67.26%, 72.61%, 29.98%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-25ms      | [S0,MB3,F]  25-8-34ms      | [S4,MB0,F]  49-9-59ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  131-9-140ms    | [S4,MB3,F]  171-9-181ms    | [S0,MB4,F]  181-9-190ms    | [S0,MB5,F]  190-8-198ms    | [S0,MB6,F]  198-9-208ms    | [S4,MB0,B]  374-10-384ms   | [S0,MB7,F]  384-8-392ms    | [S4,MB1,B]  493-10-503ms   | [S4,MB4,F]  552-9-561ms    | [S4,MB2,B]  561-11-572ms   | [S4,MB5,F]  581-9-591ms    | [S4,MB3,B]  590-11-601ms   | [S4,MB6,F]  611-9-621ms    | [S0,MB0,B]  621-11-632ms   | [S4,MB7,F]  640-8-648ms    | [S0,MB1,B]  649-10-659ms   | [S0,MB2,B]  669-9-678ms    | [S0,MB3,B]  732-9-741ms    | [S4,MB4,B]  751-9-760ms    | [S4,MB5,B]  853-9-862ms    | [S4,MB6,B]  941-9-950ms    | [S4,MB7,B]  1012-9-1021ms  | [S0,MB4,B]  1033-9-1042ms  | [S0,MB5,B]  1059-9-1068ms  | [S0,MB6,B]  1079-9-1088ms  | [S0,MB7,B]  1101-9-1110ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-12-61ms     | [S1,MB2,F]  90-12-102ms    | [S1,MB3,F]  131-12-143ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  186-7-194ms    | [S5,MB2,F]  200-7-208ms    | [S5,MB3,F]  280-8-288ms    | [S1,MB4,F]  303-12-315ms   | [S5,MB0,B]  315-9-324ms    | [S1,MB5,F]  366-14-381ms   | [S5,MB1,B]  381-9-390ms    | [S1,MB6,F]  390-12-402ms   | [S5,MB2,B]  492-9-502ms    | [S1,MB7,F]  502-12-514ms   | [S5,MB3,B]  559-10-570ms   | [S5,MB4,F]  570-8-579ms    | [S1,MB0,B]  589-15-605ms   | [S5,MB5,F]  605-8-614ms    | [S1,MB1,B]  619-16-635ms   | [S5,MB6,F]  635-9-645ms    | [S1,MB2,B]  645-16-661ms   | [S5,MB7,F]  661-10-671ms   | [S1,MB3,B]  671-14-686ms   | [S5,MB4,B]  735-9-744ms    | [S5,MB5,B]  819-9-828ms    | [S5,MB6,B]  907-9-916ms    | [S5,MB7,B]  996-9-1005ms   | [S1,MB4,B]  1011-13-1025ms | [S1,MB5,B]  1038-13-1052ms | [S1,MB6,B]  1058-14-1072ms | [S1,MB7,B]  1078-14-1092ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  143-8-151ms    | [S6,MB0,F]  179-8-187ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  274-8-282ms    | [S6,MB0,B]  282-10-293ms   | [S6,MB3,F]  293-9-302ms    | [S6,MB1,B]  354-12-367ms   | [S2,MB4,F]  367-9-376ms    | [S6,MB2,B]  442-10-453ms   | [S2,MB5,F]  453-8-461ms    | [S6,MB3,B]  531-10-542ms   | [S2,MB6,F]  542-8-550ms    | [S2,MB0,B]  560-10-571ms   | [S2,MB7,F]  571-8-580ms    | [S2,MB1,B]  590-10-601ms   | [S6,MB4,F]  601-8-610ms    | [S2,MB2,B]  620-10-631ms   | [S6,MB5,F]  631-8-640ms    | [S2,MB3,B]  646-10-656ms   | [S6,MB6,F]  656-9-666ms    | [S6,MB4,B]  716-12-728ms   | [S6,MB7,F]  728-9-738ms    | [S6,MB5,B]  802-10-813ms   | [S6,MB6,B]  891-9-901ms    | [S6,MB7,B]  980-9-989ms    | [S2,MB4,B]  996-9-1005ms   | [S2,MB5,B]  1022-9-1031ms  | [S2,MB6,B]  1037-9-1047ms  | [S2,MB7,B]  1058-9-1067ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-7-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  151-7-159ms    | [S7,MB0,F]  187-15-203ms   | [S7,MB0,B]  215-49-264ms   | [S7,MB1,F]  265-20-285ms   | [S7,MB1,B]  296-52-348ms   | [S7,MB2,F]  348-22-370ms   | [S7,MB2,B]  382-53-436ms   | [S7,MB3,F]  436-22-459ms   | [S7,MB3,B]  471-53-524ms   | [S3,MB4,F]  525-13-538ms   | [S3,MB0,B]  538-13-552ms   | [S3,MB5,F]  553-11-564ms   | [S3,MB1,B]  564-13-577ms   | [S3,MB6,F]  577-11-588ms   | [S3,MB2,B]  589-13-602ms   | [S3,MB7,F]  602-11-613ms   | [S3,MB3,B]  613-12-625ms   | [S7,MB4,F]  628-19-647ms   | [S7,MB4,B]  659-51-710ms   | [S7,MB5,F]  710-22-732ms   | [S7,MB5,B]  744-53-797ms   | [S7,MB6,F]  796-22-819ms   | [S7,MB6,B]  831-53-884ms   | [S7,MB7,F]  885-22-908ms   | [S7,MB7,B]  920-53-973ms   | [S3,MB4,B]  974-14-988ms   | [S3,MB5,B]  989-13-1003ms  | [S3,MB6,B]  1003-13-1016ms | [S3,MB7,B]  1017-13-1030ms
+[rank3]:2025-12-25 06:16:56,985 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0616_stage3_step300.svg
+[rank3]:2025-12-25 06:16:57,028 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0616_stage7_step300.svg
+[rank0]:2025-12-25 06:17:37,650 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:17:37,649 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:17:37,649 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:17:37,679 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:18:22,865 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:18:22,894 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:18:22,865 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.89, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:18:22,865 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:19:08,096 - Freezing Ratio: [Stage0] 0.00, [Stage4] 0.17, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:19:08,096 - Freezing Ratio: [Stage1] 0.00, [Stage5] 0.17, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:19:08,095 - Freezing Ratio: [Stage2] 0.00, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:19:08,125 - Freezing Ratio: [Stage3] 0.17, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:20:00,628 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:20:00,637 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:20:00,613 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:20:00,606 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:20:45,785 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:20:45,787 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.89, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:20:45,781 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:20:45,781 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:20:45,811 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:20:50,243 - Avg. fwd time: 15.2273 / Avg. bwd time: 36.4403 / Avg. batch time: 1048.7603 (ms) / GPU bubble ratio: 21.18%
+[rank0]:2025-12-25 06:20:50,320 - Avg. fwd time: 8.7924 / Avg. bwd time: 13.9564 / Avg. batch time: 1175.1550 (ms) / GPU bubble ratio: 69.03%
+[rank0]:2025-12-25 06:20:50,322 -  step: 350  loss: -4.0000  grad_norm:  7.4062  memory: 22.28GiB(46.90%)  tps: 7,013  tflops: 54.82  mfu: 17.57%
+[rank1]:2025-12-25 06:20:50,301 - Avg. fwd time: 10.2836 / Avg. bwd time: 16.5444 / Avg. batch time: 1145.4774 (ms) / GPU bubble ratio: 62.53%
+[rank1]:2025-12-25 06:20:50,321 -  step: 350  loss: -4.0000  grad_norm:  7.4062  memory: 19.63GiB(41.31%)  tps: 7,013  tflops: 54.82  mfu: 17.57%
+[rank2]:2025-12-25 06:20:50,276 - Avg. fwd time: 8.3743 / Avg. bwd time: 13.7107 / Avg. batch time: 1100.3496 (ms) / GPU bubble ratio: 67.89%
+[rank2]:2025-12-25 06:20:50,321 -  step: 350  loss: -4.0000  grad_norm:  7.4062  memory: 13.00GiB(27.36%)  tps: 7,013  tflops: 54.82  mfu: 17.57%
+[rank3]:2025-12-25 06:20:50,337 -  step: 350  loss:  1.3706  grad_norm:  7.4062  memory: 31.20GiB(65.67%)  tps: 7,013  tflops: 54.82  mfu: 17.57%
+[rank0]:2025-12-25 06:21:30,958 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:21:30,957 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:21:30,957 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:21:30,987 - Freezing Ratio: [Stage3] 0.94, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:22:16,311 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:22:16,283 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:22:16,282 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:22:16,281 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:23:01,374 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:23:01,373 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:23:01,373 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:23:01,403 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:23:46,412 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:23:46,411 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:23:46,411 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:23:46,441 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:24:31,596 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:24:31,598 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:24:31,596 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:24:31,596 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:24:31,626 - Freezing Ratio: [Stage3] 0.94, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:24:36,104 - Avg. fwd time: 15.2535 / Avg. bwd time: 36.0287 / Avg. batch time: 1043.0634 (ms) / GPU bubble ratio: 21.34%
+[rank2]:2025-12-25 06:24:36,139 - Avg. fwd time: 8.3996 / Avg. bwd time: 13.2987 / Avg. batch time: 1093.9918 (ms) / GPU bubble ratio: 68.27%
+[rank3]:2025-12-25 06:24:36,204 -  step: 400  loss:  0.3996  grad_norm:  0.7305  memory: 31.20GiB(65.67%)  tps: 7,254  tflops: 56.71  mfu: 18.18%
+[rank0]:2025-12-25 06:24:36,187 - Avg. fwd time: 8.8216 / Avg. bwd time: 13.3716 / Avg. batch time: 1167.0320 (ms) / GPU bubble ratio: 69.57%
+[rank0]:2025-12-25 06:24:36,189 -  step: 400  loss: -4.0000  grad_norm:  0.7305  memory: 22.28GiB(46.90%)  tps: 7,254  tflops: 56.71  mfu: 18.18%
+[rank1]:2025-12-25 06:24:36,166 - Avg. fwd time: 10.3176 / Avg. bwd time: 16.0016 / Avg. batch time: 1138.1344 (ms) / GPU bubble ratio: 63.00%
+[rank1]:2025-12-25 06:24:36,189 -  step: 400  loss: -4.0000  grad_norm:  0.7305  memory: 19.63GiB(41.31%)  tps: 7,254  tflops: 56.71  mfu: 18.18%
+[rank2]:2025-12-25 06:24:36,189 -  step: 400  loss: -4.0000  grad_norm:  0.7305  memory: 13.00GiB(27.36%)  tps: 7,254  tflops: 56.71  mfu: 18.18%
+[rank2]:2025-12-25 06:24:36,257 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0624_stage2_step400.svg
+[rank0]:2025-12-25 06:24:36,257 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0624_stage0_step400.svg
+[rank0]:2025-12-25 06:24:36,302 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0624_stage4_step400.svg
+[rank1]:2025-12-25 06:24:36,257 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0624_stage1_step400.svg
+[rank1]:2025-12-25 06:24:36,302 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0624_stage5_step400.svg
+[rank2]:2025-12-25 06:24:36,301 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0624_stage6_step400.svg
+[rank3]:2025-12-25 06:24:36,452 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0624_step400_rank3.svg
+[rank3]:			> Batch Time: 1109.81 ms, GPU Bubble Ratio: 73.83%, 67.14%, 72.61%, 29.79%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-26ms      | [S0,MB3,F]  26-8-34ms      | [S4,MB0,F]  49-9-59ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  131-9-140ms    | [S4,MB3,F]  172-9-181ms    | [S0,MB4,F]  181-9-190ms    | [S0,MB5,F]  191-8-199ms    | [S0,MB6,F]  199-9-208ms    | [S4,MB0,B]  374-10-385ms   | [S0,MB7,F]  385-8-393ms    | [S4,MB1,B]  493-10-503ms   | [S4,MB4,F]  552-9-561ms    | [S4,MB2,B]  561-11-572ms   | [S4,MB5,F]  581-9-590ms    | [S4,MB3,B]  590-11-601ms   | [S4,MB6,F]  612-9-622ms    | [S0,MB0,B]  622-9-631ms    | [S4,MB7,F]  641-8-649ms    | [S0,MB1,B]  650-9-659ms    | [S0,MB2,B]  670-7-677ms    | [S0,MB3,B]  733-7-741ms    | [S4,MB4,B]  753-9-762ms    | [S4,MB5,B]  856-9-865ms    | [S4,MB6,B]  943-9-952ms    | [S4,MB7,B]  1014-9-1023ms  | [S0,MB4,B]  1035-7-1042ms  | [S0,MB5,B]  1061-7-1068ms  | [S0,MB6,B]  1082-7-1089ms  | [S0,MB7,B]  1102-7-1109ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-12-61ms     | [S1,MB2,F]  90-12-102ms    | [S1,MB3,F]  131-12-143ms   | [S5,MB0,F]  172-7-180ms    | [S5,MB1,F]  186-8-194ms    | [S5,MB2,F]  201-7-209ms    | [S5,MB3,F]  280-8-288ms    | [S1,MB4,F]  303-12-315ms   | [S5,MB0,B]  315-9-324ms    | [S1,MB5,F]  367-14-382ms   | [S5,MB1,B]  381-9-391ms    | [S1,MB6,F]  391-12-403ms   | [S5,MB2,B]  492-9-502ms    | [S1,MB7,F]  502-12-514ms   | [S5,MB3,B]  559-11-570ms   | [S5,MB4,F]  570-8-578ms    | [S1,MB0,B]  590-15-606ms   | [S5,MB5,F]  605-8-614ms    | [S1,MB1,B]  620-16-636ms   | [S5,MB6,F]  636-9-646ms    | [S1,MB2,B]  646-16-662ms   | [S5,MB7,F]  662-10-672ms   | [S1,MB3,B]  672-14-687ms   | [S5,MB4,B]  737-9-746ms    | [S5,MB5,B]  821-9-831ms    | [S5,MB6,B]  909-9-919ms    | [S5,MB7,B]  998-9-1007ms   | [S1,MB4,B]  1014-14-1028ms | [S1,MB5,B]  1040-14-1054ms | [S1,MB6,B]  1061-14-1075ms | [S1,MB7,B]  1081-14-1095ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  143-8-151ms    | [S6,MB0,F]  180-8-188ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  274-8-282ms    | [S6,MB0,B]  282-10-293ms   | [S6,MB3,F]  293-9-302ms    | [S6,MB1,B]  355-12-367ms   | [S2,MB4,F]  367-9-376ms    | [S6,MB2,B]  442-10-453ms   | [S2,MB5,F]  453-8-461ms    | [S6,MB3,B]  532-10-542ms   | [S2,MB6,F]  542-8-550ms    | [S2,MB0,B]  561-10-572ms   | [S2,MB7,F]  571-8-580ms    | [S2,MB1,B]  591-10-602ms   | [S6,MB4,F]  602-8-611ms    | [S2,MB2,B]  621-10-632ms   | [S6,MB5,F]  632-9-641ms    | [S2,MB3,B]  647-10-658ms   | [S6,MB6,F]  657-9-667ms    | [S6,MB4,B]  717-12-730ms   | [S6,MB7,F]  730-9-739ms    | [S6,MB5,B]  805-10-815ms   | [S6,MB6,B]  894-9-903ms    | [S6,MB7,B]  982-9-992ms    | [S2,MB4,B]  998-9-1008ms   | [S2,MB5,B]  1024-9-1034ms  | [S2,MB6,B]  1040-9-1049ms  | [S2,MB7,B]  1060-9-1069ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-8-36ms      | [S3,MB1,F]  69-8-77ms      | [S3,MB2,F]  110-8-118ms    | [S3,MB3,F]  151-8-159ms    | [S7,MB0,F]  188-15-204ms   | [S7,MB0,B]  216-49-265ms   | [S7,MB1,F]  265-20-285ms   | [S7,MB1,B]  296-52-349ms   | [S7,MB2,F]  348-22-371ms   | [S7,MB2,B]  383-53-437ms   | [S7,MB3,F]  436-22-459ms   | [S7,MB3,B]  471-54-525ms   | [S3,MB4,F]  525-13-539ms   | [S3,MB0,B]  538-13-552ms   | [S3,MB5,F]  552-11-564ms   | [S3,MB1,B]  564-13-578ms   | [S3,MB6,F]  577-11-589ms   | [S3,MB2,B]  588-13-602ms   | [S3,MB7,F]  602-11-613ms   | [S3,MB3,B]  613-12-626ms   | [S7,MB4,F]  628-19-648ms   | [S7,MB4,B]  659-51-711ms   | [S7,MB5,F]  711-22-734ms   | [S7,MB5,B]  745-53-798ms   | [S7,MB6,F]  798-22-821ms   | [S7,MB6,B]  833-54-888ms   | [S7,MB7,F]  887-22-910ms   | [S7,MB7,B]  921-54-976ms   | [S3,MB4,B]  976-14-991ms   | [S3,MB5,B]  990-13-1004ms  | [S3,MB6,B]  1004-13-1018ms | [S3,MB7,B]  1018-13-1031ms
+[rank3]:2025-12-25 06:24:36,499 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0624_stage3_step400.svg
+[rank3]:2025-12-25 06:24:36,546 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0624_stage7_step400.svg
+[rank3]:2025-12-25 06:25:01,897 - Dataset alpaca_gpt4 is being re-looped
+[rank1]:2025-12-25 06:25:02,383 - Dataset alpaca_gpt4 is being re-looped
+[rank2]:2025-12-25 06:25:02,366 - Dataset alpaca_gpt4 is being re-looped
+[rank0]:2025-12-25 06:25:02,392 - Dataset alpaca_gpt4 is being re-looped
+[rank0]:2025-12-25 06:25:17,156 - Freezing Ratio: [Stage0] 0.05, [Stage4] 0.06, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:25:17,155 - Freezing Ratio: [Stage1] 0.04, [Stage5] 0.11, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:25:17,155 - Freezing Ratio: [Stage2] 0.11, [Stage6] 0.06, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:25:17,184 - Freezing Ratio: [Stage3] 0.06, [Stage7] 0.00, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:26:09,462 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:26:09,455 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:26:09,478 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:26:09,486 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:26:54,579 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:26:54,578 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:26:54,578 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:26:54,607 - Freezing Ratio: [Stage3] 0.94, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:27:39,740 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:27:39,740 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:27:39,739 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:27:39,769 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:28:25,002 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:28:25,005 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:28:24,997 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:28:24,997 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:28:25,028 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:28:29,417 - Avg. fwd time: 15.2626 / Avg. bwd time: 35.9047 / Avg. batch time: 1041.3383 (ms) / GPU bubble ratio: 21.38%
+[rank2]:2025-12-25 06:28:29,451 - Avg. fwd time: 8.4047 / Avg. bwd time: 13.1736 / Avg. batch time: 1092.1576 (ms) / GPU bubble ratio: 68.39%
+[rank3]:2025-12-25 06:28:29,517 -  step: 450  loss:  0.5375  grad_norm:  4.6784  memory: 31.20GiB(65.67%)  tps: 7,022  tflops: 54.90  mfu: 17.60%
+[rank0]:2025-12-25 06:28:29,499 - Avg. fwd time: 8.8288 / Avg. bwd time: 13.1864 / Avg. batch time: 1164.6481 (ms) / GPU bubble ratio: 69.76%
+[rank0]:2025-12-25 06:28:29,502 -  step: 450  loss: -4.0000  grad_norm:  4.6784  memory: 22.34GiB(47.02%)  tps: 7,022  tflops: 54.90  mfu: 17.60%
+[rank1]:2025-12-25 06:28:29,478 - Avg. fwd time: 10.3255 / Avg. bwd time: 15.8420 / Avg. batch time: 1136.0074 (ms) / GPU bubble ratio: 63.14%
+[rank1]:2025-12-25 06:28:29,501 -  step: 450  loss: -4.0000  grad_norm:  4.6784  memory: 19.63GiB(41.31%)  tps: 7,022  tflops: 54.90  mfu: 17.60%
+[rank2]:2025-12-25 06:28:29,501 -  step: 450  loss: -4.0000  grad_norm:  4.6784  memory: 13.00GiB(27.36%)  tps: 7,022  tflops: 54.90  mfu: 17.60%
+[rank0]:2025-12-25 06:29:10,161 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:29:10,160 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:29:10,160 - Freezing Ratio: [Stage2] 0.94, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:29:10,189 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:29:55,230 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:29:55,228 - Freezing Ratio: [Stage2] 0.94, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:29:55,229 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:29:55,258 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:30:40,473 - Freezing Ratio: [Stage3] 0.89, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:30:40,443 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:30:40,442 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:30:40,442 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.94, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:31:25,728 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:31:25,727 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:31:25,727 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:31:25,757 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:32:10,889 - Freezing Ratio: [Stage3] 0.06, [Stage7] 0.09, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:32:10,860 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:32:10,862 - Freezing Ratio: [Stage0] 0.05, [Stage4] 0.06, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:32:10,859 - Freezing Ratio: [Stage1] 0.07, [Stage5] 0.06, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:32:10,859 - Freezing Ratio: [Stage2] 0.17, [Stage6] 0.06, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:32:15,951 - Avg. fwd time: 15.2812 / Avg. bwd time: 35.6503 / Avg. batch time: 1037.7982 (ms) / GPU bubble ratio: 21.48%
+[rank2]:2025-12-25 06:32:15,999 - Avg. fwd time: 8.4184 / Avg. bwd time: 12.9146 / Avg. batch time: 1088.1731 (ms) / GPU bubble ratio: 68.63%
+[rank1]:2025-12-25 06:32:16,040 - Avg. fwd time: 10.3452 / Avg. bwd time: 15.5059 / Avg. batch time: 1131.4164 (ms) / GPU bubble ratio: 63.44%
+[rank3]:2025-12-25 06:32:16,110 -  step: 500  loss:  0.4339  grad_norm: 10.3901  memory: 31.20GiB(65.67%)  tps: 7,231  tflops: 56.53  mfu: 18.12%
+[rank0]:2025-12-25 06:32:16,076 - Avg. fwd time: 8.8469 / Avg. bwd time: 12.8201 / Avg. batch time: 1159.5610 (ms) / GPU bubble ratio: 70.10%
+[rank0]:2025-12-25 06:32:16,112 -  step: 500  loss: -4.0000  grad_norm: 10.3901  memory: 22.34GiB(47.02%)  tps: 7,230  tflops: 56.52  mfu: 18.12%
+[rank2]:2025-12-25 06:32:16,098 -  step: 500  loss: -4.0000  grad_norm: 10.3901  memory: 13.00GiB(27.36%)  tps: 7,230  tflops: 56.52  mfu: 18.12%
+[rank1]:2025-12-25 06:32:16,101 -  step: 500  loss: -4.0000  grad_norm: 10.3901  memory: 19.65GiB(41.35%)  tps: 7,230  tflops: 56.52  mfu: 18.12%
+[rank0]:2025-12-25 06:32:16,159 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0632_stage0_step500.svg
+[rank0]:2025-12-25 06:32:16,197 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0632_stage4_step500.svg
+[rank2]:2025-12-25 06:32:16,159 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0632_stage2_step500.svg
+[rank2]:2025-12-25 06:32:16,197 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0632_stage6_step500.svg
+[rank1]:2025-12-25 06:32:16,160 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0632_stage1_step500.svg
+[rank1]:2025-12-25 06:32:16,200 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0632_stage5_step500.svg
+[rank3]:2025-12-25 06:32:16,354 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0632_step500_rank3.svg
+[rank3]:			> Batch Time: 1110.82 ms, GPU Bubble Ratio: 73.81%, 67.16%, 72.68%, 29.82%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-25ms      | [S0,MB3,F]  25-8-34ms      | [S4,MB0,F]  49-9-58ms      | [S4,MB1,F]  89-9-99ms      | [S4,MB2,F]  130-9-139ms    | [S4,MB3,F]  171-9-180ms    | [S0,MB4,F]  180-9-190ms    | [S0,MB5,F]  190-8-198ms    | [S0,MB6,F]  198-9-208ms    | [S4,MB0,B]  375-10-385ms   | [S0,MB7,F]  385-8-393ms    | [S4,MB1,B]  494-10-504ms   | [S4,MB4,F]  552-9-561ms    | [S4,MB2,B]  562-11-573ms   | [S4,MB5,F]  582-9-591ms    | [S4,MB3,B]  591-11-602ms   | [S4,MB6,F]  613-9-622ms    | [S0,MB0,B]  622-9-632ms    | [S4,MB7,F]  642-8-650ms    | [S0,MB1,B]  650-9-659ms    | [S0,MB2,B]  670-7-678ms    | [S0,MB3,B]  734-7-742ms    | [S4,MB4,B]  754-9-763ms    | [S4,MB5,B]  855-9-864ms    | [S4,MB6,B]  945-9-954ms    | [S4,MB7,B]  1015-9-1024ms  | [S0,MB4,B]  1036-7-1043ms  | [S0,MB5,B]  1062-7-1069ms  | [S0,MB6,B]  1082-7-1089ms  | [S0,MB7,B]  1103-7-1110ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-11-20ms      | [S1,MB1,F]  49-11-61ms     | [S1,MB2,F]  89-12-102ms    | [S1,MB3,F]  130-11-142ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  185-7-193ms    | [S5,MB2,F]  200-7-208ms    | [S5,MB3,F]  279-7-287ms    | [S1,MB4,F]  302-12-314ms   | [S5,MB0,B]  314-9-324ms    | [S1,MB5,F]  367-14-382ms   | [S5,MB1,B]  382-9-391ms    | [S1,MB6,F]  392-12-404ms   | [S5,MB2,B]  493-9-503ms    | [S1,MB7,F]  503-12-515ms   | [S5,MB3,B]  560-11-571ms   | [S5,MB4,F]  571-8-579ms    | [S1,MB0,B]  590-15-606ms   | [S5,MB5,F]  606-8-615ms    | [S1,MB1,B]  620-16-636ms   | [S5,MB6,F]  636-9-646ms    | [S1,MB2,B]  646-16-662ms   | [S5,MB7,F]  662-10-673ms   | [S1,MB3,B]  673-14-688ms   | [S5,MB4,B]  737-9-747ms    | [S5,MB5,B]  822-9-832ms    | [S5,MB6,B]  910-9-920ms    | [S5,MB7,B]  999-9-1008ms   | [S1,MB4,B]  1014-14-1028ms | [S1,MB5,B]  1041-14-1055ms | [S1,MB6,B]  1061-14-1075ms | [S1,MB7,B]  1081-14-1095ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  101-8-109ms    | [S2,MB3,F]  142-8-150ms    | [S6,MB0,F]  179-8-187ms    | [S6,MB1,F]  193-8-201ms    | [S6,MB2,F]  273-8-281ms    | [S6,MB0,B]  281-10-292ms   | [S6,MB3,F]  293-9-302ms    | [S6,MB1,B]  355-12-367ms   | [S2,MB4,F]  368-9-377ms    | [S6,MB2,B]  443-10-454ms   | [S2,MB5,F]  454-8-462ms    | [S6,MB3,B]  532-10-542ms   | [S2,MB6,F]  542-8-551ms    | [S2,MB0,B]  561-10-572ms   | [S2,MB7,F]  572-8-581ms    | [S2,MB1,B]  592-10-603ms   | [S6,MB4,F]  603-8-611ms    | [S2,MB2,B]  622-10-633ms   | [S6,MB5,F]  633-8-642ms    | [S2,MB3,B]  648-10-658ms   | [S6,MB6,F]  658-9-668ms    | [S6,MB4,B]  718-12-731ms   | [S6,MB7,F]  730-9-740ms    | [S6,MB5,B]  805-10-816ms   | [S6,MB6,B]  894-9-904ms    | [S6,MB7,B]  983-9-992ms    | [S2,MB4,B]  999-9-1008ms   | [S2,MB5,B]  1025-9-1034ms  | [S2,MB6,B]  1040-9-1050ms  | [S2,MB7,B]  1061-9-1070ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-7-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  150-7-158ms    | [S7,MB0,F]  187-15-203ms   | [S7,MB0,B]  215-49-264ms   | [S7,MB1,F]  263-20-283ms   | [S7,MB1,B]  296-51-348ms   | [S7,MB2,F]  349-22-371ms   | [S7,MB2,B]  382-53-436ms   | [S7,MB3,F]  437-22-459ms   | [S7,MB3,B]  471-54-525ms   | [S3,MB4,F]  525-13-539ms   | [S3,MB0,B]  539-14-553ms   | [S3,MB5,F]  553-11-565ms   | [S3,MB1,B]  564-13-578ms   | [S3,MB6,F]  578-11-589ms   | [S3,MB2,B]  589-13-603ms   | [S3,MB7,F]  603-11-614ms   | [S3,MB3,B]  614-12-627ms   | [S7,MB4,F]  629-19-648ms   | [S7,MB4,B]  660-51-712ms   | [S7,MB5,F]  712-22-734ms   | [S7,MB5,B]  746-53-799ms   | [S7,MB6,F]  799-22-822ms   | [S7,MB6,B]  833-54-888ms   | [S7,MB7,F]  888-22-910ms   | [S7,MB7,B]  923-54-977ms   | [S3,MB4,B]  976-14-991ms   | [S3,MB5,B]  991-13-1005ms  | [S3,MB6,B]  1005-13-1018ms | [S3,MB7,B]  1018-13-1031ms
+[rank3]:2025-12-25 06:32:16,395 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0632_stage3_step500.svg
+[rank3]:2025-12-25 06:32:16,439 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0632_stage7_step500.svg
+[rank3]:2025-12-25 06:33:03,656 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:33:03,668 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:33:03,632 - Freezing Ratio: [Stage2] 0.94, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:33:03,640 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:33:48,940 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:33:48,939 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:33:48,939 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:33:48,969 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:34:34,185 - Freezing Ratio: [Stage3] 0.83, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:34:34,155 - Freezing Ratio: [Stage2] 0.94, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:34:34,161 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:34:34,155 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:35:19,242 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:35:19,212 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:35:19,212 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:35:19,213 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:36:04,385 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:36:04,355 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:36:04,355 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:36:04,360 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:36:04,362 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:36:08,824 - Avg. fwd time: 15.2869 / Avg. bwd time: 35.5702 / Avg. batch time: 1036.6685 (ms) / GPU bubble ratio: 21.51%
+[rank2]:2025-12-25 06:36:08,859 - Avg. fwd time: 8.4228 / Avg. bwd time: 12.8320 / Avg. batch time: 1086.9631 (ms) / GPU bubble ratio: 68.71%
+[rank2]:2025-12-25 06:36:08,910 -  step: 550  loss: -4.0000  grad_norm:  0.4803  memory: 13.00GiB(27.36%)  tps: 7,037  tflops: 55.02  mfu: 17.63%
+[rank1]:2025-12-25 06:36:08,887 - Avg. fwd time: 10.3512 / Avg. bwd time: 15.4002 / Avg. batch time: 1130.0193 (ms) / GPU bubble ratio: 63.54%
+[rank1]:2025-12-25 06:36:08,910 -  step: 550  loss: -4.0000  grad_norm:  0.4803  memory: 19.65GiB(41.35%)  tps: 7,038  tflops: 55.02  mfu: 17.63%
+[rank0]:2025-12-25 06:36:08,908 - Avg. fwd time: 8.8528 / Avg. bwd time: 12.6989 / Avg. batch time: 1157.9989 (ms) / GPU bubble ratio: 70.22%
+[rank0]:2025-12-25 06:36:08,911 -  step: 550  loss: -4.0000  grad_norm:  0.4803  memory: 22.34GiB(47.02%)  tps: 7,038  tflops: 55.02  mfu: 17.63%
+[rank3]:2025-12-25 06:36:08,925 -  step: 550  loss:  0.3209  grad_norm:  0.4803  memory: 31.20GiB(65.67%)  tps: 7,037  tflops: 55.02  mfu: 17.63%
+[rank3]:2025-12-25 06:36:49,675 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:36:49,645 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:36:49,646 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.89, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:36:49,646 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:37:34,887 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:37:34,918 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:37:34,888 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:37:34,889 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:38:19,953 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:38:19,983 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:38:19,953 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:38:19,954 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:39:05,113 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:39:05,084 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:39:05,084 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:39:05,085 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:39:50,216 - Freezing Ratio: [Stage2] 0.11, [Stage6] 0.06, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:39:50,217 - Freezing Ratio: [Stage1] 0.04, [Stage5] 0.06, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:39:50,217 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:39:50,219 - Freezing Ratio: [Stage0] 0.05, [Stage4] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:39:50,246 - Freezing Ratio: [Stage3] 0.00, [Stage7] 0.09, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:39:55,388 - Avg. fwd time: 15.2990 / Avg. bwd time: 35.3876 / Avg. batch time: 1034.1067 (ms) / GPU bubble ratio: 21.58%
+[rank2]:2025-12-25 06:39:55,436 - Avg. fwd time: 8.4339 / Avg. bwd time: 12.6478 / Avg. batch time: 1084.0706 (ms) / GPU bubble ratio: 68.89%
+[rank1]:2025-12-25 06:39:55,483 - Avg. fwd time: 10.3661 / Avg. bwd time: 15.1588 / Avg. batch time: 1126.6865 (ms) / GPU bubble ratio: 63.75%
+[rank0]:2025-12-25 06:39:55,520 - Avg. fwd time: 8.8663 / Avg. bwd time: 12.4382 / Avg. batch time: 1154.3127 (ms) / GPU bubble ratio: 70.47%
+[rank0]:2025-12-25 06:39:55,556 -  step: 600  loss: -4.0000  grad_norm:  6.8639  memory: 22.34GiB(47.02%)  tps: 7,229  tflops: 56.51  mfu: 18.11%
+[rank3]:2025-12-25 06:39:55,554 -  step: 600  loss:  0.2889  grad_norm:  6.8639  memory: 31.20GiB(65.67%)  tps: 7,229  tflops: 56.52  mfu: 18.11%
+[rank2]:2025-12-25 06:39:55,542 -  step: 600  loss: -4.0000  grad_norm:  6.8639  memory: 13.00GiB(27.36%)  tps: 7,229  tflops: 56.52  mfu: 18.11%
+[rank2]:2025-12-25 06:39:55,605 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0639_stage2_step600.svg
+[rank1]:2025-12-25 06:39:55,546 -  step: 600  loss: -4.0000  grad_norm:  6.8639  memory: 19.65GiB(41.35%)  tps: 7,229  tflops: 56.51  mfu: 18.11%
+[rank1]:2025-12-25 06:39:55,605 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0639_stage1_step600.svg
+[rank0]:2025-12-25 06:39:55,605 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0639_stage0_step600.svg
+[rank0]:2025-12-25 06:39:55,646 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0639_stage4_step600.svg
+[rank2]:2025-12-25 06:39:55,645 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0639_stage6_step600.svg
+[rank1]:2025-12-25 06:39:55,647 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0639_stage5_step600.svg
+[rank3]:2025-12-25 06:39:55,798 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0639_step600_rank3.svg
+[rank3]:			> Batch Time: 1109.85 ms, GPU Bubble Ratio: 73.75%, 67.07%, 72.62%, 29.93%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-25ms      | [S0,MB3,F]  25-8-34ms      | [S4,MB0,F]  49-9-59ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  131-9-140ms    | [S4,MB3,F]  171-9-181ms    | [S0,MB4,F]  181-9-190ms    | [S0,MB5,F]  190-8-198ms    | [S0,MB6,F]  198-9-208ms    | [S4,MB0,B]  374-10-384ms   | [S0,MB7,F]  385-8-393ms    | [S4,MB1,B]  493-10-503ms   | [S4,MB4,F]  552-9-561ms    | [S4,MB2,B]  561-11-572ms   | [S4,MB5,F]  582-9-591ms    | [S4,MB3,B]  591-11-602ms   | [S4,MB6,F]  612-9-622ms    | [S0,MB0,B]  622-9-631ms    | [S4,MB7,F]  642-8-650ms    | [S0,MB1,B]  650-9-659ms    | [S0,MB2,B]  670-8-678ms    | [S0,MB3,B]  734-7-741ms    | [S4,MB4,B]  753-9-762ms    | [S4,MB5,B]  856-9-865ms    | [S4,MB6,B]  943-9-952ms    | [S4,MB7,B]  1014-9-1023ms  | [S0,MB4,B]  1035-7-1042ms  | [S0,MB5,B]  1061-7-1068ms  | [S0,MB6,B]  1081-7-1088ms  | [S0,MB7,B]  1102-7-1109ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-12-61ms     | [S1,MB2,F]  90-12-102ms    | [S1,MB3,F]  131-12-143ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  186-7-194ms    | [S5,MB2,F]  200-8-208ms    | [S5,MB3,F]  280-7-288ms    | [S1,MB4,F]  303-12-315ms   | [S5,MB0,B]  315-9-324ms    | [S1,MB5,F]  367-14-381ms   | [S5,MB1,B]  381-9-391ms    | [S1,MB6,F]  391-12-403ms   | [S5,MB2,B]  492-9-502ms    | [S1,MB7,F]  502-12-514ms   | [S5,MB3,B]  559-11-570ms   | [S5,MB4,F]  570-8-579ms    | [S1,MB0,B]  590-15-606ms   | [S5,MB5,F]  606-8-615ms    | [S1,MB1,B]  620-16-636ms   | [S5,MB6,F]  636-9-646ms    | [S1,MB2,B]  646-16-662ms   | [S5,MB7,F]  662-10-673ms   | [S1,MB3,B]  673-14-688ms   | [S5,MB4,B]  737-9-747ms    | [S5,MB5,B]  822-9-831ms    | [S5,MB6,B]  909-9-919ms    | [S5,MB7,B]  998-9-1007ms   | [S1,MB4,B]  1013-14-1027ms | [S1,MB5,B]  1040-14-1054ms | [S1,MB6,B]  1060-14-1074ms | [S1,MB7,B]  1081-14-1095ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  142-8-151ms    | [S6,MB0,F]  179-8-187ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  274-8-282ms    | [S6,MB0,B]  282-10-293ms   | [S6,MB3,F]  293-9-302ms    | [S6,MB1,B]  354-12-367ms   | [S2,MB4,F]  367-9-376ms    | [S6,MB2,B]  442-10-453ms   | [S2,MB5,F]  453-8-461ms    | [S6,MB3,B]  531-10-542ms   | [S2,MB6,F]  542-8-550ms    | [S2,MB0,B]  561-10-572ms   | [S2,MB7,F]  572-8-580ms    | [S2,MB1,B]  591-10-602ms   | [S6,MB4,F]  602-8-611ms    | [S2,MB2,B]  622-10-633ms   | [S6,MB5,F]  633-9-642ms    | [S2,MB3,B]  647-10-658ms   | [S6,MB6,F]  658-9-668ms    | [S6,MB4,B]  718-12-730ms   | [S6,MB7,F]  730-9-740ms    | [S6,MB5,B]  805-10-815ms   | [S6,MB6,B]  893-9-903ms    | [S6,MB7,B]  982-9-991ms    | [S2,MB4,B]  998-9-1007ms   | [S2,MB5,B]  1024-9-1033ms  | [S2,MB6,B]  1039-9-1049ms  | [S2,MB7,B]  1060-9-1069ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-8-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  151-7-159ms    | [S7,MB0,F]  187-15-203ms   | [S7,MB0,B]  215-49-264ms   | [S7,MB1,F]  264-19-284ms   | [S7,MB1,B]  296-52-348ms   | [S7,MB2,F]  348-22-370ms   | [S7,MB2,B]  382-53-436ms   | [S7,MB3,F]  436-22-459ms   | [S7,MB3,B]  470-53-524ms   | [S3,MB4,F]  525-13-538ms   | [S3,MB0,B]  538-14-552ms   | [S3,MB5,F]  553-11-564ms   | [S3,MB1,B]  564-13-578ms   | [S3,MB6,F]  578-11-589ms   | [S3,MB2,B]  589-13-602ms   | [S3,MB7,F]  602-11-613ms   | [S3,MB3,B]  614-12-626ms   | [S7,MB4,F]  629-19-648ms   | [S7,MB4,B]  660-51-711ms   | [S7,MB5,F]  712-21-734ms   | [S7,MB5,B]  746-53-799ms   | [S7,MB6,F]  799-22-822ms   | [S7,MB6,B]  834-53-888ms   | [S7,MB7,F]  887-22-910ms   | [S7,MB7,B]  922-54-976ms   | [S3,MB4,B]  976-14-990ms   | [S3,MB5,B]  990-13-1004ms  | [S3,MB6,B]  1004-13-1017ms | [S3,MB7,B]  1018-13-1031ms
+[rank3]:2025-12-25 06:39:55,840 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0639_stage3_step600.svg
+[rank3]:2025-12-25 06:39:55,885 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0639_stage7_step600.svg
+[rank2]:2025-12-25 06:40:43,078 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:40:43,084 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:40:43,107 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:40:43,099 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:41:28,104 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:41:28,133 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:41:28,104 - Freezing Ratio: [Stage1] 0.85, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:41:28,105 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:42:13,164 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:42:13,194 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:42:13,164 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:42:13,166 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:42:58,275 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:42:58,276 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:42:58,274 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:42:58,305 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:43:43,461 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:43:43,463 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:43:43,456 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:43:43,487 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:43:43,457 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:43:47,886 - Avg. fwd time: 15.2998 / Avg. bwd time: 35.3365 / Avg. batch time: 1033.3357 (ms) / GPU bubble ratio: 21.60%
+[rank1]:2025-12-25 06:43:47,950 - Avg. fwd time: 10.3697 / Avg. bwd time: 15.0977 / Avg. batch time: 1125.7722 (ms) / GPU bubble ratio: 63.80%
+[rank0]:2025-12-25 06:43:47,972 - Avg. fwd time: 8.8695 / Avg. bwd time: 12.3561 / Avg. batch time: 1153.2710 (ms) / GPU bubble ratio: 70.55%
+[rank0]:2025-12-25 06:43:47,974 -  step: 650  loss: -4.0000  grad_norm:  1.6376  memory: 22.34GiB(47.02%)  tps: 7,049  tflops: 55.11  mfu: 17.66%
+[rank2]:2025-12-25 06:43:47,921 - Avg. fwd time: 8.4364 / Avg. bwd time: 12.5997 / Avg. batch time: 1083.2681 (ms) / GPU bubble ratio: 68.93%
+[rank2]:2025-12-25 06:43:47,973 -  step: 650  loss: -4.0000  grad_norm:  1.6376  memory: 13.00GiB(27.36%)  tps: 7,049  tflops: 55.11  mfu: 17.66%
+[rank3]:2025-12-25 06:43:47,989 -  step: 650  loss:  0.3217  grad_norm:  1.6376  memory: 31.20GiB(65.67%)  tps: 7,049  tflops: 55.11  mfu: 17.66%
+[rank1]:2025-12-25 06:43:47,973 -  step: 650  loss: -4.0000  grad_norm:  1.6376  memory: 19.65GiB(41.35%)  tps: 7,049  tflops: 55.11  mfu: 17.66%
+[rank2]:2025-12-25 06:44:28,552 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:44:28,582 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:44:28,552 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:44:28,553 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:45:13,648 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:45:13,649 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:45:13,648 - Freezing Ratio: [Stage2] 0.89, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:45:13,678 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:45:58,773 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:45:58,803 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:45:58,773 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:45:58,774 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:46:43,990 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:46:43,991 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:46:43,990 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:46:44,019 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.64, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:47:29,012 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:47:29,012 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:47:29,012 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:47:29,015 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:47:29,042 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:47:33,438 - Avg. fwd time: 15.3079 / Avg. bwd time: 35.1789 / Avg. batch time: 1031.0826 (ms) / GPU bubble ratio: 21.66%
+[rank2]:2025-12-25 06:47:33,471 - Avg. fwd time: 8.4455 / Avg. bwd time: 12.4467 / Avg. batch time: 1080.7505 (ms) / GPU bubble ratio: 69.07%
+[rank1]:2025-12-25 06:47:33,501 - Avg. fwd time: 10.3826 / Avg. bwd time: 14.8961 / Avg. batch time: 1122.8881 (ms) / GPU bubble ratio: 63.98%
+[rank1]:2025-12-25 06:47:33,525 -  step: 700  loss: -4.0000  grad_norm:  1.1830  memory: 19.65GiB(41.35%)  tps: 7,264  tflops: 56.79  mfu: 18.20%
+[rank0]:2025-12-25 06:47:33,523 - Avg. fwd time: 8.8809 / Avg. bwd time: 12.1394 / Avg. batch time: 1150.0947 (ms) / GPU bubble ratio: 70.76%
+[rank0]:2025-12-25 06:47:33,525 -  step: 700  loss: -4.0000  grad_norm:  1.1830  memory: 22.34GiB(47.02%)  tps: 7,264  tflops: 56.79  mfu: 18.20%
+[rank3]:2025-12-25 06:47:33,540 -  step: 700  loss:  0.2875  grad_norm:  1.1830  memory: 31.20GiB(65.67%)  tps: 7,264  tflops: 56.79  mfu: 18.20%
+[rank2]:2025-12-25 06:47:33,525 -  step: 700  loss: -4.0000  grad_norm:  1.1830  memory: 13.00GiB(27.36%)  tps: 7,264  tflops: 56.79  mfu: 18.20%
+[rank2]:2025-12-25 06:47:33,597 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0647_stage2_step700.svg
+[rank1]:2025-12-25 06:47:33,597 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0647_stage1_step700.svg
+[rank1]:2025-12-25 06:47:33,641 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0647_stage5_step700.svg
+[rank0]:2025-12-25 06:47:33,597 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0647_stage0_step700.svg
+[rank0]:2025-12-25 06:47:33,640 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0647_stage4_step700.svg
+[rank2]:2025-12-25 06:47:33,640 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0647_stage6_step700.svg
+[rank3]:2025-12-25 06:47:33,797 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0647_step700_rank3.svg
+[rank3]:			> Batch Time: 1105.82 ms, GPU Bubble Ratio: 73.69%, 67.01%, 72.49%, 29.79%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-25ms      | [S0,MB3,F]  25-8-34ms      | [S4,MB0,F]  49-9-58ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  130-9-140ms    | [S4,MB3,F]  171-9-181ms    | [S0,MB4,F]  181-9-190ms    | [S0,MB5,F]  190-8-198ms    | [S0,MB6,F]  198-9-208ms    | [S4,MB0,B]  374-10-384ms   | [S0,MB7,F]  384-8-393ms    | [S4,MB1,B]  492-10-502ms   | [S4,MB4,F]  550-9-559ms    | [S4,MB2,B]  559-11-570ms   | [S4,MB5,F]  579-9-588ms    | [S4,MB3,B]  589-11-600ms   | [S4,MB6,F]  609-9-619ms    | [S0,MB0,B]  619-9-629ms    | [S4,MB7,F]  639-8-647ms    | [S0,MB1,B]  647-9-656ms    | [S0,MB2,B]  667-7-675ms    | [S0,MB3,B]  731-7-738ms    | [S4,MB4,B]  750-9-759ms    | [S4,MB5,B]  852-9-861ms    | [S4,MB6,B]  939-9-948ms    | [S4,MB7,B]  1010-9-1019ms  | [S0,MB4,B]  1031-7-1038ms  | [S0,MB5,B]  1057-7-1064ms  | [S0,MB6,B]  1077-7-1084ms  | [S0,MB7,B]  1098-7-1105ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-12-61ms     | [S1,MB2,F]  90-12-102ms    | [S1,MB3,F]  130-12-142ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  186-7-194ms    | [S5,MB2,F]  200-7-208ms    | [S5,MB3,F]  280-7-288ms    | [S1,MB4,F]  303-12-315ms   | [S5,MB0,B]  315-9-324ms    | [S1,MB5,F]  366-14-381ms   | [S5,MB1,B]  381-9-391ms    | [S1,MB6,F]  391-12-403ms   | [S5,MB2,B]  491-9-501ms    | [S1,MB7,F]  501-12-513ms   | [S5,MB3,B]  557-11-568ms   | [S5,MB4,F]  568-8-577ms    | [S1,MB0,B]  587-15-603ms   | [S5,MB5,F]  603-8-612ms    | [S1,MB1,B]  617-16-633ms   | [S5,MB6,F]  633-9-643ms    | [S1,MB2,B]  643-16-659ms   | [S5,MB7,F]  659-10-670ms   | [S1,MB3,B]  670-14-685ms   | [S5,MB4,B]  734-9-743ms    | [S5,MB5,B]  818-9-827ms    | [S5,MB6,B]  905-9-914ms    | [S5,MB7,B]  994-9-1003ms   | [S1,MB4,B]  1009-14-1023ms | [S1,MB5,B]  1036-14-1050ms | [S1,MB6,B]  1056-14-1070ms | [S1,MB7,B]  1077-14-1091ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  142-8-150ms    | [S6,MB0,F]  179-8-187ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  274-8-282ms    | [S6,MB0,B]  282-10-293ms   | [S6,MB3,F]  293-9-302ms    | [S6,MB1,B]  354-12-367ms   | [S2,MB4,F]  367-9-376ms    | [S6,MB2,B]  442-10-452ms   | [S2,MB5,F]  452-8-461ms    | [S6,MB3,B]  530-10-540ms   | [S2,MB6,F]  540-8-549ms    | [S2,MB0,B]  559-10-570ms   | [S2,MB7,F]  569-8-578ms    | [S2,MB1,B]  589-10-600ms   | [S6,MB4,F]  600-8-608ms    | [S2,MB2,B]  619-10-630ms   | [S6,MB5,F]  630-8-639ms    | [S2,MB3,B]  645-10-655ms   | [S6,MB6,F]  655-9-665ms    | [S6,MB4,B]  715-12-727ms   | [S6,MB7,F]  727-9-737ms    | [S6,MB5,B]  801-10-812ms   | [S6,MB6,B]  889-9-899ms    | [S6,MB7,B]  978-9-987ms    | [S2,MB4,B]  994-9-1003ms   | [S2,MB5,B]  1020-9-1029ms  | [S2,MB6,B]  1035-9-1045ms  | [S2,MB7,B]  1056-9-1065ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-7-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  150-7-158ms    | [S7,MB0,F]  187-15-203ms   | [S7,MB0,B]  215-49-264ms   | [S7,MB1,F]  264-19-284ms   | [S7,MB1,B]  296-52-348ms   | [S7,MB2,F]  348-22-370ms   | [S7,MB2,B]  382-53-435ms   | [S7,MB3,F]  435-22-458ms   | [S7,MB3,B]  470-53-524ms   | [S3,MB4,F]  523-13-537ms   | [S3,MB0,B]  536-13-550ms   | [S3,MB5,F]  550-11-562ms   | [S3,MB1,B]  562-13-576ms   | [S3,MB6,F]  575-11-587ms   | [S3,MB2,B]  587-13-600ms   | [S3,MB7,F]  600-11-611ms   | [S3,MB3,B]  611-12-624ms   | [S7,MB4,F]  626-19-645ms   | [S7,MB4,B]  657-51-708ms   | [S7,MB5,F]  709-22-731ms   | [S7,MB5,B]  742-53-795ms   | [S7,MB6,F]  795-22-818ms   | [S7,MB6,B]  830-53-884ms   | [S7,MB7,F]  883-22-905ms   | [S7,MB7,B]  917-53-971ms   | [S3,MB4,B]  971-14-986ms   | [S3,MB5,B]  986-13-1000ms  | [S3,MB6,B]  1000-13-1013ms | [S3,MB7,B]  1014-13-1027ms
+[rank3]:2025-12-25 06:47:33,841 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0647_stage3_step700.svg
+[rank3]:2025-12-25 06:47:33,890 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0647_stage7_step700.svg
+[rank2]:2025-12-25 06:48:14,465 - Freezing Ratio: [Stage2] 0.06, [Stage6] 0.00, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:48:14,465 - Freezing Ratio: [Stage1] 0.04, [Stage5] 0.00, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:48:14,467 - Freezing Ratio: [Stage0] 0.05, [Stage4] 0.00, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:48:14,495 - Freezing Ratio: [Stage3] 0.00, [Stage7] 0.18, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:49:06,940 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:49:06,947 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:49:06,973 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:49:06,963 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:49:52,209 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:49:52,209 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:49:52,208 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:49:52,238 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:50:37,258 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:50:37,258 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:50:37,258 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:50:37,287 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:51:22,307 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:51:22,308 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:51:22,312 - [GC] Peforming periodical GC collection 0.01 seconds
+[rank0]:2025-12-25 06:51:22,314 - Freezing Ratio: [Stage0] 0.79, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:51:22,337 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:51:26,782 - Avg. fwd time: 15.3086 / Avg. bwd time: 35.1604 / Avg. batch time: 1030.8035 (ms) / GPU bubble ratio: 21.66%
+[rank2]:2025-12-25 06:51:26,817 - Avg. fwd time: 8.4460 / Avg. bwd time: 12.4327 / Avg. batch time: 1080.4895 (ms) / GPU bubble ratio: 69.08%
+[rank1]:2025-12-25 06:51:26,847 - Avg. fwd time: 10.3834 / Avg. bwd time: 14.8776 / Avg. batch time: 1122.5943 (ms) / GPU bubble ratio: 64.00%
+[rank1]:2025-12-25 06:51:26,873 -  step: 750  loss: -4.0000  grad_norm:  0.3348  memory: 19.65GiB(41.35%)  tps: 7,021  tflops: 54.89  mfu: 17.59%
+[rank0]:2025-12-25 06:51:26,871 - Avg. fwd time: 8.8821 / Avg. bwd time: 12.1049 / Avg. batch time: 1149.7440 (ms) / GPU bubble ratio: 70.79%
+[rank0]:2025-12-25 06:51:26,874 -  step: 750  loss: -4.0000  grad_norm:  0.3348  memory: 22.34GiB(47.02%)  tps: 7,021  tflops: 54.89  mfu: 17.59%
+[rank3]:2025-12-25 06:51:26,889 -  step: 750  loss:  0.3133  grad_norm:  0.3348  memory: 31.20GiB(65.67%)  tps: 7,021  tflops: 54.89  mfu: 17.59%
+[rank2]:2025-12-25 06:51:26,873 -  step: 750  loss: -4.0000  grad_norm:  0.3348  memory: 13.00GiB(27.36%)  tps: 7,021  tflops: 54.89  mfu: 17.59%
+[rank0]:2025-12-25 06:52:07,544 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:52:07,543 - Freezing Ratio: [Stage2] 0.78, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:52:07,573 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:52:07,543 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:52:52,746 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:52:52,746 - Freezing Ratio: [Stage1] 0.78, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:52:52,747 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:52:52,776 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:53:37,820 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:53:37,820 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:53:37,819 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:53:37,849 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:54:22,886 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:54:22,885 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:54:22,914 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.82, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:54:22,885 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.78, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:55:08,027 - Freezing Ratio: [Stage2] 0.83, [Stage6] 0.78, Threshold: 1.0000e-02
+[rank1]:2025-12-25 06:55:08,027 - Freezing Ratio: [Stage1] 0.81, [Stage5] 0.83, Threshold: 1.0000e-02
+[rank0]:2025-12-25 06:55:08,027 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank0]:2025-12-25 06:55:08,030 - Freezing Ratio: [Stage0] 0.84, [Stage4] 0.78, Threshold: 1.0000e-02
+[rank3]:2025-12-25 06:55:08,057 - Freezing Ratio: [Stage3] 0.78, [Stage7] 0.73, Threshold: 1.0000e-02
+[rank2]:2025-12-25 06:55:12,576 - Avg. fwd time: 8.4536 / Avg. bwd time: 12.3105 / Avg. batch time: 1078.5070 (ms) / GPU bubble ratio: 69.20%
+[rank1]:2025-12-25 06:55:12,606 - Avg. fwd time: 10.3934 / Avg. bwd time: 14.7168 / Avg. batch time: 1120.3145 (ms) / GPU bubble ratio: 64.14%
+[rank3]:2025-12-25 06:55:12,543 - Avg. fwd time: 15.3171 / Avg. bwd time: 35.0348 / Avg. batch time: 1029.0377 (ms) / GPU bubble ratio: 21.71%
+[rank0]:2025-12-25 06:55:12,635 - Avg. fwd time: 8.8916 / Avg. bwd time: 11.9302 / Avg. batch time: 1147.2290 (ms) / GPU bubble ratio: 70.96%
+[rank0]:2025-12-25 06:55:12,637 -  step: 800  loss: -4.0000  grad_norm:  0.1663  memory: 22.34GiB(47.02%)  tps: 7,257  tflops: 56.73  mfu: 18.18%
+[rank0]:2025-12-25 06:55:12,637 - ℹ️ final step: 800  loss: -4.0000  grad_norm:  0.1663  tps: 7,438  tflops: 58.15  mfu: 17.01%
+[rank0]:2025-12-25 06:55:12,637 - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2025-12-25 06:55:12,638 - Saving a model only checkpoint in torch.float16 at last step, step 800.
+[rank2]:2025-12-25 06:55:12,637 -  step: 800  loss: -4.0000  grad_norm:  0.1663  memory: 13.00GiB(27.36%)  tps: 7,257  tflops: 56.73  mfu: 18.18%
+[rank2]:2025-12-25 06:55:12,637 - ℹ️ final step: 800  loss: -4.0000  grad_norm:  0.1663  tps: 7,438  tflops: 58.14  mfu: 17.00%
+[rank2]:2025-12-25 06:55:12,637 - Saving the checkpoint (or staging if async is enabled).
+[rank2]:2025-12-25 06:55:12,638 - Saving a model only checkpoint in torch.float16 at last step, step 800.
+[rank1]:2025-12-25 06:55:12,637 -  step: 800  loss: -4.0000  grad_norm:  0.1663  memory: 19.65GiB(41.35%)  tps: 7,257  tflops: 56.73  mfu: 18.18%
+[rank1]:2025-12-25 06:55:12,637 - ℹ️ final step: 800  loss: -4.0000  grad_norm:  0.1663  tps: 7,438  tflops: 58.14  mfu: 17.00%
+[rank1]:2025-12-25 06:55:12,637 - Saving the checkpoint (or staging if async is enabled).
+[rank1]:2025-12-25 06:55:12,638 - Saving a model only checkpoint in torch.float16 at last step, step 800.
+[rank3]:2025-12-25 06:55:12,652 -  step: 800  loss:  0.2927  grad_norm:  0.1663  memory: 31.20GiB(65.67%)  tps: 7,257  tflops: 56.73  mfu: 18.18%
+[rank3]:2025-12-25 06:55:12,653 - ℹ️ final step: 800  loss:  0.2927  grad_norm:  0.1663  tps: 7,442  tflops: 58.18  mfu: 17.13%
+[rank3]:2025-12-25 06:55:12,653 - Saving the checkpoint (or staging if async is enabled).
+[rank3]:2025-12-25 06:55:12,654 - Saving a model only checkpoint in torch.float16 at last step, step 800.
+[rank0]:2025-12-25 06:55:14,658 - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank2]:2025-12-25 06:55:14,725 - ✅ Frozen Ratio History of Rank 2 (Stage 2) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0655_stage2_final800.svg
+[rank1]:2025-12-25 06:55:14,725 - ✅ Frozen Ratio History of Rank 1 (Stage 1) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0655_stage1_final800.svg
+[rank0]:2025-12-25 06:55:14,725 - ✅ Frozen Ratio History of Rank 0 (Stage 0) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0655_stage0_final800.svg
+[rank0]:2025-12-25 06:55:14,768 - ✅ Frozen Ratio History of Rank 0 (Stage 4) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank0/251225_0655_stage4_final800.svg
+[rank2]:2025-12-25 06:55:14,768 - ✅ Frozen Ratio History of Rank 2 (Stage 6) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank2/251225_0655_stage6_final800.svg
+[rank1]:2025-12-25 06:55:14,770 - ✅ Frozen Ratio History of Rank 1 (Stage 5) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank1/251225_0655_stage5_final800.svg
+[rank0]:2025-12-25 06:55:14,871 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank0_stage0.svg
+[rank0]:	> Counts Sum: 1005, Total Sum: 1425 (70.53%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 60.0, 0.0, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 0.0, 0.0]
+[rank2]:2025-12-25 06:55:14,868 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank2_stage2.svg
+[rank2]:	> Counts Sum: 965, Total Sum: 1350 (71.48%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 37.33, 0.0, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 12.0, 42.66]
+[rank1]:2025-12-25 06:55:14,896 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank1_stage1.svg
+[rank1]:	> Counts Sum: 1399, Total Sum: 2025 (69.09%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 33.33, 18.66, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 20.0, 1.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 0.0, 0.0]
+[rank3]:2025-12-25 06:55:14,913 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0655_final800_rank3.svg
+[rank3]:			> Batch Time: 1114.14 ms, GPU Bubble Ratio: 72.97%, 67.24%, 72.66%, 29.95%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-8-8ms        | [S0,MB1,F]  8-9-17ms       | [S0,MB2,F]  17-8-25ms      | [S0,MB3,F]  25-8-34ms      | [S4,MB0,F]  49-9-59ms      | [S4,MB1,F]  90-9-99ms      | [S4,MB2,F]  130-9-140ms    | [S4,MB3,F]  171-9-180ms    | [S0,MB4,F]  180-9-190ms    | [S0,MB5,F]  190-8-198ms    | [S0,MB6,F]  198-9-207ms    | [S4,MB0,B]  374-10-385ms   | [S0,MB7,F]  386-8-394ms    | [S4,MB1,B]  494-10-504ms   | [S4,MB4,F]  553-9-562ms    | [S4,MB2,B]  562-11-573ms   | [S4,MB5,F]  583-9-592ms    | [S4,MB3,B]  593-11-604ms   | [S4,MB6,F]  614-9-623ms    | [S0,MB0,B]  624-10-634ms   | [S4,MB7,F]  643-8-651ms    | [S0,MB1,B]  652-10-662ms   | [S0,MB2,B]  672-9-681ms    | [S0,MB3,B]  735-9-744ms    | [S4,MB4,B]  755-9-764ms    | [S4,MB5,B]  858-9-867ms    | [S4,MB6,B]  946-9-955ms    | [S4,MB7,B]  1017-9-1026ms  | [S0,MB4,B]  1038-9-1047ms  | [S0,MB5,B]  1064-9-1073ms  | [S0,MB6,B]  1084-9-1093ms  | [S0,MB7,B]  1105-9-1114ms 
+[rank3]:			  [Rank 1]	[S1,MB0,F]  8-12-20ms      | [S1,MB1,F]  49-11-61ms     | [S1,MB2,F]  90-11-102ms    | [S1,MB3,F]  130-11-142ms   | [S5,MB0,F]  171-7-179ms    | [S5,MB1,F]  186-7-193ms    | [S5,MB2,F]  200-7-208ms    | [S5,MB3,F]  279-7-287ms    | [S1,MB4,F]  303-12-315ms   | [S5,MB0,B]  315-9-324ms    | [S1,MB5,F]  367-14-381ms   | [S5,MB1,B]  382-9-391ms    | [S1,MB6,F]  392-12-404ms   | [S5,MB2,B]  493-9-503ms    | [S1,MB7,F]  504-12-516ms   | [S5,MB3,B]  561-11-572ms   | [S5,MB4,F]  572-8-580ms    | [S1,MB0,B]  591-15-607ms   | [S5,MB5,F]  607-8-616ms    | [S1,MB1,B]  621-16-638ms   | [S5,MB6,F]  638-9-648ms    | [S1,MB2,B]  648-16-664ms   | [S5,MB7,F]  664-10-674ms   | [S1,MB3,B]  674-14-689ms   | [S5,MB4,B]  738-9-748ms    | [S5,MB5,B]  824-9-833ms    | [S5,MB6,B]  912-9-921ms    | [S5,MB7,B]  1001-9-1010ms  | [S1,MB4,B]  1016-14-1030ms | [S1,MB5,B]  1043-14-1057ms | [S1,MB6,B]  1063-14-1077ms | [S1,MB7,B]  1084-14-1098ms
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  61-8-69ms      | [S2,MB2,F]  102-8-110ms    | [S2,MB3,F]  142-8-150ms    | [S6,MB0,F]  179-8-187ms    | [S6,MB1,F]  194-8-202ms    | [S6,MB2,F]  273-8-281ms    | [S6,MB0,B]  281-10-292ms   | [S6,MB3,F]  293-9-303ms    | [S6,MB1,B]  355-12-367ms   | [S2,MB4,F]  368-9-377ms    | [S6,MB2,B]  443-10-454ms   | [S2,MB5,F]  455-8-463ms    | [S6,MB3,B]  532-10-543ms   | [S2,MB6,F]  543-8-552ms    | [S2,MB0,B]  562-10-573ms   | [S2,MB7,F]  573-8-582ms    | [S2,MB1,B]  593-10-604ms   | [S6,MB4,F]  604-8-612ms    | [S2,MB2,B]  623-10-634ms   | [S6,MB5,F]  634-8-643ms    | [S2,MB3,B]  649-10-659ms   | [S6,MB6,F]  659-9-669ms    | [S6,MB4,B]  719-12-732ms   | [S6,MB7,F]  732-9-741ms    | [S6,MB5,B]  807-10-817ms   | [S6,MB6,B]  896-9-905ms    | [S6,MB7,B]  985-9-994ms    | [S2,MB4,B]  1000-9-1010ms  | [S2,MB5,B]  1026-9-1036ms  | [S2,MB6,B]  1042-9-1052ms  | [S2,MB7,B]  1063-9-1072ms 
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-8-36ms      | [S3,MB1,F]  69-7-77ms      | [S3,MB2,F]  110-7-118ms    | [S3,MB3,F]  150-7-158ms    | [S7,MB0,F]  187-15-203ms   | [S7,MB0,B]  215-49-264ms   | [S7,MB1,F]  264-20-284ms   | [S7,MB1,B]  296-52-348ms   | [S7,MB2,F]  349-22-371ms   | [S7,MB2,B]  383-54-437ms   | [S7,MB3,F]  437-22-460ms   | [S7,MB3,B]  472-54-526ms   | [S3,MB4,F]  526-13-539ms   | [S3,MB0,B]  540-14-554ms   | [S3,MB5,F]  554-11-566ms   | [S3,MB1,B]  566-13-579ms   | [S3,MB6,F]  579-11-590ms   | [S3,MB2,B]  591-13-604ms   | [S3,MB7,F]  604-11-615ms   | [S3,MB3,B]  615-12-628ms   | [S7,MB4,F]  630-19-649ms   | [S7,MB4,B]  662-51-713ms   | [S7,MB5,F]  713-22-735ms   | [S7,MB5,B]  747-53-801ms   | [S7,MB6,F]  801-22-824ms   | [S7,MB6,B]  836-54-890ms   | [S7,MB7,F]  890-22-912ms   | [S7,MB7,B]  924-54-978ms   | [S3,MB4,B]  979-14-994ms   | [S3,MB5,B]  993-13-1007ms  | [S3,MB6,B]  1007-13-1020ms | [S3,MB7,B]  1021-13-1034ms
+[rank0]:2025-12-25 06:55:14,970 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank0_stage4.svg
+[rank0]:	> Counts Sum: 950, Total Sum: 1350 (70.37%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 17.33, 18.66, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 36.0, 0.0]
+[rank0]:2025-12-25 06:55:14,970 - Sleeping 2 seconds for other ranks to complete
+[rank2]:2025-12-25 06:55:14,966 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank2_stage6.svg
+[rank2]:	> Counts Sum: 924, Total Sum: 1350 (68.44%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 0.0, 1.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 34.66, 1.33]
+[rank2]:2025-12-25 06:55:14,967 - Destroying the purge thread.
+[rank1]:2025-12-25 06:55:14,995 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank1_stage5.svg
+[rank1]:	> Counts Sum: 983, Total Sum: 1350 (72.81%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 34.66, 10.66, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 44.0, 26.66]
+[rank1]:2025-12-25 06:55:14,995 - Destroying the purge thread.
+[rank3]:2025-12-25 06:55:15,144 - ✅ Pipeline schedule is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/pipeline_schedule/251225_0655_thry_final800_rank3.svg
+[rank3]:			> Batch Time: 619.12 ms, GPU Bubble Ratio: 15.79%, 15.79%, 15.79%, 15.79%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-10-10ms      | [S0,MB1,F]  10-10-21ms     | [S0,MB2,F]  21-10-32ms     | [S0,MB3,F]  32-10-43ms     | [S4,MB0,F]  43-10-54ms     | [S4,MB1,F]  54-10-65ms     | [S4,MB2,F]  65-10-76ms     | [S4,MB3,F]  76-10-86ms     | [S0,MB4,F]  86-10-97ms     | [S0,MB5,F]  97-10-108ms    | [S0,MB6,F]  108-10-119ms   | [S4,MB0,B]  152-21-173ms   | [S0,MB7,F]  173-10-184ms   | [S4,MB1,B]  184-21-206ms   | [S4,MB4,F]  217-10-228ms   | [S4,MB2,B]  228-21-249ms   | [S4,MB5,F]  249-10-260ms   | [S4,MB3,B]  260-21-282ms   | [S4,MB6,F]  282-10-293ms   | [S0,MB0,B]  293-21-314ms   | [S4,MB7,F]  314-10-325ms   | [S0,MB1,B]  325-21-347ms   | [S0,MB2,B]  347-21-369ms   | [S0,MB3,B]  380-21-401ms   | [S4,MB4,B]  412-21-434ms   | [S4,MB5,B]  445-21-467ms   | [S4,MB6,B]  477-21-499ms   | [S4,MB7,B]  510-21-532ms   | [S0,MB4,B]  532-21-553ms   | [S0,MB5,B]  553-21-575ms   | [S0,MB6,B]  575-21-597ms   | [S0,MB7,B]  597-21-619ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  10-10-21ms     | [S1,MB1,F]  21-10-32ms     | [S1,MB2,F]  32-10-43ms     | [S1,MB3,F]  43-10-54ms     | [S5,MB0,F]  54-10-65ms     | [S5,MB1,F]  65-10-76ms     | [S5,MB2,F]  76-10-86ms     | [S5,MB3,F]  86-10-97ms     | [S1,MB4,F]  97-10-108ms    | [S5,MB0,B]  130-21-152ms   | [S1,MB5,F]  152-10-162ms   | [S5,MB1,B]  162-21-184ms   | [S1,MB6,F]  184-10-195ms   | [S5,MB2,B]  195-21-217ms   | [S1,MB7,F]  217-10-228ms   | [S5,MB3,B]  228-21-249ms   | [S5,MB4,F]  249-10-260ms   | [S1,MB0,B]  260-21-282ms   | [S5,MB5,F]  282-10-293ms   | [S1,MB1,B]  293-21-314ms   | [S5,MB6,F]  314-10-325ms   | [S1,MB2,B]  325-21-347ms   | [S5,MB7,F]  347-10-358ms   | [S1,MB3,B]  358-21-380ms   | [S5,MB4,B]  391-21-412ms   | [S5,MB5,B]  423-21-445ms   | [S5,MB6,B]  456-21-477ms   | [S5,MB7,B]  488-21-510ms   | [S1,MB4,B]  510-21-532ms   | [S1,MB5,B]  532-21-553ms   | [S1,MB6,B]  553-21-575ms   | [S1,MB7,B]  575-21-597ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  21-10-32ms     | [S2,MB1,F]  32-10-43ms     | [S2,MB2,F]  43-10-54ms     | [S2,MB3,F]  54-10-65ms     | [S6,MB0,F]  65-10-76ms     | [S6,MB1,F]  76-10-86ms     | [S6,MB2,F]  86-10-97ms     | [S6,MB0,B]  108-21-130ms   | [S6,MB3,F]  130-10-141ms   | [S6,MB1,B]  141-21-162ms   | [S2,MB4,F]  162-10-173ms   | [S6,MB2,B]  173-21-195ms   | [S2,MB5,F]  195-10-206ms   | [S6,MB3,B]  206-21-228ms   | [S2,MB6,F]  228-10-238ms   | [S2,MB0,B]  238-21-260ms   | [S2,MB7,F]  260-10-271ms   | [S2,MB1,B]  271-21-293ms   | [S6,MB4,F]  293-10-304ms   | [S2,MB2,B]  304-21-325ms   | [S6,MB5,F]  325-10-336ms   | [S2,MB3,B]  336-21-358ms   | [S6,MB6,F]  358-10-369ms   | [S6,MB4,B]  369-21-391ms   | [S6,MB7,F]  391-10-401ms   | [S6,MB5,B]  401-21-423ms   | [S6,MB6,B]  434-21-456ms   | [S6,MB7,B]  467-21-488ms   | [S2,MB4,B]  488-21-510ms   | [S2,MB5,B]  510-21-532ms   | [S2,MB6,B]  532-21-553ms   | [S2,MB7,B]  553-21-575ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  32-10-43ms     | [S3,MB1,F]  43-10-54ms     | [S3,MB2,F]  54-10-65ms     | [S3,MB3,F]  65-10-76ms     | [S7,MB0,F]  76-10-86ms     | [S7,MB0,B]  86-21-108ms    | [S7,MB1,F]  108-10-119ms   | [S7,MB1,B]  119-21-141ms   | [S7,MB2,F]  141-10-152ms   | [S7,MB2,B]  152-21-173ms   | [S7,MB3,F]  173-10-184ms   | [S7,MB3,B]  184-21-206ms   | [S3,MB4,F]  206-10-217ms   | [S3,MB0,B]  217-21-238ms   | [S3,MB5,F]  238-10-249ms   | [S3,MB1,B]  249-21-271ms   | [S3,MB6,F]  271-10-282ms   | [S3,MB2,B]  282-21-304ms   | [S3,MB7,F]  304-10-314ms   | [S3,MB3,B]  314-21-336ms   | [S7,MB4,F]  336-10-347ms   | [S7,MB4,B]  347-21-369ms   | [S7,MB5,F]  369-10-380ms   | [S7,MB5,B]  380-21-401ms   | [S7,MB6,F]  401-10-412ms   | [S7,MB6,B]  412-21-434ms   | [S7,MB7,F]  434-10-445ms   | [S7,MB7,B]  445-21-467ms   | [S3,MB4,B]  467-21-488ms   | [S3,MB5,B]  488-21-510ms   | [S3,MB6,B]  510-21-532ms   | [S3,MB7,B]  532-21-553ms  
+[rank3]:2025-12-25 06:55:15,190 - ✅ Frozen Ratio History of Rank 3 (Stage 3) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0655_stage3_final800.svg
+[rank3]:2025-12-25 06:55:15,240 - ✅ Frozen Ratio History of Rank 3 (Stage 7) is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_ratio_history/rank3/251225_0655_stage7_final800.svg
+[rank2]:2025-12-25 06:55:15,308 - Process group destroyed
+[rank1]:2025-12-25 06:55:15,283 - Process group destroyed
+[rank3]:2025-12-25 06:55:15,341 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank3_stage3.svg
+[rank3]:	> Counts Sum: 942, Total Sum: 1350 (69.78%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 14.66, 25.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 21.33, 0.0]
+[rank3]:2025-12-25 06:55:15,421 - ✅ Elementwise Histogram is saved as: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1/frozen_params_histogram/251225_0655_rank3_stage7.svg
+[rank3]:	> Counts Sum: 494, Total Sum: 825 (59.88%), Ratio(%) per element: [85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 85.33, 20.0, 41.33, 0.0, 0.0]
+[rank3]:2025-12-25 06:55:15,421 - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: uploading config.yaml
+[rank3]:wandb: 
+[rank3]:wandb: Run history:
+[rank3]:wandb:      final/avg_end_to_end(s) ▁
+[rank3]:wandb:               final/avg_loss ▁
+[rank3]:wandb:             final/avg_mfu(%) ▁
+[rank3]:wandb:             final/avg_tflops ▁
+[rank3]:wandb:    final/avg_throughput(tps) ▁
+[rank3]:wandb:              final/grad_norm ▁
+[rank3]:wandb:               final/max_loss ▁
+[rank3]:wandb:                    grad_norm █▂▁▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb: loss_metrics/global_avg_loss ██▇▄▂▄▃▂▁▁▁▁▁▁▁▁▁
+[rank3]:wandb: loss_metrics/global_max_loss ██▇▄▂▄▃▂▁▁▁▁▁▁▁▁▁
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: Run summary:
+[rank3]:wandb:      final/avg_end_to_end(s) 4.40289
+[rank3]:wandb:               final/avg_loss 0.29268
+[rank3]:wandb:             final/avg_mfu(%) 17.12897
+[rank3]:wandb:             final/avg_tflops 58.18118
+[rank3]:wandb:    final/avg_throughput(tps) 7442.39017
+[rank3]:wandb:              final/grad_norm 0.16629
+[rank3]:wandb:               final/max_loss 0.29268
+[rank3]:wandb:                    grad_norm 0.16629
+[rank3]:wandb: loss_metrics/global_avg_loss 0.29268
+[rank3]:wandb: loss_metrics/global_max_loss 0.29268
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: 🚀 View run 1224_Interleaved1F1B_apf_42_dm1 at: https://wandb.ai/orangingq/torchtitan/runs/j17d96b1
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: /data2/shcho/torchtitan/tb/1224_Interleaved1F1B_apf_42_dm1/20251225-0552/wandb/run-20251225_055248-j17d96b1/logs
+[rank0]:2025-12-25 06:55:16,970 - Training completed
+[rank0]:2025-12-25 06:55:16,971 - Destroying the purge thread.
+[rank0]:2025-12-25 06:55:17,267 - Process group destroyed
+[rank3]:2025-12-25 06:55:17,260 - Process group destroyed
+[rank2]:Stage 2: Modules to keep: {'layers.5', 'layers.6'}
+[rank2]:Stage 6: Modules to keep: {'layers.13', 'layers.14'}
+[rank1]:Stage 1: Modules to keep: {'layers.4', 'layers.3', 'layers.2'}
+[rank1]:Stage 5: Modules to keep: {'layers.12', 'layers.11'}
+[rank0]:Stage 0: Modules to keep: {'layers.0', 'layers.1', 'tok_embeddings'}
+[rank0]:Stage 4: Modules to keep: {'layers.9', 'layers.10'}
+[rank3]:Stage 3: Modules to keep: {'layers.8', 'layers.7'}
+[rank3]:Stage 7: Modules to keep: {'norm', 'layers.15', 'output'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /home/shcho/torchtitan/logs/dmserver1/1104_llama1b/config_1224.toml
+[rank3]:		- dump_folder: /data2/shcho/torchtitan
+[rank3]:		- description: "Main Table Experiment, without streaming mode, sample-level with truncation, with bf16 autocast
+[rank3]:1107: for timelyapf: clone().cpu() removed to fix freezing issue.!!! yay~~~
+[rank3]:1108: steps 1200 (3 epochs) -> 800 (2 epochs) / alpaca dataset
+[rank3]:    - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
+[rank3]:1109: switch to alpaca_gpt4+alpaca_cleaned dataset
+[rank3]:1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+[rank3]:"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 1224_Interleaved1F1B_apf_42_dm1
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /data2/shcho/torchtitan/profile_trace/1224_Interleaved1F1B_apf_42_dm1
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /data2/shcho/torchtitan/memory_snapshot/1224_Interleaved1F1B_apf_42_dm1
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 50
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /data2/shcho/torchtitan/tb/1224_Interleaved1F1B_apf_42_dm1
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /data2/shcho/torchtitan/images/1224_Interleaved1F1B_apf_42_dm1
+[rank3]:		- pplog_freq: 200
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 1224_Interleaved1F1B_apf_42_dm1
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 1B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.2-1B
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 5e-06
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.95
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 100
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.01
+[rank3]:	- training:
+[rank3]:		- dataset: alpaca_gpt4
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 32
+[rank3]:		- global_batch_size: 128
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 800
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: 42
+[rank3]:		- deterministic: False
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: Interleaved1F1B
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 4
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 2
+[rank3]:		- stages_list: [3, 7]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /data2/shcho/torchtitan/checkpoint/1224_Interleaved1F1B_apf_42_dm1
+[rank3]:		- interval: 1200
+[rank3]:		- initial_load_path: /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /data2/shcho/torchtitan/comm_traces/1224_Interleaved1F1B_apf_42_dm1
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: False
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 32
+[rank3]:		- seq_len: 512
+[rank3]:		- freq: 200
+[rank3]:		- steps: 100
+[rank3]:	- freezing:
+[rank3]:		- freeze: True
+[rank3]:		- metric_type: apf
+[rank3]:		- phase_unit: 50
+[rank3]:		- stability_check_freq: 10
+[rank3]:		- max_freeze_ratio: 0.8
+[rank3]:		- adjustment: False
+[rank3]:		- threshold: 0.01
+[rank3]:		- percentile: 80
+[rank3]:
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
