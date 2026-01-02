@@ -182,7 +182,7 @@ class FullyRandomFreezer_v6(_Freezer):
                 for a in self.pipeline_schedule[self.pp_rank]:
                     a.progressive_freezing = 1.0
                     if a.stage == self.config.parallelism.num_stages - 1: # last stage
-                        a.expected_freeze_ratio = 1.0 - 1/a.num_params
+                        a.expected_freeze_ratio = 1.0 - 1/a.num_freezable_params
                     else:
                         a.expected_freeze_ratio = 1.0
                 self.monitoring_lb = True
@@ -461,7 +461,7 @@ class FullyRandomFreezer_v6(_Freezer):
                 for a in self.pipeline_schedule[self.pp_rank]:
                     a.progressive_freezing = 1.0
                     if a.stage == self.config.parallelism.num_stages - 1: # last stage
-                        a.expected_freeze_ratio = 1.0 - 1/a.num_params
+                        a.expected_freeze_ratio = 1.0 - 1/a.num_freezable_params
                     else:
                         a.expected_freeze_ratio = 1.0
                 self.monitoring_lb = True
@@ -716,18 +716,18 @@ class APFFreezerWithTimelyFreeze(_Freezer):
         elif self.monitoring_lb:
             for action in self.pipeline_schedule[self.pp_rank]:
                 action.rand_noise = 0
-                action.freezing_list = [True] * action.num_params
+                action.freezing_list = [True] * action.num_freezable_params
                 if action.stage == 0:
                     action.freezing_list[0] = False # do not freeze the first layer to consistently compute the input gradient
             return
         else:
             for action in self.pipeline_schedule[self.pp_rank]:
-                freezable_num = action.num_params # - len(never_freeze[action.stage])
-                freeze_cand_num = int(min(freezable_num, action.num_params*self.aggressiveness + sum([v for v in self.freeze_cand[action.stage].values()])))
-                actual_num_freeze = min(freeze_cand_num, int(np.round(action.num_params * action.actual_freeze_ratio)))
+                freezable_num = action.num_freezable_params # - len(never_freeze[action.stage])
+                freeze_cand_num = int(min(freezable_num, action.num_freezable_params*self.aggressiveness + sum([v for v in self.freeze_cand[action.stage].values()])))
+                actual_num_freeze = min(freeze_cand_num, int(np.round(action.num_freezable_params * action.actual_freeze_ratio)))
                 action.freezing_list = []
                 if actual_num_freeze <= 0:
-                    action.freezing_list = [False] * action.num_params
+                    action.freezing_list = [False] * action.num_freezable_params
                 else:
                     weights = [1 if val else 0.01 for val in self.freeze_cand[action.stage].values()]
                     # for name, val in self.freeze_cand[action.stage].items():
@@ -738,7 +738,7 @@ class APFFreezerWithTimelyFreeze(_Freezer):
                     #     else:
                     #         weights += [0.01]
                     idx = torch.multinomial(torch.tensor(weights, dtype=torch.float16), actual_num_freeze, replacement=False)
-                    freezing_list = torch.zeros(action.num_params, dtype=torch.bool)
+                    freezing_list = torch.zeros(action.num_freezable_params, dtype=torch.bool)
                     freezing_list[idx] = True
                     action.freezing_list = freezing_list.tolist()
         return 
@@ -778,7 +778,7 @@ class APFFreezerWithTimelyFreeze(_Freezer):
                 logger.info(f"[Step {curr_step}] Monitoring Lowerbound")
             for a in self.pipeline_schedule[self.pp_rank]:
                 a.progressive_freezing = 1.0
-                a.expected_freeze_ratio = 1.0 if a.stage > 0 else 1.0 - 1/a.num_params # don't freeze the first layer, to consistently maintain computing the input gradient
+                a.expected_freeze_ratio = 1.0 if a.stage > 0 else 1.0 - 1/a.num_freezable_params # don't freeze the first layer, to consistently maintain computing the input gradient
 
             self.monitoring_lb = True
             self.monitoring_lb_start = self.logger.step_cnt

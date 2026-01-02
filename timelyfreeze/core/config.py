@@ -23,6 +23,22 @@ class Job(BaseJob):
 class Training(BaseTraining):
     pass
 
+@dataclass 
+class LoRA:
+    enable_lora: bool = False
+    """Whether to enable LoRA adapters in the model."""
+    lora_r: int = 16
+    """LoRA rank."""
+    lora_alpha: int = 32
+    """LoRA alpha."""
+    lora_dropout: float = 0.05
+    """LoRA dropout rate."""
+    lora_target_modules: list[str] = field(default_factory=lambda: [
+        "wq", "wk", "wv", "wo", "w1", "w2", "w3"
+        # "q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"
+    ])
+    """List of target modules for LoRA adaptation."""
+
 @dataclass
 class Metrics(BaseMetrics):
     log_freq: int = 100
@@ -200,6 +216,7 @@ class TimelyFreezeConfig(JobConfig):
     """
     job: Job = field(default_factory=Job)
     training: Training = field(default_factory=Training)
+    lora: LoRA = field(default_factory=LoRA)
     metrics: Metrics = field(default_factory=Metrics)
     parallelism: PipelineParallelism = field(default_factory=PipelineParallelism)
     freezing: Freezing = field(default_factory=Freezing)

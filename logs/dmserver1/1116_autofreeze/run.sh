@@ -4,7 +4,7 @@
 EXPLAIN="AutoFreeze configuration experiment on different PERCENTILE values."
 
 EXPERIMENT_TAG="1116_autofreeze"
-TODAY="1116"
+TODAY="1226"
 
 export WANDB_TAG="${EXPERIMENT_TAG}"
 export CUDA_VISIBLE_DEVICES=1,2,3,4
@@ -37,7 +37,7 @@ COMMON_ARGS=(
 
 SEED=42
 for PP_SCHEDULER in 1F1B ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
-    for PERCENTILE in 40 50 60 70 80 90 ; do
+    for PERCENTILE in 30 40 50 60 70 80 90 ; do
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_auto_p${PERCENTILE}_${SEED}.log"
         BASENAME="${TODAY}_${PP_SCHEDULER}_auto_p${PERCENTILE}_${SEED}_dm1"

@@ -5,7 +5,7 @@ EXPLAIN="Main Table Experiment"
 EXPERIMENT_TAG="1104_llama1b"
 MODEL_TYPE="Llama-3.2-1B"
 TASKS="mmlu,hellaswag,arc_challenge,truthfulqa_mc1" # "humaneval,mbpp" 
-KEYWORD="1224*"
+KEYWORD="1230*"
 
 export CUDA_VISIBLE_DEVICES="${1:-0}"
 export HF_ALLOW_CODE_EVAL=1

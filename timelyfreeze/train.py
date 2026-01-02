@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import importlib
-import logging
 import os
 import time
 from datetime import timedelta
@@ -15,6 +14,7 @@ import numpy as np
 import torch
 from torch.distributed.elastic.multiprocessing.errors import record
 
+from torchtitan.models.lora import maybe_attach_lora
 import torchtitan.protocols.train_spec as train_spec_module
 from torchtitan.components.checkpoint import CheckpointManager
 from torchtitan.components.dataloader import DataloaderStopIteration
@@ -24,7 +24,7 @@ from torchtitan.components.metrics import (
     build_metrics_processor,
     ensure_pp_loss_visible,
 )
-from torchtitan.config import ConfigManager, JobConfig
+from torchtitan.config import ConfigManager
 from torchtitan.distributed import ParallelDims, utils as dist_utils
 from torchtitan.protocols.model_converter import build_model_converters
 from torchtitan.tools import utils
@@ -36,7 +36,7 @@ from torchtitan.tools.profiling import (
 
 from timelyfreeze.core.freezer import _Freezer, get_freezer
 from timelyfreeze.core.config import TimelyFreezeConfig
-from timelyfreeze.core.action import ActionType, ActionWithFreezing, ActionWithTime
+from timelyfreeze.core.action import ActionType, ActionWithTime
 from timelyfreeze.core.schedule import gather_pipeline_schedule, schedule_pipeline
 from timelyfreeze.core.util import draw_afr_time_scatter_plot, draw_elementwise_histogram, draw_line_chart, draw_pipeline_schedule
 from timelyfreeze.core import logger as pplog
@@ -546,7 +546,14 @@ class TrainerWithFreezer(torch.distributed.checkpoint.stateful.Stateful):
     def train(self):
         job_config = self.job_config
 
+        # load from checkpoint if available
         self.checkpointer.load(step=job_config.checkpoint.load_step)
+
+        # attach LoRA if enabled
+        if job_config.lora.enable_lora:
+            self.model_parts = maybe_attach_lora(self.model_parts, job_config) # attach LoRA if enabled
+            self.freezer.reinitialize_parameters_info() # reinitialize parameters info after LoRA attachment
+
         if torch.distributed.get_rank() == 0:
             logger.info(f"Training starts at step {self.step + 1}")
 
@@ -691,11 +698,11 @@ def draw_charts(freezer: _Freezer|None, step: int, config: TimelyFreezeConfig):
                                             bwd_input_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None,
                                             bwd_weight_time=[fwd_mean] * config.parallelism.num_stages if config.parallelism.bwd_separated else None)
             draw_pipeline_schedule(save_file=f'pipeline_schedule/{timestamp}_thry_{filename_suffix}_rank{config.comm.global_rank}.svg',
-                            pipeline_schedule=pipeline_schedule,
-                            config=config,
-                            # title=f"Theoretical Pipeline Schedule", 
-                            xlabel="Time (ms)", ylabel="Rank", tick_unit=200
-                            )
+                                    pipeline_schedule=pipeline_schedule,
+                                    config=config,
+                                    # title=f"Theoretical Pipeline Schedule", 
+                                    xlabel="Time (ms)", ylabel="Rank", tick_unit=200
+                                    )
 
     if draw_frozen_ratio_history:
         for s in config.parallelism.stages_list:

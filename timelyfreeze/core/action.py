@@ -226,8 +226,12 @@ class ActionWithFreezing(ActionWithTime):
     def __init__(self, type:ActionType, rank:int, microbatch:int=None, stage:int=None, max_duration:float=0.0, min_duration:float=None):
         '''Action class for the pipeline with freezing capability.'''
         super().__init__(type, rank, microbatch, stage, max_duration)
-        self._module = None # the module that this action is associated with and the unit of freezing # yet to be assigned
-        self.num_params : int = None # number of parameters in the module # yet to be assigned
+        self._module = None 
+        '''Module associated with this action block for freezing purpose.'''
+        self.num_freezable_params : int = None 
+        '''Number of freezable parameters in the module'''
+        self.freezable_params_list : list[str] = None
+        '''List of freezable parameter names in the module (i.e., parameters with requires_grad=True)'''
 
         # time setting
         self._max_duration : float = max_duration # maximum duration of this action, default is 0.0
@@ -248,8 +252,8 @@ class ActionWithFreezing(ActionWithTime):
         self.frozen_ratio_history = [] # frozen ratio history per stage. self.frozen_ratio_history[batch_idx] = frozen ratio at batch_idx
         self.paramwise_frozen_count = {} # [frozen, total] count for each layer in each stage
 
-        # cache
-        self.freeze_cache = {} # cache for requires_grad_ state of the parameters, key is the name of the parameter, value is requires_grad
+        # # cache
+        # self.freeze_cache = {} # cache for requires_grad_ state of the parameters, key is the name of the parameter, value is requires_grad
         return
     
     @property
@@ -331,7 +335,9 @@ class ActionWithFreezing(ActionWithTime):
     def module(self, module):
         '''Set the module that this action is associated with.'''
         self._module = module
-        self.num_params : int = len(list(self._module.parameters()))
+        self.freezable_params_list : list[str] = [name for name, p in self._module.named_parameters() if p.requires_grad]
+        self.num_freezable_params : int = len(self.freezable_params_list)
+        return
     
     @property
     def freeze_flag(self):
@@ -342,12 +348,12 @@ class ActionWithFreezing(ActionWithTime):
     def freeze_flag(self, freeze_flag:bool):
         '''
         Set the freeze flag.
-        Freeze flag is set to True only if the action type is BACKWARD_WEIGHT or FULL_BACKWARD, and the module and num_params are set.
+        Freeze flag is set to True only if the action type is BACKWARD_WEIGHT or FULL_BACKWARD, and the module and num_freezable_params are set.
         '''
         freeze_flag = freeze_flag and self.freezable \
-                    and (self.module is not None) and (self.num_params is not None)  
+                    and (self.module is not None) and (self.num_freezable_params is not None)  
         if freeze_flag and len(self.paramwise_frozen_count) == 0:
-            self.paramwise_frozen_count = {name: [0, 0] for name, _ in self.module.named_parameters()} # reset the paramwise frozen count
+            self.paramwise_frozen_count = {name: [0, 0] for name in self.freezable_params_list} # reset the paramwise frozen count
         self._freeze_flag = freeze_flag
 
     def freeze(self, start_batch_idx:int|None=None)->list[bool]:
@@ -357,10 +363,10 @@ class ActionWithFreezing(ActionWithTime):
         '''
         if not self.freeze_flag: # only freeze when the freeze flag is set.
             return
-        if self.num_params == 0:
+        if self.num_freezable_params == 0:
             return
         
-        if self.freezing_list is None or len(self.freezing_list) != self.num_params:
+        if self.freezing_list is None or len(self.freezing_list) != self.num_freezable_params:
             raise ValueError("Freezing list is not set. Please set the freezing list before calling freeze().")
         
         expected_start_batch_idx = len(self.frozen_ratio_history)
@@ -369,17 +375,26 @@ class ActionWithFreezing(ActionWithTime):
 
         # with torch.no_grad():
         #     for idx, (name, param) in enumerate(self.module.named_parameters()):
+        #         if name not in self.freezable_params_list:
+        #             continue
         #         param.requires_grad_(not self.freezing_list[idx]) # freeze the parameters by setting requires_grad to False
 
         # append the actual frozen ratio to the freeze ratio history
         actual_ratio = float(sum(self.freezing_list)) / len(self.freezing_list)
         self._log_afr(start_batch_idx, actual_ratio)
 
-        for idx, (name, param) in enumerate(self.module.named_parameters()):
-            self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
-            self.paramwise_frozen_count[name][0] += int(self.freezing_list[idx]) # count frozen parameters
-            self.paramwise_frozen_count[name][1] += 1
-        return self.freezing_list
+        idx = 0
+        whole_freezing_list = []
+        for name, param in self.module.named_parameters():
+            if name in self.freezable_params_list:
+                # self.freeze_cache[name] = param.requires_grad # cache the requires_grad state of the parameter
+                self.paramwise_frozen_count[name][0] += int(self.freezing_list[idx]) # count frozen parameters
+                self.paramwise_frozen_count[name][1] += 1
+                whole_freezing_list.append(self.freezing_list[idx])
+                idx += 1
+            else:
+                whole_freezing_list.append(not param.requires_grad) # non-freezable parameters remain the same
+        return whole_freezing_list
     
     def _log_afr(self, batch_idx:int, ratio:float):
         '''Add the actual frozen ratio to the freeze ratio history.'''

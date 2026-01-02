@@ -833,7 +833,7 @@ class _PipelineStageBase(ABC):
                 ######## CSH Addition End ########
                     grads_input, _ = self.backward_maybe_with_nosync(
                     "full", bwd_kwargs, last_backward=last_backward
-                )
+                    )
             else:
                 param_groups: list[dict[str, Any]] | None = None
                 # Skip the backward for the first stage since we will perform the weight update with

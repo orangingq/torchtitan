@@ -1,5 +1,4 @@
 import time
-from matplotlib import pyplot as plt
 import numpy as np
 import torch
 import torch.distributed as dist

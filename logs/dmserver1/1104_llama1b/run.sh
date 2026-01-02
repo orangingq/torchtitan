@@ -7,11 +7,12 @@ EXPLAIN="Main Table Experiment, without streaming mode, sample-level with trunca
     - learning rate : tried lr=3e-6 (->3e-9), 5e-6(->0), 1e-5(->0). BEST: lr=5e-6
 1109: switch to alpaca_gpt4+alpaca_cleaned dataset
 1224: everything same as 1109 (dataset: alpaca_gpt4) but debugged requires_grad bug
+1227: everything same as 1224 but seed=42->11
+1230: everything same as 1224 but seed=42->22
 "
 EXPERIMENT_TAG="1104_llama1b"
-TODAY="1224"
+TODAY="1230"
 
-export WANDB_TAG="${EXPERIMENT_TAG}"
 export WANDB_TAG="${EXPERIMENT_TAG}"
 # Respect Slurm's CUDA_VISIBLE_DEVICES
 if [ -z "$CUDA_VISIBLE_DEVICES" ]; then
@@ -49,8 +50,8 @@ COMMON_ARGS=(
 )
 
 
-SEED=42
-for PP_SCHEDULER in Interleaved1F1B ZBVZeroBubble ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
+SEED=22
+for PP_SCHEDULER in GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ; do # GPipe 1F1B Interleaved1F1B  InterleavedZeroBubble ZBVZeroBubble
     for METRIC_TYPE in fullrand7 timelyapf timelyauto nofreeze apf auto ; do # nofreeze apf fullrand7 timelyapf timelyauto auto
 
         OUTPUT_FILE="${LOG_DIR}/${TODAY}_${PP_SCHEDULER}_${METRIC_TYPE}_${SEED}.log"
