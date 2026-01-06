@@ -5,9 +5,11 @@
 ```bash
 git clone https://github.com/orangingq/torchtitan # 비번은 카톡에
 cd torchtitan 
-pip install torchtitan
+conda create -n llm python=3.13
+conda activate llm
+# pip3 install torch torchvision # Please install PyTorch before proceeding.
 pip3 install --pre torch --index-url https://download.pytorch.org/whl/nightly/cu128 --force-reinstall
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 apt-get update # 무시 가능
 apt-get install -y pciutils # 무시 가능
 ```
@@ -24,8 +26,9 @@ wandb login # 키는 wandb 사이트에서
 ### Step 4: Tokenizer Download
 
 ```bash
-huggingface-cli download meta-llama/Llama-3.2-1B-Instruct --include "original/*" "tokenizer*.json" "special_tokens_map.json" --local-dir /home/shcho/torchtitan/assets/tokenizer/Llama-3.2-1B-Instruct
-huggingface-cli download meta-llama/Llama-3.1-8B-Instruct --include "original/*" "tokenizer*.json" "special_tokens_map.json" --local-dir /opt/dlami/nvme/DMLAB/shcho/torchtitan/assets/tokenizer/Llama-3.1-8B-Instruct
+hf download meta-llama/Llama-3.2-1B-Instruct --include "original/*" "tokenizer*.json" "special_tokens_map.json" --local-dir /home/shcho/torchtitan/assets/tokenizer/Llama-3.2-1B-Instruct
+hf download meta-llama/Llama-3.1-8B-Instruct --include "original/*" "tokenizer*.json" "special_tokens_map.json" --local-dir /opt/dlami/nvme/DMLAB/shcho/torchtitan/assets/tokenizer/Llama-3.1-8B-Instruct
+hf download meta-llama/Llama-3.1-8B --include "original/*" "tokenizer*.json" "special_tokens_map.json" --local-dir /opt/dlami/nvme/DMLAB/shcho/torchtitan/assets/tokenizer/Llama-3.1-8B
 ```
 
 ### Step 5: Pretrained Llama Model Download & Format Conversion
@@ -37,6 +40,7 @@ hf download meta-llama/Llama-3.2-1B-Instruct --include "original/*" "model.safet
 hf download meta-llama/Llama-3.2-3B-Instruct --include "original/*" "model.safetensors" --local-dir /data2/shcho/torchtitan/base_model/Llama-3.2-3B-Instruct
 # H200 server
 hf download meta-llama/Llama-3.1-8B-Instruct --include "original/*" "*.safetensors" "model.safetensors.index.json" "config.json" --local-dir /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct
+hf download meta-llama/Llama-3.1-8B --include "original/*" "*.safetensors" "model.safetensors.index.json" "config.json" --local-dir /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B
 ```
 
 #### Format Change: Huggingface -> DCP Format
@@ -44,6 +48,7 @@ hf download meta-llama/Llama-3.1-8B-Instruct --include "original/*" "*.safetenso
 python ./scripts/checkpoint_conversion/convert_from_llama.py /workspace/torchtitan_data/base_model/Llama-3.1-8B/original /workspace/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
 python ./scripts/checkpoint_conversion/convert_from_llama.py /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original /data2/shcho/torchtitan/base_model/Llama-3.2-1B/original_dcp
 python ./scripts/checkpoint_conversion/convert_from_llama.py /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B-Instruct/original_dcp
+python ./scripts/checkpoint_conversion/convert_from_llama.py /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B/original /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
 ```
 
 # Out-of-date installation steps

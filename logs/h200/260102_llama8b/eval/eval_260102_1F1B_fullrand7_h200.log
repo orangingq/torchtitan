@@ -1,0 +1,101 @@
+➡️No .safetensors files found in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_1F1B_fullrand7_h200/step-2000. Converting to HuggingFace format...
+
+❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️
+✔️Current Timestamp: Tue Jan  6 05:36:16 UTC 2026
+✔️SERVER: wbl-kaist-gpu-2 (172.16.143.166),  GPUs: 1
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/260102_llama8b/eval/eval.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/260102_llama8b/eval/eval_260102_1F1B_fullrand7_h200.log
+✔️RESULT: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_1F1B_fullrand7_h200/step-2000/eval_260102_1F1B_fullrand7_h200.json
+✔️Main Table Experiment
+☑️> python3 -m timelyfreeze.evaluation --model_path=/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_1F1B_fullrand7_h200/step-2000 --dtype=float16 --model_type=Llama-3.1-8B --batch_size=32 --device_map=cuda --tasks=mmlu,hellaswag,arc_challenge,truthfulqa_mc1 --num_fewshot 0 --num_fewshot_task mmlu=5,arc_challenge=10 --output_json=/opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_1F1B_fullrand7_h200/step-2000/eval_260102_1F1B_fullrand7_h200.json
+❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️❄️
+generation_kwargs: {'max_new_tokens': 512, 'temperature': 0.0} specified through cli, these settings will update set parameters in yaml tasks. Ensure 'do_sample=True' for non-greedy decoding!
+Traceback (most recent call last):
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/utils/hub.py", line 479, in cached_files
+    hf_hub_download(
+    ~~~~~~~~~~~~~~~^
+        path_or_repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        local_files_only=local_files_only,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 106, in _inner_fn
+    validate_repo_id(arg_value)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 154, in validate_repo_id
+    raise HFValidationError(
+    ...<2 lines>...
+    )
+huggingface_hub.errors.HFValidationError: Repo id must be in the form 'repo_name' or 'namespace/repo_name': 'assets/tokenizer/Llama-3.2-1B'. Use `repo_type` argument if needed.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/evaluation.py", line 154, in <module>
+    main()
+    ~~~~^^
+  File "/opt/dlami/nvme/DMLAB/shcho/torchtitan/timelyfreeze/evaluation.py", line 88, in main
+    part = evaluator.simple_evaluate(
+        model="hf",
+    ...<7 lines>...
+        gen_kwargs={ "max_new_tokens": 512, "temperature": 0.0 },
+    )
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/lm_eval/utils.py", line 458, in _wrapper
+    return fn(*args, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/lm_eval/evaluator.py", line 245, in simple_evaluate
+    lm = lm_eval.api.registry.get_model(model).create_from_arg_string(
+        model_args,
+    ...<4 lines>...
+        },
+    )
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/lm_eval/api/model.py", line 155, in create_from_arg_string
+    return cls(**args, **args2)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/lm_eval/models/huggingface.py", line 201, in __init__
+    self._create_tokenizer(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        pretrained,
+        ^^^^^^^^^^^
+    ...<6 lines>...
+        add_bos_token=add_bos_token,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/lm_eval/models/huggingface.py", line 771, in _create_tokenizer
+    self.tokenizer = transformers.AutoTokenizer.from_pretrained(
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        tokenizer, **kwargs
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/models/auto/tokenization_auto.py", line 1089, in from_pretrained
+    tokenizer_config = get_tokenizer_config(pretrained_model_name_or_path, **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/models/auto/tokenization_auto.py", line 921, in get_tokenizer_config
+    resolved_config_file = cached_file(
+        pretrained_model_name_or_path,
+    ...<12 lines>...
+        _commit_hash=commit_hash,
+    )
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/utils/hub.py", line 322, in cached_file
+    file = cached_files(path_or_repo_id=path_or_repo_id, filenames=[filename], **kwargs)
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/utils/hub.py", line 532, in cached_files
+    _get_cache_file_to_return(path_or_repo_id, filename, cache_dir, revision, repo_type)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/transformers/utils/hub.py", line 143, in _get_cache_file_to_return
+    resolved_file = try_to_load_from_cache(
+        path_or_repo_id, full_filename, cache_dir=cache_dir, revision=revision, repo_type=repo_type
+    )
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 106, in _inner_fn
+    validate_repo_id(arg_value)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/dlami/nvme/DMLAB/shcho/miniforge3/envs/llm/lib/python3.13/site-packages/huggingface_hub/utils/_validators.py", line 154, in validate_repo_id
+    raise HFValidationError(
+    ...<2 lines>...
+    )
+huggingface_hub.errors.HFValidationError: Repo id must be in the form 'repo_name' or 'namespace/repo_name': 'assets/tokenizer/Llama-3.2-1B'. Use `repo_type` argument if needed.
+config.json not found in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_1F1B_fullrand7_h200/step-2000. Downloading from meta-llama/Llama-3.1-8B...
+Config OK: llama
+Downloaded config.json to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_1F1B_fullrand7_h200/step-2000
