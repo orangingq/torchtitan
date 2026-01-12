@@ -7,6 +7,7 @@
 import argparse
 from pathlib import Path
 
+from setproctitle import setproctitle
 import torch
 import torch.distributed.checkpoint as dcp
 import torchtitan.protocols.train_spec as train_spec_module
@@ -72,6 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, nargs="?", default="llama3")
     parser.add_argument("--model_flavor", type=str, nargs="?", default="8B")
     args = parser.parse_args()
+    setproctitle(f"[Checkpoint Conversion] TimelyFreeze⏰ - {args.input_dir}") # set the process title
 
     import torch.distributed as dist
     dist.init_process_group(backend="nccl")

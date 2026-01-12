@@ -1,0 +1,843 @@
+
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+✔️Current Timestamp: Sat Jan  3 07:49:40 UTC 2026
+✔️SERVER: wbl-kaist-gpu-2 (172.16.143.166),  GPUs: 4,5,6,7
+✔️SCRIPT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/260102_llama8b/run.sh
+✔️OUTPUT: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/260102_llama8b/260102_Interleaved1F1B_nofreeze.log
+✔️Llama 3.1 8B Experiment
+260102: everything same with 1104_llama8b/1128, but with seed=42
+
+✔️Running with nofreeze x Interleaved1F1B ... 
+☑️> torchrun --standalone --nnodes=1 --nproc_per_node=4 --local_addr=127.0.0.1 --local-ranks-filter=0,1,2,3 --role=rank --tee=3 -m timelyfreeze.train --job.config_file=/opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/260102_llama8b/config_260102.toml --job.description="Llama 3.1 8B Experiment
+260102: everything same with 1104_llama8b/1128, but with seed=42
+" --parallelism.pipeline_parallel_degree=4  --freezing.no-freeze
+🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+W0103 07:49:41.377000 3288003 site-packages/torch/distributed/run.py:803] 
+W0103 07:49:41.377000 3288003 site-packages/torch/distributed/run.py:803] *****************************************
+W0103 07:49:41.377000 3288003 site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0103 07:49:41.377000 3288003 site-packages/torch/distributed/run.py:803] *****************************************
+[rank3]:2026-01-03 07:49:49,012 - Starting job: "Llama 3.1 8B Experiment
+[rank3]:260102: everything same with 1104_llama8b/1128, but with seed=42
+[rank3]:"
+[rank2]:2026-01-03 07:49:49,087 - Starting job: "Llama 3.1 8B Experiment
+[rank2]:260102: everything same with 1104_llama8b/1128, but with seed=42
+[rank2]:"
+[rank0]:2026-01-03 07:49:49,250 - Starting job: "Llama 3.1 8B Experiment
+[rank0]:260102: everything same with 1104_llama8b/1128, but with seed=42
+[rank0]:"
+[rank1]:2026-01-03 07:49:49,268 - Starting job: "Llama 3.1 8B Experiment
+[rank1]:260102: everything same with 1104_llama8b/1128, but with seed=42
+[rank1]:"
+[rank2]:2026-01-03 07:49:50,135 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank2]:2026-01-03 07:49:50,137 - Building 1-D device mesh with ['pp'], [4]
+[rank2]:2026-01-03 07:49:50,141 - Deterministic algorithm enabled (expect perf degradation).
+[rank3]:2026-01-03 07:49:50,131 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank3]:2026-01-03 07:49:50,133 - Building 1-D device mesh with ['pp'], [4]
+[rank3]:2026-01-03 07:49:50,138 - Deterministic algorithm enabled (expect perf degradation).
+[rank0]:2026-01-03 07:49:50,270 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank0]:2026-01-03 07:49:50,272 - Building 1-D device mesh with ['pp'], [4]
+[rank0]:2026-01-03 07:49:50,276 - [GC] Initial GC collection 0.00 seconds
+[rank0]:2026-01-03 07:49:50,276 - Deterministic algorithm enabled (expect perf degradation).
+[rank0]:2026-01-03 07:49:50,278 - Loading tokenizer from tokenizer.json
+[rank1]:2026-01-03 07:49:50,285 - ENV[TORCH_NCCL_ASYNC_ERROR_HANDLING] = 1 will be overridden to 3 based on job config
+[rank1]:2026-01-03 07:49:50,287 - Building 1-D device mesh with ['pp'], [4]
+[rank1]:2026-01-03 07:49:50,292 - Deterministic algorithm enabled (expect perf degradation).
+[rank0]:2026-01-03 07:49:50,585 - Preparing openhermes dataset from teknium/OpenHermes-2.5
+[rank2]:2026-01-03 07:49:52,318 - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank2]:2026-01-03 07:49:52,394 - PP rank 2 is building stage_idx 2 with modules ['layers.9', 'layers.10', 'layers.11', 'layers.12']
+[rank2]:2026-01-03 07:49:52,414 - PP rank 2 is building stage_idx 6 with modules ['layers.25', 'layers.26', 'layers.27', 'layers.28']
+[rank2]:2026-01-03 07:49:52,415 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank0]:2026-01-03 07:49:52,410 - Building llama3 8B with TransformerModelArgs(_enforced='This field is used to enforce all fields have defaults.', dim=4096, n_layers=32, n_heads=32, n_kv_heads=8, vocab_size=128256, multiple_of=1024, ffn_dim_multiplier=1.3, norm_eps=1e-05, rope_theta=500000, max_seq_len=1024, depth_init=True, use_flex_attn=False, attn_mask_type='causal', eos_id=0)
+[rank1]:2026-01-03 07:49:52,407 - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank1]:2026-01-03 07:49:52,484 - PP rank 1 is building stage_idx 1 with modules ['layers.4', 'layers.5', 'layers.6', 'layers.7', 'layers.8']
+[rank1]:2026-01-03 07:49:52,504 - PP rank 1 is building stage_idx 5 with modules ['layers.21', 'layers.22', 'layers.23', 'layers.24']
+[rank1]:2026-01-03 07:49:52,505 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank2]:2026-01-03 07:49:52,630 - Peak FLOPS used for computing MFU: 9.890e+14
+[rank2]:2026-01-03 07:49:52,631 - CUDA memory usage for model: 6.51GiB(4.65%)
+[rank0]:2026-01-03 07:49:52,661 - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank0]:2026-01-03 07:49:52,718 - Model llama3 8B size: 8,030,261,248 total parameters
+[rank0]:2026-01-03 07:49:52,742 - PP rank 0 is building stage_idx 0 with modules ['tok_embeddings', 'layers.0', 'layers.1', 'layers.2', 'layers.3']
+[rank0]:2026-01-03 07:49:52,762 - PP rank 0 is building stage_idx 4 with modules ['layers.17', 'layers.18', 'layers.19', 'layers.20']
+[rank0]:2026-01-03 07:49:52,762 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank1]:2026-01-03 07:49:52,746 - Peak FLOPS used for computing MFU: 9.890e+14
+[rank1]:2026-01-03 07:49:52,746 - CUDA memory usage for model: 7.33GiB(5.24%)
+[rank0]:2026-01-03 07:49:53,015 - Peak FLOPS used for computing MFU: 9.890e+14
+[rank0]:2026-01-03 07:49:53,015 - CUDA memory usage for model: 8.46GiB(6.05%)
+[rank3]:wandb: Currently logged in as: orangingq to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+[rank3]:wandb: setting up run 2mhrzrkk
+[rank3]:wandb: Tracking run with wandb version 0.23.1
+[rank3]:wandb: Run data is saved locally in /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/260102_Interleaved1F1B_nofreeze_h200/20260103-0749/wandb/run-20260103_074953-2mhrzrkk
+[rank3]:wandb: Run `wandb offline` to turn off syncing.
+[rank3]:wandb: Syncing run 260102_Interleaved1F1B_nofreeze_h200
+[rank3]:wandb: ⭐️ View project at https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: 🚀 View run at https://wandb.ai/orangingq/torchtitan/runs/2mhrzrkk
+[rank3]:2026-01-03 07:49:54,516 - WandB logging enabled
+[rank3]:2026-01-03 07:49:54,516 - CUDA capacity: NVIDIA H200 with 139.81GiB memory
+[rank3]:2026-01-03 07:49:54,589 - PP rank 3 is building stage_idx 3 with modules ['layers.13', 'layers.14', 'layers.15', 'layers.16']
+[rank3]:2026-01-03 07:49:54,610 - PP rank 3 is building stage_idx 7 with modules ['layers.29', 'layers.30', 'layers.31', 'norm', 'output']
+[rank3]:2026-01-03 07:49:54,610 - Using pipeline schedule Interleaved1F1B with 8 microbatches and 8 stages.
+[rank2]:2026-01-03 07:49:54,902 - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2026-01-03 07:49:54,902 - Checkpointing active. Checkpoints will be loaded from and saved to /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_Interleaved1F1B_nofreeze_h200
+[rank0]:2026-01-03 07:49:54,902 - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2026-01-03 07:49:54,903 - Trainer is initialized with local batch size 16, global batch size 64, gradient accumulation steps 4, sequence length 1024, total steps 2000 (warmup 200)
+[rank0]:2026-01-03 07:49:54,903 - Loading the checkpoint from /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B/original_dcp.
+[rank3]:2026-01-03 07:49:54,889 - Peak FLOPS used for computing MFU: 9.890e+14
+[rank3]:2026-01-03 07:49:54,890 - CUDA memory usage for model: 7.66GiB(5.48%)
+[rank3]:2026-01-03 07:49:54,901 - Mixed precision training with TP or PP is handled by autocast
+[rank1]:2026-01-03 07:49:54,907 - Mixed precision training with TP or PP is handled by autocast
+[rank0]:2026-01-03 07:50:05,988 - [GC] GC collection for checkpoint loading. 0.00 seconds
+[rank0]:2026-01-03 07:50:05,988 - Finished loading the checkpoint in 11.09 seconds.
+[rank0]:2026-01-03 07:50:05,989 - Training starts at step 1
+[rank3]:2026-01-03 07:50:10,128 -  step:  1  loss:  8.2933  grad_norm:     inf  memory: 36.92GiB(26.41%)  tps: 1,053  tflops: 49.11  mfu: 4.97%
+[rank3]:2026-01-03 07:50:10,128 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2026-01-03 07:50:10,145 -  step:  1  loss: -4.0000  grad_norm:     inf  memory: 44.78GiB(32.03%)  tps: 940  tflops: 43.85  mfu: 4.43%
+[rank0]:2026-01-03 07:50:10,145 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank2]:2026-01-03 07:50:10,122 -  step:  1  loss: -4.0000  grad_norm:     inf  memory: 32.33GiB(23.13%)  tps: 923  tflops: 43.05  mfu: 4.35%
+[rank2]:2026-01-03 07:50:10,122 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank1]:2026-01-03 07:50:10,125 -  step:  1  loss: -4.0000  grad_norm:     inf  memory: 41.56GiB(29.72%)  tps: 927  tflops: 43.26  mfu: 4.37%
+[rank1]:2026-01-03 07:50:10,125 - Synchronizing and adjusting timeout for all ProcessGroups to 0:05:00
+[rank0]:2026-01-03 07:52:18,734 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 07:52:21,351 - Avg. fwd time: 7.1252 / Avg. bwd time: 20.0805 / Avg. batch time: 565.6683 (ms) / GPU bubble ratio: 23.05%
+[rank3]:2026-01-03 07:52:21,323 - Avg. fwd time: 7.7029 / Avg. bwd time: 22.8175 / Avg. batch time: 533.9507 (ms) / GPU bubble ratio: 8.54%
+[rank1]:2026-01-03 07:52:21,385 - Avg. fwd time: 8.0703 / Avg. bwd time: 22.5760 / Avg. batch time: 614.1935 (ms) / GPU bubble ratio: 20.17%
+[rank2]:2026-01-03 07:52:21,444 -  step: 50  loss: -4.0000  grad_norm: 5745.0029  memory: 45.36GiB(32.45%)  tps: 6,113  tflops: 285.13  mfu: 28.83%
+[rank0]:2026-01-03 07:52:21,416 - Avg. fwd time: 7.1958 / Avg. bwd time: 21.2884 / Avg. batch time: 649.0244 (ms) / GPU bubble ratio: 29.78%
+[rank0]:2026-01-03 07:52:21,450 -  step: 50  loss: -4.0000  grad_norm: 5745.0029  memory: 61.68GiB(44.11%)  tps: 6,114  tflops: 285.16  mfu: 28.83%
+[rank3]:2026-01-03 07:52:21,448 -  step: 50  loss:  9.4337  grad_norm: 5745.0029  memory: 51.75GiB(37.01%)  tps: 6,113  tflops: 285.13  mfu: 28.83%
+[rank1]:2026-01-03 07:52:21,446 -  step: 50  loss: -4.0000  grad_norm: 5745.0029  memory: 56.21GiB(40.20%)  tps: 6,113  tflops: 285.13  mfu: 28.83%
+[rank0]:2026-01-03 07:54:32,766 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 07:54:35,359 - Avg. fwd time: 7.6878 / Avg. bwd time: 22.8550 / Avg. batch time: 533.7604 (ms) / GPU bubble ratio: 8.44%
+[rank2]:2026-01-03 07:54:35,389 - Avg. fwd time: 7.1129 / Avg. bwd time: 20.0994 / Avg. batch time: 565.3787 (ms) / GPU bubble ratio: 22.99%
+[rank1]:2026-01-03 07:54:35,423 - Avg. fwd time: 8.0285 / Avg. bwd time: 22.6059 / Avg. batch time: 613.8733 (ms) / GPU bubble ratio: 20.15%
+[rank3]:2026-01-03 07:54:35,486 -  step: 100  loss:  4.3234  grad_norm: 87.0845  memory: 51.75GiB(37.01%)  tps: 6,112  tflops: 285.05  mfu: 28.82%
+[rank0]:2026-01-03 07:54:35,454 - Avg. fwd time: 7.1800 / Avg. bwd time: 21.3333 / Avg. batch time: 648.7396 (ms) / GPU bubble ratio: 29.68%
+[rank0]:2026-01-03 07:54:35,488 -  step: 100  loss: -4.0000  grad_norm: 87.0845  memory: 61.68GiB(44.11%)  tps: 6,112  tflops: 285.05  mfu: 28.82%
+[rank2]:2026-01-03 07:54:35,482 -  step: 100  loss: -4.0000  grad_norm: 87.0845  memory: 45.36GiB(32.45%)  tps: 6,112  tflops: 285.05  mfu: 28.82%
+[rank1]:2026-01-03 07:54:35,484 -  step: 100  loss: -4.0000  grad_norm: 87.0845  memory: 56.21GiB(40.20%)  tps: 6,112  tflops: 285.05  mfu: 28.82%
+[rank3]:2026-01-03 07:54:35,730 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0754_step100_rank3.svg
+[rank3]:			> Batch Time: 649.20 ms, GPU Bubble Ratio: 29.40%, 24.24%, 32.70%, 24.40%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  39-8-47ms      | [S4,MB1,F]  48-6-55ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-6-83ms      | [S0,MB6,F]  167-6-173ms    | [S4,MB0,B]  174-20-194ms   | [S0,MB7,F]  202-6-209ms    | [S4,MB1,B]  225-20-245ms   | [S4,MB4,F]  245-6-252ms    | [S4,MB2,B]  253-20-273ms   | [S4,MB5,F]  275-6-281ms    | [S4,MB3,B]  282-20-302ms   | [S4,MB6,F]  307-6-314ms    | [S0,MB0,B]  314-22-337ms   | [S4,MB7,F]  340-6-347ms    | [S0,MB1,B]  347-22-370ms   | [S0,MB2,B]  373-22-395ms   | [S0,MB3,B]  405-22-428ms   | [S4,MB4,B]  428-20-448ms   | [S4,MB5,B]  451-20-472ms   | [S4,MB6,B]  480-20-500ms   | [S4,MB7,B]  522-20-542ms   | [S0,MB4,B]  547-22-570ms   | [S0,MB5,B]  573-22-595ms   | [S0,MB6,B]  598-22-621ms   | [S0,MB7,B]  626-22-649ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  71-6-77ms      | [S1,MB4,F]  137-8-146ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  173-8-181ms    | [S5,MB1,B]  182-20-202ms   | [S1,MB6,F]  209-8-217ms    | [S5,MB2,B]  217-20-238ms   | [S1,MB7,F]  245-8-253ms    | [S5,MB3,B]  254-20-274ms   | [S5,MB4,F]  274-6-281ms    | [S1,MB0,B]  281-25-307ms   | [S5,MB5,F]  307-6-314ms    | [S1,MB1,B]  314-25-339ms   | [S5,MB6,F]  340-7-347ms    | [S1,MB2,B]  347-25-372ms   | [S5,MB7,F]  372-7-379ms    | [S1,MB3,B]  380-25-405ms   | [S5,MB4,B]  405-20-426ms   | [S5,MB5,B]  431-20-451ms   | [S5,MB6,B]  460-20-480ms   | [S5,MB7,B]  499-19-519ms   | [S1,MB4,B]  521-25-547ms   | [S1,MB5,B]  547-25-572ms   | [S1,MB6,B]  572-25-598ms   | [S1,MB7,B]  598-25-623ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  110-6-117ms    | [S6,MB0,B]  117-20-137ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  181-6-188ms    | [S6,MB2,B]  188-20-208ms   | [S2,MB5,F]  217-6-224ms    | [S6,MB3,B]  224-20-244ms   | [S2,MB6,F]  245-6-252ms    | [S2,MB0,B]  254-20-274ms   | [S2,MB7,F]  274-6-281ms    | [S2,MB1,B]  281-20-301ms   | [S6,MB4,F]  301-6-308ms    | [S2,MB2,B]  313-20-334ms   | [S6,MB5,F]  334-6-341ms    | [S2,MB3,B]  346-20-367ms   | [S6,MB6,F]  367-6-374ms    | [S6,MB4,B]  379-20-400ms   | [S6,MB7,F]  403-6-410ms    | [S6,MB5,B]  410-20-430ms   | [S6,MB6,B]  439-20-459ms   | [S6,MB7,B]  477-20-497ms   | [S2,MB4,B]  499-20-519ms   | [S2,MB5,B]  519-20-540ms   | [S2,MB6,B]  540-20-560ms   | [S2,MB7,B]  565-20-586ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-44ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-110ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-145ms   | [S7,MB2,F]  145-7-153ms    | [S7,MB2,B]  155-25-181ms   | [S7,MB3,F]  181-7-189ms    | [S7,MB3,B]  191-25-216ms   | [S3,MB4,F]  217-7-224ms    | [S3,MB0,B]  224-20-244ms   | [S3,MB5,F]  245-6-252ms    | [S3,MB1,B]  252-20-272ms   | [S3,MB6,F]  272-7-279ms    | [S3,MB2,B]  281-20-301ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  308-20-329ms   | [S7,MB4,F]  329-7-337ms    | [S7,MB4,B]  341-25-367ms   | [S7,MB5,F]  367-7-375ms    | [S7,MB5,B]  377-25-403ms   | [S7,MB6,F]  403-7-411ms    | [S7,MB6,B]  413-25-439ms   | [S7,MB7,F]  439-8-447ms    | [S7,MB7,B]  449-25-474ms   | [S3,MB4,B]  477-20-497ms   | [S3,MB5,B]  497-20-518ms   | [S3,MB6,B]  518-20-538ms   | [S3,MB7,B]  543-20-563ms  
+[rank0]:2026-01-03 07:56:46,943 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 07:56:49,535 - Avg. fwd time: 7.6735 / Avg. bwd time: 22.8676 / Avg. batch time: 533.6140 (ms) / GPU bubble ratio: 8.42%
+[rank2]:2026-01-03 07:56:49,565 - Avg. fwd time: 7.1022 / Avg. bwd time: 20.1162 / Avg. batch time: 565.5199 (ms) / GPU bubble ratio: 22.99%
+[rank1]:2026-01-03 07:56:49,599 - Avg. fwd time: 8.0102 / Avg. bwd time: 22.6272 / Avg. batch time: 614.0071 (ms) / GPU bubble ratio: 20.16%
+[rank3]:2026-01-03 07:56:49,663 -  step: 150  loss:  1.9409  grad_norm: 23.3772  memory: 51.75GiB(37.01%)  tps: 6,105  tflops: 284.76  mfu: 28.79%
+[rank0]:2026-01-03 07:56:49,631 - Avg. fwd time: 7.1680 / Avg. bwd time: 21.3566 / Avg. batch time: 648.8723 (ms) / GPU bubble ratio: 29.66%
+[rank0]:2026-01-03 07:56:49,665 -  step: 150  loss: -4.0000  grad_norm: 23.3772  memory: 61.68GiB(44.11%)  tps: 6,105  tflops: 284.76  mfu: 28.79%
+[rank2]:2026-01-03 07:56:49,659 -  step: 150  loss: -4.0000  grad_norm: 23.3772  memory: 45.36GiB(32.45%)  tps: 6,105  tflops: 284.76  mfu: 28.79%
+[rank1]:2026-01-03 07:56:49,661 -  step: 150  loss: -4.0000  grad_norm: 23.3772  memory: 56.21GiB(40.20%)  tps: 6,105  tflops: 284.76  mfu: 28.79%
+[rank0]:2026-01-03 07:59:00,769 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 07:59:03,352 - Avg. fwd time: 7.6608 / Avg. bwd time: 22.8718 / Avg. batch time: 533.4398 (ms) / GPU bubble ratio: 8.42%
+[rank2]:2026-01-03 07:59:03,381 - Avg. fwd time: 7.0941 / Avg. bwd time: 20.1284 / Avg. batch time: 565.2444 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 07:59:03,415 - Avg. fwd time: 7.9986 / Avg. bwd time: 22.6383 / Avg. batch time: 613.7172 (ms) / GPU bubble ratio: 20.13%
+[rank0]:2026-01-03 07:59:03,447 - Avg. fwd time: 7.1612 / Avg. bwd time: 21.3703 / Avg. batch time: 648.5772 (ms) / GPU bubble ratio: 29.61%
+[rank0]:2026-01-03 07:59:03,481 -  step: 200  loss: -4.0000  grad_norm: 22.5649  memory: 61.68GiB(44.11%)  tps: 6,122  tflops: 285.52  mfu: 28.87%
+[rank3]:2026-01-03 07:59:03,479 -  step: 200  loss:  0.4856  grad_norm: 22.5649  memory: 51.75GiB(37.01%)  tps: 6,122  tflops: 285.53  mfu: 28.87%
+[rank2]:2026-01-03 07:59:03,474 -  step: 200  loss: -4.0000  grad_norm: 22.5649  memory: 45.36GiB(32.45%)  tps: 6,122  tflops: 285.52  mfu: 28.87%
+[rank1]:2026-01-03 07:59:03,477 -  step: 200  loss: -4.0000  grad_norm: 22.5649  memory: 56.21GiB(40.20%)  tps: 6,122  tflops: 285.52  mfu: 28.87%
+[rank3]:2026-01-03 07:59:03,699 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0759_step200_rank3.svg
+[rank3]:			> Batch Time: 648.20 ms, GPU Bubble Ratio: 29.25%, 24.15%, 32.58%, 24.46%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  47-6-54ms      | [S4,MB2,F]  54-6-61ms      | [S4,MB3,F]  61-6-68ms      | [S0,MB4,F]  68-6-75ms      | [S0,MB5,F]  75-6-82ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  202-6-208ms    | [S4,MB1,B]  224-20-244ms   | [S4,MB4,F]  245-6-251ms    | [S4,MB2,B]  252-20-272ms   | [S4,MB5,F]  273-6-280ms    | [S4,MB3,B]  280-20-301ms   | [S4,MB6,F]  306-6-313ms    | [S0,MB0,B]  313-22-336ms   | [S4,MB7,F]  339-6-346ms    | [S0,MB1,B]  346-22-369ms   | [S0,MB2,B]  372-22-395ms   | [S0,MB3,B]  405-22-428ms   | [S4,MB4,B]  428-20-448ms   | [S4,MB5,B]  450-20-470ms   | [S4,MB6,B]  479-20-499ms   | [S4,MB7,B]  521-20-541ms   | [S0,MB4,B]  546-22-569ms   | [S0,MB5,B]  572-22-594ms   | [S0,MB6,B]  597-22-620ms   | [S0,MB7,B]  625-22-648ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  70-6-77ms      | [S1,MB4,F]  137-8-145ms    | [S5,MB0,B]  145-20-166ms   | [S1,MB5,F]  172-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  208-8-217ms    | [S5,MB2,B]  217-20-237ms   | [S1,MB7,F]  244-8-253ms    | [S5,MB3,B]  253-20-273ms   | [S5,MB4,F]  273-6-280ms    | [S1,MB0,B]  280-25-306ms   | [S5,MB5,F]  306-6-312ms    | [S1,MB1,B]  313-25-339ms   | [S5,MB6,F]  339-7-346ms    | [S1,MB2,B]  346-25-371ms   | [S5,MB7,F]  372-7-379ms    | [S1,MB3,B]  379-25-404ms   | [S5,MB4,B]  405-20-425ms   | [S5,MB5,B]  429-20-450ms   | [S5,MB6,B]  459-20-479ms   | [S5,MB7,B]  498-19-518ms   | [S1,MB4,B]  520-25-545ms   | [S1,MB5,B]  546-25-571ms   | [S1,MB6,B]  571-25-597ms   | [S1,MB7,B]  597-25-622ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-64ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  109-6-116ms    | [S6,MB0,B]  116-20-136ms   | [S6,MB3,F]  145-6-151ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  180-6-187ms    | [S6,MB2,B]  187-20-208ms   | [S2,MB5,F]  216-6-223ms    | [S6,MB3,B]  223-20-244ms   | [S2,MB6,F]  244-6-251ms    | [S2,MB0,B]  252-20-273ms   | [S2,MB7,F]  273-6-280ms    | [S2,MB1,B]  280-20-300ms   | [S6,MB4,F]  301-6-308ms    | [S2,MB2,B]  313-20-333ms   | [S6,MB5,F]  333-6-340ms    | [S2,MB3,B]  346-20-366ms   | [S6,MB6,F]  366-6-373ms    | [S6,MB4,B]  379-20-399ms   | [S6,MB7,F]  402-6-409ms    | [S6,MB5,B]  409-20-429ms   | [S6,MB6,B]  438-20-458ms   | [S6,MB7,B]  476-20-496ms   | [S2,MB4,B]  498-20-518ms   | [S2,MB5,B]  518-20-539ms   | [S2,MB6,B]  539-20-559ms   | [S2,MB7,B]  564-20-585ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  37-6-44ms      | [S3,MB2,F]  44-6-51ms      | [S3,MB3,F]  53-6-59ms      | [S7,MB0,F]  71-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-144ms   | [S7,MB2,F]  144-7-152ms    | [S7,MB2,B]  154-25-180ms   | [S7,MB3,F]  180-7-188ms    | [S7,MB3,B]  190-25-216ms   | [S3,MB4,F]  216-6-223ms    | [S3,MB0,B]  223-20-244ms   | [S3,MB5,F]  244-6-251ms    | [S3,MB1,B]  251-20-271ms   | [S3,MB6,F]  272-7-279ms    | [S3,MB2,B]  280-20-300ms   | [S3,MB7,F]  300-6-307ms    | [S3,MB3,B]  308-20-328ms   | [S7,MB4,F]  328-7-336ms    | [S7,MB4,B]  340-25-365ms   | [S7,MB5,F]  366-7-374ms    | [S7,MB5,B]  376-25-402ms   | [S7,MB6,F]  402-7-409ms    | [S7,MB6,B]  412-25-438ms   | [S7,MB7,F]  438-7-445ms    | [S7,MB7,B]  447-25-473ms   | [S3,MB4,B]  476-20-496ms   | [S3,MB5,B]  496-20-517ms   | [S3,MB6,B]  517-20-537ms   | [S3,MB7,B]  542-20-562ms  
+[rank0]:2026-01-03 08:01:14,867 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:01:17,447 - Avg. fwd time: 7.6542 / Avg. bwd time: 22.8744 / Avg. batch time: 533.3400 (ms) / GPU bubble ratio: 8.42%
+[rank0]:2026-01-03 08:01:17,543 - Avg. fwd time: 7.1582 / Avg. bwd time: 21.3763 / Avg. batch time: 648.5965 (ms) / GPU bubble ratio: 29.61%
+[rank2]:2026-01-03 08:01:17,477 - Avg. fwd time: 7.0904 / Avg. bwd time: 20.1347 / Avg. batch time: 565.2740 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 08:01:17,511 - Avg. fwd time: 7.9935 / Avg. bwd time: 22.6442 / Avg. batch time: 613.7404 (ms) / GPU bubble ratio: 20.13%
+[rank1]:2026-01-03 08:01:17,573 -  step: 250  loss: -4.0000  grad_norm:  1.2112  memory: 56.21GiB(40.20%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank3]:2026-01-03 08:01:17,575 -  step: 250  loss:  0.2700  grad_norm:  1.2112  memory: 51.75GiB(37.01%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank0]:2026-01-03 08:01:17,577 -  step: 250  loss: -4.0000  grad_norm:  1.2112  memory: 61.68GiB(44.11%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank2]:2026-01-03 08:01:17,570 -  step: 250  loss: -4.0000  grad_norm:  1.2112  memory: 45.36GiB(32.45%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank0]:2026-01-03 08:03:28,827 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 08:03:31,444 - Avg. fwd time: 7.0888 / Avg. bwd time: 20.1378 / Avg. batch time: 565.1260 (ms) / GPU bubble ratio: 22.92%
+[rank3]:2026-01-03 08:03:31,412 - Avg. fwd time: 7.6503 / Avg. bwd time: 22.8739 / Avg. batch time: 533.2570 (ms) / GPU bubble ratio: 8.41%
+[rank1]:2026-01-03 08:03:31,479 - Avg. fwd time: 7.9913 / Avg. bwd time: 22.6488 / Avg. batch time: 613.6045 (ms) / GPU bubble ratio: 20.10%
+[rank0]:2026-01-03 08:03:31,512 - Avg. fwd time: 7.1576 / Avg. bwd time: 21.3810 / Avg. batch time: 648.4741 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 08:03:31,545 -  step: 300  loss: -4.0000  grad_norm:  0.4558  memory: 61.68GiB(44.11%)  tps: 6,115  tflops: 285.20  mfu: 28.84%
+[rank2]:2026-01-03 08:03:31,539 -  step: 300  loss: -4.0000  grad_norm:  0.4558  memory: 45.36GiB(32.45%)  tps: 6,115  tflops: 285.20  mfu: 28.84%
+[rank3]:2026-01-03 08:03:31,543 -  step: 300  loss:  0.2806  grad_norm:  0.4558  memory: 51.75GiB(37.01%)  tps: 6,115  tflops: 285.20  mfu: 28.84%
+[rank1]:2026-01-03 08:03:31,541 -  step: 300  loss: -4.0000  grad_norm:  0.4558  memory: 56.21GiB(40.20%)  tps: 6,115  tflops: 285.20  mfu: 28.84%
+[rank3]:2026-01-03 08:03:31,758 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0803_step300_rank3.svg
+[rank3]:			> Batch Time: 648.25 ms, GPU Bubble Ratio: 29.25%, 24.13%, 32.60%, 24.56%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  47-6-54ms      | [S4,MB2,F]  54-6-61ms      | [S4,MB3,F]  62-6-68ms      | [S0,MB4,F]  69-6-75ms      | [S0,MB5,F]  76-6-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  201-6-208ms    | [S4,MB1,B]  224-20-244ms   | [S4,MB4,F]  245-6-251ms    | [S4,MB2,B]  252-20-272ms   | [S4,MB5,F]  274-6-280ms    | [S4,MB3,B]  281-20-301ms   | [S4,MB6,F]  306-6-313ms    | [S0,MB0,B]  313-22-336ms   | [S4,MB7,F]  339-6-346ms    | [S0,MB1,B]  346-22-369ms   | [S0,MB2,B]  372-22-395ms   | [S0,MB3,B]  405-22-428ms   | [S4,MB4,B]  428-20-448ms   | [S4,MB5,B]  450-20-471ms   | [S4,MB6,B]  479-20-500ms   | [S4,MB7,B]  521-20-541ms   | [S0,MB4,B]  546-22-569ms   | [S0,MB5,B]  572-22-594ms   | [S0,MB6,B]  597-22-620ms   | [S0,MB7,B]  625-22-648ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  70-6-77ms      | [S1,MB4,F]  137-8-145ms    | [S5,MB0,B]  145-20-166ms   | [S1,MB5,F]  172-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  208-8-216ms    | [S5,MB2,B]  217-20-237ms   | [S1,MB7,F]  244-8-253ms    | [S5,MB3,B]  253-20-273ms   | [S5,MB4,F]  274-6-280ms    | [S1,MB0,B]  281-25-306ms   | [S5,MB5,F]  306-6-313ms    | [S1,MB1,B]  313-25-339ms   | [S5,MB6,F]  339-7-346ms    | [S1,MB2,B]  346-25-372ms   | [S5,MB7,F]  372-7-379ms    | [S1,MB3,B]  379-25-405ms   | [S5,MB4,B]  405-20-425ms   | [S5,MB5,B]  430-20-450ms   | [S5,MB6,B]  459-20-479ms   | [S5,MB7,B]  498-19-518ms   | [S1,MB4,B]  520-25-546ms   | [S1,MB5,B]  546-25-571ms   | [S1,MB6,B]  571-25-597ms   | [S1,MB7,B]  597-25-622ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  109-6-116ms    | [S6,MB0,B]  116-20-136ms   | [S6,MB3,F]  145-6-151ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  180-6-187ms    | [S6,MB2,B]  187-20-208ms   | [S2,MB5,F]  216-6-223ms    | [S6,MB3,B]  223-20-244ms   | [S2,MB6,F]  244-6-251ms    | [S2,MB0,B]  253-20-273ms   | [S2,MB7,F]  273-6-280ms    | [S2,MB1,B]  280-20-301ms   | [S6,MB4,F]  301-6-308ms    | [S2,MB2,B]  313-20-333ms   | [S6,MB5,F]  333-6-340ms    | [S2,MB3,B]  346-20-366ms   | [S6,MB6,F]  366-6-373ms    | [S6,MB4,B]  379-20-399ms   | [S6,MB7,F]  402-6-409ms    | [S6,MB5,B]  409-20-429ms   | [S6,MB6,B]  438-20-458ms   | [S6,MB7,B]  476-20-496ms   | [S2,MB4,B]  498-20-518ms   | [S2,MB5,B]  519-20-539ms   | [S2,MB6,B]  539-20-559ms   | [S2,MB7,B]  564-20-585ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-44ms      | [S3,MB2,F]  44-6-51ms      | [S3,MB3,F]  53-6-59ms      | [S7,MB0,F]  71-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-144ms   | [S7,MB2,F]  144-7-152ms    | [S7,MB2,B]  154-25-180ms   | [S7,MB3,F]  180-7-188ms    | [S7,MB3,B]  190-25-216ms   | [S3,MB4,F]  216-7-223ms    | [S3,MB0,B]  223-20-244ms   | [S3,MB5,F]  244-6-251ms    | [S3,MB1,B]  251-20-271ms   | [S3,MB6,F]  271-6-278ms    | [S3,MB2,B]  280-20-300ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  308-20-328ms   | [S7,MB4,F]  328-7-336ms    | [S7,MB4,B]  340-25-366ms   | [S7,MB5,F]  366-7-374ms    | [S7,MB5,B]  376-25-401ms   | [S7,MB6,F]  402-7-409ms    | [S7,MB6,B]  412-25-437ms   | [S7,MB7,F]  438-7-446ms    | [S7,MB7,B]  448-25-473ms   | [S3,MB4,B]  476-20-496ms   | [S3,MB5,B]  496-20-517ms   | [S3,MB6,B]  517-20-537ms   | [S3,MB7,B]  542-20-562ms  
+[rank0]:2026-01-03 08:05:43,078 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:05:45,673 - Avg. fwd time: 7.6494 / Avg. bwd time: 22.8756 / Avg. batch time: 533.2566 (ms) / GPU bubble ratio: 8.41%
+[rank2]:2026-01-03 08:05:45,707 - Avg. fwd time: 7.0900 / Avg. bwd time: 20.1409 / Avg. batch time: 565.2077 (ms) / GPU bubble ratio: 22.91%
+[rank1]:2026-01-03 08:05:45,744 - Avg. fwd time: 7.9916 / Avg. bwd time: 22.6522 / Avg. batch time: 613.6974 (ms) / GPU bubble ratio: 20.11%
+[rank1]:2026-01-03 08:05:45,806 -  step: 350  loss: -4.0000  grad_norm:  0.4607  memory: 56.21GiB(40.20%)  tps: 6,101  tflops: 284.57  mfu: 28.77%
+[rank3]:2026-01-03 08:05:45,808 -  step: 350  loss:  0.3254  grad_norm:  0.4607  memory: 51.75GiB(37.01%)  tps: 6,101  tflops: 284.57  mfu: 28.77%
+[rank0]:2026-01-03 08:05:45,777 - Avg. fwd time: 7.1587 / Avg. bwd time: 21.3853 / Avg. batch time: 648.5741 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:05:45,810 -  step: 350  loss: -4.0000  grad_norm:  0.4607  memory: 61.68GiB(44.11%)  tps: 6,101  tflops: 284.57  mfu: 28.77%
+[rank2]:2026-01-03 08:05:45,804 -  step: 350  loss: -4.0000  grad_norm:  0.4607  memory: 45.36GiB(32.45%)  tps: 6,101  tflops: 284.57  mfu: 28.77%
+[rank0]:2026-01-03 08:07:57,126 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:07:59,733 - Avg. fwd time: 7.6496 / Avg. bwd time: 22.8782 / Avg. batch time: 533.2740 (ms) / GPU bubble ratio: 8.41%
+[rank2]:2026-01-03 08:07:59,764 - Avg. fwd time: 7.0912 / Avg. bwd time: 20.1426 / Avg. batch time: 565.1740 (ms) / GPU bubble ratio: 22.90%
+[rank1]:2026-01-03 08:07:59,799 - Avg. fwd time: 7.9919 / Avg. bwd time: 22.6548 / Avg. batch time: 613.6717 (ms) / GPU bubble ratio: 20.10%
+[rank3]:2026-01-03 08:07:59,865 -  step: 400  loss:  0.2621  grad_norm:  0.3634  memory: 51.75GiB(37.01%)  tps: 6,111  tflops: 285.01  mfu: 28.82%
+[rank0]:2026-01-03 08:07:59,834 - Avg. fwd time: 7.1602 / Avg. bwd time: 21.3887 / Avg. batch time: 648.5568 (ms) / GPU bubble ratio: 29.57%
+[rank0]:2026-01-03 08:07:59,868 -  step: 400  loss: -4.0000  grad_norm:  0.3634  memory: 61.68GiB(44.11%)  tps: 6,111  tflops: 285.01  mfu: 28.82%
+[rank2]:2026-01-03 08:07:59,861 -  step: 400  loss: -4.0000  grad_norm:  0.3634  memory: 45.36GiB(32.45%)  tps: 6,111  tflops: 285.01  mfu: 28.82%
+[rank1]:2026-01-03 08:07:59,864 -  step: 400  loss: -4.0000  grad_norm:  0.3634  memory: 56.21GiB(40.20%)  tps: 6,111  tflops: 285.01  mfu: 28.82%
+[rank3]:2026-01-03 08:08:00,083 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0807_step400_rank3.svg
+[rank3]:			> Batch Time: 649.27 ms, GPU Bubble Ratio: 29.34%, 24.29%, 32.68%, 24.56%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  47-6-54ms      | [S4,MB2,F]  55-6-61ms      | [S4,MB3,F]  62-6-68ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-6-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  202-6-209ms    | [S4,MB1,B]  225-20-245ms   | [S4,MB4,F]  245-6-252ms    | [S4,MB2,B]  253-20-273ms   | [S4,MB5,F]  274-6-281ms    | [S4,MB3,B]  281-20-302ms   | [S4,MB6,F]  307-7-314ms    | [S0,MB0,B]  314-22-337ms   | [S4,MB7,F]  340-6-347ms    | [S0,MB1,B]  347-22-370ms   | [S0,MB2,B]  373-22-395ms   | [S0,MB3,B]  406-22-428ms   | [S4,MB4,B]  428-20-448ms   | [S4,MB5,B]  451-20-471ms   | [S4,MB6,B]  480-20-500ms   | [S4,MB7,B]  522-20-542ms   | [S0,MB4,B]  547-22-569ms   | [S0,MB5,B]  573-22-595ms   | [S0,MB6,B]  598-22-621ms   | [S0,MB7,B]  626-22-649ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  70-6-77ms      | [S1,MB4,F]  137-8-145ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  172-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  208-8-217ms    | [S5,MB2,B]  217-20-237ms   | [S1,MB7,F]  245-8-253ms    | [S5,MB3,B]  253-20-274ms   | [S5,MB4,F]  274-6-281ms    | [S1,MB0,B]  281-25-306ms   | [S5,MB5,F]  307-6-313ms    | [S1,MB1,B]  314-25-339ms   | [S5,MB6,F]  340-7-347ms    | [S1,MB2,B]  347-25-372ms   | [S5,MB7,F]  372-7-379ms    | [S1,MB3,B]  380-25-405ms   | [S5,MB4,B]  405-20-426ms   | [S5,MB5,B]  430-20-451ms   | [S5,MB6,B]  459-20-479ms   | [S5,MB7,B]  499-19-519ms   | [S1,MB4,B]  521-25-546ms   | [S1,MB5,B]  546-25-572ms   | [S1,MB6,B]  572-25-598ms   | [S1,MB7,B]  598-25-623ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  109-6-116ms    | [S6,MB0,B]  116-20-136ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  181-6-187ms    | [S6,MB2,B]  188-20-208ms   | [S2,MB5,F]  217-6-224ms    | [S6,MB3,B]  224-20-244ms   | [S2,MB6,F]  245-6-252ms    | [S2,MB0,B]  253-20-273ms   | [S2,MB7,F]  274-6-280ms    | [S2,MB1,B]  281-20-301ms   | [S6,MB4,F]  301-7-308ms    | [S2,MB2,B]  313-20-334ms   | [S6,MB5,F]  334-6-341ms    | [S2,MB3,B]  346-20-367ms   | [S6,MB6,F]  367-6-374ms    | [S6,MB4,B]  379-20-399ms   | [S6,MB7,F]  403-6-409ms    | [S6,MB5,B]  410-20-430ms   | [S6,MB6,B]  439-20-459ms   | [S6,MB7,B]  477-20-497ms   | [S2,MB4,B]  499-20-519ms   | [S2,MB5,B]  519-20-539ms   | [S2,MB6,B]  540-20-560ms   | [S2,MB7,B]  565-20-585ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  37-6-44ms      | [S3,MB2,F]  45-6-51ms      | [S3,MB3,F]  53-6-59ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-144ms   | [S7,MB2,F]  145-7-152ms    | [S7,MB2,B]  154-25-180ms   | [S7,MB3,F]  180-7-188ms    | [S7,MB3,B]  190-25-216ms   | [S3,MB4,F]  216-7-223ms    | [S3,MB0,B]  224-20-244ms   | [S3,MB5,F]  244-6-251ms    | [S3,MB1,B]  252-20-272ms   | [S3,MB6,F]  272-6-279ms    | [S3,MB2,B]  280-20-301ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  308-20-329ms   | [S7,MB4,F]  329-7-337ms    | [S7,MB4,B]  341-25-366ms   | [S7,MB5,F]  367-7-374ms    | [S7,MB5,B]  377-25-402ms   | [S7,MB6,F]  402-7-410ms    | [S7,MB6,B]  412-25-438ms   | [S7,MB7,F]  438-7-446ms    | [S7,MB7,B]  448-25-474ms   | [S3,MB4,B]  477-20-497ms   | [S3,MB5,B]  497-20-517ms   | [S3,MB6,B]  518-20-538ms   | [S3,MB7,B]  543-20-563ms  
+[rank0]:2026-01-03 08:10:11,324 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:10:13,911 - Avg. fwd time: 7.6485 / Avg. bwd time: 22.8782 / Avg. batch time: 533.2469 (ms) / GPU bubble ratio: 8.41%
+[rank2]:2026-01-03 08:10:13,942 - Avg. fwd time: 7.0912 / Avg. bwd time: 20.1434 / Avg. batch time: 565.2068 (ms) / GPU bubble ratio: 22.90%
+[rank1]:2026-01-03 08:10:13,979 - Avg. fwd time: 7.9910 / Avg. bwd time: 22.6560 / Avg. batch time: 613.7033 (ms) / GPU bubble ratio: 20.10%
+[rank1]:2026-01-03 08:10:14,042 -  step: 450  loss: -4.0000  grad_norm:  0.3290  memory: 56.21GiB(40.20%)  tps: 6,105  tflops: 284.75  mfu: 28.79%
+[rank0]:2026-01-03 08:10:14,012 - Avg. fwd time: 7.1606 / Avg. bwd time: 21.3911 / Avg. batch time: 648.5943 (ms) / GPU bubble ratio: 29.57%
+[rank0]:2026-01-03 08:10:14,046 -  step: 450  loss: -4.0000  grad_norm:  0.3290  memory: 61.68GiB(44.11%)  tps: 6,105  tflops: 284.75  mfu: 28.79%
+[rank3]:2026-01-03 08:10:14,044 -  step: 450  loss:  0.2795  grad_norm:  0.3290  memory: 51.75GiB(37.01%)  tps: 6,105  tflops: 284.75  mfu: 28.79%
+[rank2]:2026-01-03 08:10:14,040 -  step: 450  loss: -4.0000  grad_norm:  0.3290  memory: 45.36GiB(32.45%)  tps: 6,105  tflops: 284.75  mfu: 28.79%
+[rank0]:2026-01-03 08:12:25,317 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:12:27,905 - Avg. fwd time: 7.6474 / Avg. bwd time: 22.8781 / Avg. batch time: 533.2169 (ms) / GPU bubble ratio: 8.40%
+[rank2]:2026-01-03 08:12:27,937 - Avg. fwd time: 7.0909 / Avg. bwd time: 20.1437 / Avg. batch time: 565.1362 (ms) / GPU bubble ratio: 22.89%
+[rank0]:2026-01-03 08:12:28,007 - Avg. fwd time: 7.1604 / Avg. bwd time: 21.3928 / Avg. batch time: 648.5291 (ms) / GPU bubble ratio: 29.56%
+[rank1]:2026-01-03 08:12:27,973 - Avg. fwd time: 7.9900 / Avg. bwd time: 22.6568 / Avg. batch time: 613.6329 (ms) / GPU bubble ratio: 20.09%
+[rank1]:2026-01-03 08:12:28,037 -  step: 500  loss: -4.0000  grad_norm:  0.4176  memory: 56.21GiB(40.20%)  tps: 6,114  tflops: 285.14  mfu: 28.83%
+[rank2]:2026-01-03 08:12:28,035 -  step: 500  loss: -4.0000  grad_norm:  0.4176  memory: 45.36GiB(32.45%)  tps: 6,114  tflops: 285.14  mfu: 28.83%
+[rank0]:2026-01-03 08:12:28,041 -  step: 500  loss: -4.0000  grad_norm:  0.4176  memory: 61.68GiB(44.11%)  tps: 6,114  tflops: 285.14  mfu: 28.83%
+[rank3]:2026-01-03 08:12:28,039 -  step: 500  loss:  0.2722  grad_norm:  0.4176  memory: 51.75GiB(37.01%)  tps: 6,114  tflops: 285.15  mfu: 28.83%
+[rank3]:2026-01-03 08:12:28,258 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0812_step500_rank3.svg
+[rank3]:			> Batch Time: 648.22 ms, GPU Bubble Ratio: 29.22%, 24.12%, 32.58%, 24.43%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  47-6-54ms      | [S4,MB2,F]  55-6-61ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-75ms      | [S0,MB5,F]  76-6-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  202-6-208ms    | [S4,MB1,B]  225-20-245ms   | [S4,MB4,F]  245-6-252ms    | [S4,MB2,B]  252-20-273ms   | [S4,MB5,F]  274-6-281ms    | [S4,MB3,B]  281-20-301ms   | [S4,MB6,F]  307-7-314ms    | [S0,MB0,B]  314-22-337ms   | [S4,MB7,F]  340-6-346ms    | [S0,MB1,B]  347-22-370ms   | [S0,MB2,B]  373-22-395ms   | [S0,MB3,B]  406-22-428ms   | [S4,MB4,B]  429-20-449ms   | [S4,MB5,B]  451-20-471ms   | [S4,MB6,B]  480-20-500ms   | [S4,MB7,B]  521-20-541ms   | [S0,MB4,B]  547-22-569ms   | [S0,MB5,B]  572-22-595ms   | [S0,MB6,B]  598-22-620ms   | [S0,MB7,B]  625-22-648ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  70-6-77ms      | [S1,MB4,F]  137-8-145ms    | [S5,MB0,B]  145-20-166ms   | [S1,MB5,F]  172-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  208-8-217ms    | [S5,MB2,B]  217-20-237ms   | [S1,MB7,F]  244-8-253ms    | [S5,MB3,B]  253-20-274ms   | [S5,MB4,F]  274-6-281ms    | [S1,MB0,B]  281-25-306ms   | [S5,MB5,F]  306-6-313ms    | [S1,MB1,B]  314-25-339ms   | [S5,MB6,F]  339-7-346ms    | [S1,MB2,B]  347-25-372ms   | [S5,MB7,F]  372-7-379ms    | [S1,MB3,B]  380-25-405ms   | [S5,MB4,B]  405-20-426ms   | [S5,MB5,B]  430-20-450ms   | [S5,MB6,B]  459-20-479ms   | [S5,MB7,B]  499-19-519ms   | [S1,MB4,B]  521-25-546ms   | [S1,MB5,B]  546-25-572ms   | [S1,MB6,B]  572-25-597ms   | [S1,MB7,B]  597-25-623ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  109-6-116ms    | [S6,MB0,B]  116-20-136ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  181-6-188ms    | [S6,MB2,B]  188-20-208ms   | [S2,MB5,F]  217-6-224ms    | [S6,MB3,B]  224-20-244ms   | [S2,MB6,F]  245-6-252ms    | [S2,MB0,B]  253-20-273ms   | [S2,MB7,F]  274-6-281ms    | [S2,MB1,B]  281-20-301ms   | [S6,MB4,F]  301-6-308ms    | [S2,MB2,B]  313-20-333ms   | [S6,MB5,F]  334-6-340ms    | [S2,MB3,B]  346-20-367ms   | [S6,MB6,F]  367-6-374ms    | [S6,MB4,B]  379-20-400ms   | [S6,MB7,F]  402-6-409ms    | [S6,MB5,B]  409-20-430ms   | [S6,MB6,B]  438-20-459ms   | [S6,MB7,B]  477-20-497ms   | [S2,MB4,B]  499-20-519ms   | [S2,MB5,B]  519-20-539ms   | [S2,MB6,B]  539-20-560ms   | [S2,MB7,B]  565-20-585ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-44ms      | [S3,MB2,F]  45-6-51ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-144ms   | [S7,MB2,F]  145-7-152ms    | [S7,MB2,B]  154-25-180ms   | [S7,MB3,F]  180-7-188ms    | [S7,MB3,B]  190-25-216ms   | [S3,MB4,F]  216-7-223ms    | [S3,MB0,B]  224-20-244ms   | [S3,MB5,F]  244-6-251ms    | [S3,MB1,B]  251-20-272ms   | [S3,MB6,F]  272-6-279ms    | [S3,MB2,B]  280-20-301ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  308-20-328ms   | [S7,MB4,F]  329-7-336ms    | [S7,MB4,B]  340-25-366ms   | [S7,MB5,F]  366-7-374ms    | [S7,MB5,B]  376-25-402ms   | [S7,MB6,F]  402-7-410ms    | [S7,MB6,B]  412-25-438ms   | [S7,MB7,F]  438-7-446ms    | [S7,MB7,B]  448-25-474ms   | [S3,MB4,B]  476-20-497ms   | [S3,MB5,B]  497-20-517ms   | [S3,MB6,B]  517-20-538ms   | [S3,MB7,B]  542-20-562ms  
+[rank0]:2026-01-03 08:14:39,161 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 08:14:41,768 - Avg. fwd time: 7.0904 / Avg. bwd time: 20.1437 / Avg. batch time: 565.1265 (ms) / GPU bubble ratio: 22.89%
+[rank3]:2026-01-03 08:14:41,735 - Avg. fwd time: 7.6456 / Avg. bwd time: 22.8766 / Avg. batch time: 533.1605 (ms) / GPU bubble ratio: 8.40%
+[rank1]:2026-01-03 08:14:41,807 - Avg. fwd time: 7.9888 / Avg. bwd time: 22.6577 / Avg. batch time: 613.6286 (ms) / GPU bubble ratio: 20.09%
+[rank1]:2026-01-03 08:14:41,871 -  step: 550  loss: -4.0000  grad_norm:  0.3194  memory: 56.21GiB(40.20%)  tps: 6,121  tflops: 285.49  mfu: 28.87%
+[rank2]:2026-01-03 08:14:41,869 -  step: 550  loss: -4.0000  grad_norm:  0.3194  memory: 45.36GiB(32.45%)  tps: 6,121  tflops: 285.49  mfu: 28.87%
+[rank0]:2026-01-03 08:14:41,841 - Avg. fwd time: 7.1600 / Avg. bwd time: 21.3939 / Avg. batch time: 648.5255 (ms) / GPU bubble ratio: 29.55%
+[rank0]:2026-01-03 08:14:41,875 -  step: 550  loss: -4.0000  grad_norm:  0.3194  memory: 61.68GiB(44.11%)  tps: 6,121  tflops: 285.49  mfu: 28.87%
+[rank3]:2026-01-03 08:14:41,873 -  step: 550  loss:  0.1631  grad_norm:  0.3194  memory: 51.75GiB(37.01%)  tps: 6,121  tflops: 285.49  mfu: 28.87%
+[rank0]:2026-01-03 08:16:53,821 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 08:16:56,486 - Avg. fwd time: 7.0953 / Avg. bwd time: 20.1480 / Avg. batch time: 565.2869 (ms) / GPU bubble ratio: 22.89%
+[rank3]:2026-01-03 08:16:56,452 - Avg. fwd time: 7.6506 / Avg. bwd time: 22.8841 / Avg. batch time: 533.3481 (ms) / GPU bubble ratio: 8.40%
+[rank1]:2026-01-03 08:16:56,523 - Avg. fwd time: 7.9943 / Avg. bwd time: 22.6630 / Avg. batch time: 613.8025 (ms) / GPU bubble ratio: 20.09%
+[rank1]:2026-01-03 08:16:56,587 -  step: 600  loss: -4.0000  grad_norm:  0.7904  memory: 56.21GiB(40.20%)  tps: 6,081  tflops: 283.62  mfu: 28.68%
+[rank2]:2026-01-03 08:16:56,584 -  step: 600  loss: -4.0000  grad_norm:  0.7904  memory: 45.36GiB(32.45%)  tps: 6,081  tflops: 283.62  mfu: 28.68%
+[rank0]:2026-01-03 08:16:56,557 - Avg. fwd time: 7.1656 / Avg. bwd time: 21.3983 / Avg. batch time: 648.7082 (ms) / GPU bubble ratio: 29.55%
+[rank0]:2026-01-03 08:16:56,591 -  step: 600  loss: -4.0000  grad_norm:  0.7904  memory: 61.68GiB(44.11%)  tps: 6,081  tflops: 283.62  mfu: 28.68%
+[rank3]:2026-01-03 08:16:56,589 -  step: 600  loss:  0.4059  grad_norm:  0.7904  memory: 51.75GiB(37.01%)  tps: 6,081  tflops: 283.62  mfu: 28.68%
+[rank3]:2026-01-03 08:16:56,804 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0816_step600_rank3.svg
+[rank3]:			> Batch Time: 652.80 ms, GPU Bubble Ratio: 29.21%, 24.01%, 32.53%, 24.21%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  23-7-30ms      | [S4,MB0,F]  39-8-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  55-7-62ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-77ms      | [S0,MB5,F]  77-7-84ms      | [S0,MB6,F]  168-6-175ms    | [S4,MB0,B]  175-20-195ms   | [S0,MB7,F]  203-7-210ms    | [S4,MB1,B]  227-20-247ms   | [S4,MB4,F]  247-6-254ms    | [S4,MB2,B]  254-20-275ms   | [S4,MB5,F]  276-7-283ms    | [S4,MB3,B]  283-20-304ms   | [S4,MB6,F]  309-7-316ms    | [S0,MB0,B]  316-22-339ms   | [S4,MB7,F]  342-7-349ms    | [S0,MB1,B]  349-22-372ms   | [S0,MB2,B]  375-23-398ms   | [S0,MB3,B]  409-22-432ms   | [S4,MB4,B]  432-20-452ms   | [S4,MB5,B]  454-20-474ms   | [S4,MB6,B]  483-20-504ms   | [S4,MB7,B]  525-20-545ms   | [S0,MB4,B]  551-22-573ms   | [S0,MB5,B]  576-22-599ms   | [S0,MB6,B]  602-22-624ms   | [S0,MB7,B]  630-22-652ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-6-64ms      | [S5,MB2,F]  64-7-71ms      | [S5,MB3,F]  71-7-78ms      | [S1,MB4,F]  138-8-147ms    | [S5,MB0,B]  147-20-167ms   | [S1,MB5,F]  174-8-183ms    | [S5,MB1,B]  183-20-203ms   | [S1,MB6,F]  210-8-219ms    | [S5,MB2,B]  219-20-239ms   | [S1,MB7,F]  246-8-255ms    | [S5,MB3,B]  255-20-275ms   | [S5,MB4,F]  276-6-283ms    | [S1,MB0,B]  283-25-309ms   | [S5,MB5,F]  309-7-316ms    | [S1,MB1,B]  316-25-341ms   | [S5,MB6,F]  342-7-349ms    | [S1,MB2,B]  349-25-375ms   | [S5,MB7,F]  375-7-382ms    | [S1,MB3,B]  382-25-408ms   | [S5,MB4,B]  408-20-429ms   | [S5,MB5,B]  433-20-454ms   | [S5,MB6,B]  463-20-483ms   | [S5,MB7,B]  503-20-523ms   | [S1,MB4,B]  525-25-550ms   | [S1,MB5,B]  550-25-576ms   | [S1,MB6,B]  576-25-601ms   | [S1,MB7,B]  601-25-627ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-45ms      | [S2,MB3,F]  47-6-54ms      | [S6,MB0,F]  57-8-65ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-138ms   | [S6,MB3,F]  146-6-153ms    | [S6,MB1,B]  153-20-174ms   | [S2,MB4,F]  182-6-189ms    | [S6,MB2,B]  189-20-210ms   | [S2,MB5,F]  218-6-225ms    | [S6,MB3,B]  226-20-246ms   | [S2,MB6,F]  247-7-254ms    | [S2,MB0,B]  255-20-275ms   | [S2,MB7,F]  276-7-283ms    | [S2,MB1,B]  283-20-303ms   | [S6,MB4,F]  303-7-311ms    | [S2,MB2,B]  315-20-336ms   | [S6,MB5,F]  336-7-343ms    | [S2,MB3,B]  349-20-369ms   | [S6,MB6,F]  369-6-376ms    | [S6,MB4,B]  382-20-402ms   | [S6,MB7,F]  405-6-412ms    | [S6,MB5,B]  412-20-433ms   | [S6,MB6,B]  442-20-462ms   | [S6,MB7,B]  480-20-501ms   | [S2,MB4,B]  502-20-523ms   | [S2,MB5,B]  523-20-543ms   | [S2,MB6,B]  543-20-564ms   | [S2,MB7,B]  569-20-589ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-83ms     | [S7,MB0,B]  85-25-110ms    | [S7,MB1,F]  110-7-118ms    | [S7,MB1,B]  120-25-146ms   | [S7,MB2,F]  146-7-154ms    | [S7,MB2,B]  156-25-182ms   | [S7,MB3,F]  182-8-190ms    | [S7,MB3,B]  192-25-218ms   | [S3,MB4,F]  218-7-225ms    | [S3,MB0,B]  226-20-246ms   | [S3,MB5,F]  246-7-253ms    | [S3,MB1,B]  253-20-274ms   | [S3,MB6,F]  274-7-281ms    | [S3,MB2,B]  282-20-303ms   | [S3,MB7,F]  303-7-310ms    | [S3,MB3,B]  311-20-331ms   | [S7,MB4,F]  331-7-339ms    | [S7,MB4,B]  343-25-369ms   | [S7,MB5,F]  369-7-377ms    | [S7,MB5,B]  379-25-405ms   | [S7,MB6,F]  405-8-413ms    | [S7,MB6,B]  415-26-441ms   | [S7,MB7,F]  442-8-450ms    | [S7,MB7,B]  452-25-478ms   | [S3,MB4,B]  480-20-501ms   | [S3,MB5,B]  501-20-521ms   | [S3,MB6,B]  522-20-542ms   | [S3,MB7,B]  546-20-567ms  
+[rank0]:2026-01-03 08:19:09,749 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 08:19:12,396 - Avg. fwd time: 7.1035 / Avg. bwd time: 20.1546 / Avg. batch time: 565.6726 (ms) / GPU bubble ratio: 22.90%
+[rank3]:2026-01-03 08:19:12,362 - Avg. fwd time: 7.6599 / Avg. bwd time: 22.8965 / Avg. batch time: 533.6824 (ms) / GPU bubble ratio: 8.39%
+[rank1]:2026-01-03 08:19:12,435 - Avg. fwd time: 8.0036 / Avg. bwd time: 22.6709 / Avg. batch time: 614.2103 (ms) / GPU bubble ratio: 20.09%
+[rank1]:2026-01-03 08:19:12,499 -  step: 650  loss: -4.0000  grad_norm:  0.5133  memory: 56.21GiB(40.20%)  tps: 6,027  tflops: 281.12  mfu: 28.42%
+[rank2]:2026-01-03 08:19:12,496 -  step: 650  loss: -4.0000  grad_norm:  0.5133  memory: 45.36GiB(32.45%)  tps: 6,027  tflops: 281.12  mfu: 28.42%
+[rank0]:2026-01-03 08:19:12,469 - Avg. fwd time: 7.1746 / Avg. bwd time: 21.4046 / Avg. batch time: 649.1347 (ms) / GPU bubble ratio: 29.56%
+[rank0]:2026-01-03 08:19:12,503 -  step: 650  loss: -4.0000  grad_norm:  0.5133  memory: 61.68GiB(44.11%)  tps: 6,027  tflops: 281.12  mfu: 28.42%
+[rank3]:2026-01-03 08:19:12,501 -  step: 650  loss:  0.2671  grad_norm:  0.5133  memory: 51.75GiB(37.01%)  tps: 6,027  tflops: 281.12  mfu: 28.42%
+[rank0]:2026-01-03 08:21:25,537 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:21:28,171 - Avg. fwd time: 7.6687 / Avg. bwd time: 22.9081 / Avg. batch time: 533.9917 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:21:28,204 - Avg. fwd time: 7.1110 / Avg. bwd time: 20.1604 / Avg. batch time: 565.9616 (ms) / GPU bubble ratio: 22.90%
+[rank1]:2026-01-03 08:21:28,244 - Avg. fwd time: 8.0125 / Avg. bwd time: 22.6782 / Avg. batch time: 614.5224 (ms) / GPU bubble ratio: 20.09%
+[rank1]:2026-01-03 08:21:28,308 -  step: 700  loss: -4.0000  grad_norm:  0.6162  memory: 56.21GiB(40.20%)  tps: 6,032  tflops: 281.33  mfu: 28.45%
+[rank3]:2026-01-03 08:21:28,310 -  step: 700  loss:  0.3476  grad_norm:  0.6162  memory: 51.75GiB(37.01%)  tps: 6,032  tflops: 281.34  mfu: 28.45%
+[rank0]:2026-01-03 08:21:28,278 - Avg. fwd time: 7.1828 / Avg. bwd time: 21.4104 / Avg. batch time: 649.4620 (ms) / GPU bubble ratio: 29.56%
+[rank0]:2026-01-03 08:21:28,312 -  step: 700  loss: -4.0000  grad_norm:  0.6162  memory: 61.68GiB(44.11%)  tps: 6,032  tflops: 281.33  mfu: 28.45%
+[rank2]:2026-01-03 08:21:28,305 -  step: 700  loss: -4.0000  grad_norm:  0.6162  memory: 45.36GiB(32.45%)  tps: 6,032  tflops: 281.33  mfu: 28.45%
+[rank3]:2026-01-03 08:21:28,527 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0821_step700_rank3.svg
+[rank3]:			> Batch Time: 654.77 ms, GPU Bubble Ratio: 29.38%, 24.19%, 32.69%, 24.37%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-7-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  23-7-30ms      | [S4,MB0,F]  39-8-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  55-7-62ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-77ms      | [S0,MB5,F]  77-7-84ms      | [S0,MB6,F]  169-7-176ms    | [S4,MB0,B]  176-20-196ms   | [S0,MB7,F]  204-7-211ms    | [S4,MB1,B]  227-20-248ms   | [S4,MB4,F]  248-6-255ms    | [S4,MB2,B]  256-20-276ms   | [S4,MB5,F]  277-7-284ms    | [S4,MB3,B]  285-20-305ms   | [S4,MB6,F]  311-7-318ms    | [S0,MB0,B]  318-22-341ms   | [S4,MB7,F]  344-7-351ms    | [S0,MB1,B]  351-22-374ms   | [S0,MB2,B]  377-23-400ms   | [S0,MB3,B]  410-22-432ms   | [S4,MB4,B]  433-20-453ms   | [S4,MB5,B]  456-20-476ms   | [S4,MB6,B]  485-20-505ms   | [S4,MB7,B]  527-20-547ms   | [S0,MB4,B]  552-22-575ms   | [S0,MB5,B]  578-22-600ms   | [S0,MB6,B]  604-22-626ms   | [S0,MB7,B]  632-22-654ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-6-64ms      | [S5,MB2,F]  64-7-71ms      | [S5,MB3,F]  71-7-79ms      | [S1,MB4,F]  139-8-148ms    | [S5,MB0,B]  148-20-168ms   | [S1,MB5,F]  174-8-183ms    | [S5,MB1,B]  183-20-204ms   | [S1,MB6,F]  211-8-219ms    | [S5,MB2,B]  220-20-240ms   | [S1,MB7,F]  247-8-256ms    | [S5,MB3,B]  256-20-277ms   | [S5,MB4,F]  277-7-284ms    | [S1,MB0,B]  284-25-310ms   | [S5,MB5,F]  310-7-317ms    | [S1,MB1,B]  318-25-343ms   | [S5,MB6,F]  343-7-350ms    | [S1,MB2,B]  351-25-376ms   | [S5,MB7,F]  376-7-384ms    | [S1,MB3,B]  383-25-409ms   | [S5,MB4,B]  409-20-430ms   | [S5,MB5,B]  435-20-455ms   | [S5,MB6,B]  464-20-484ms   | [S5,MB7,B]  504-20-524ms   | [S1,MB4,B]  526-25-552ms   | [S1,MB5,B]  552-25-577ms   | [S1,MB6,B]  577-25-603ms   | [S1,MB7,B]  603-25-629ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-45ms      | [S2,MB3,F]  47-6-54ms      | [S6,MB0,F]  57-8-66ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-138ms   | [S6,MB3,F]  147-6-154ms    | [S6,MB1,B]  154-20-174ms   | [S2,MB4,F]  183-6-190ms    | [S6,MB2,B]  190-20-210ms   | [S2,MB5,F]  219-6-226ms    | [S6,MB3,B]  227-20-247ms   | [S2,MB6,F]  247-7-255ms    | [S2,MB0,B]  256-20-276ms   | [S2,MB7,F]  277-7-284ms    | [S2,MB1,B]  284-20-305ms   | [S6,MB4,F]  305-7-312ms    | [S2,MB2,B]  317-20-338ms   | [S6,MB5,F]  338-7-345ms    | [S2,MB3,B]  350-20-371ms   | [S6,MB6,F]  371-7-378ms    | [S6,MB4,B]  383-20-404ms   | [S6,MB7,F]  407-6-414ms    | [S6,MB5,B]  414-20-435ms   | [S6,MB6,B]  443-20-464ms   | [S6,MB7,B]  482-20-502ms   | [S2,MB4,B]  504-20-524ms   | [S2,MB5,B]  524-20-545ms   | [S2,MB6,B]  545-20-565ms   | [S2,MB7,B]  570-20-591ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  73-10-83ms     | [S7,MB0,B]  85-25-111ms    | [S7,MB1,F]  111-7-119ms    | [S7,MB1,B]  121-25-146ms   | [S7,MB2,F]  147-8-155ms    | [S7,MB2,B]  157-25-182ms   | [S7,MB3,F]  183-8-191ms    | [S7,MB3,B]  193-26-219ms   | [S3,MB4,F]  219-7-226ms    | [S3,MB0,B]  227-20-247ms   | [S3,MB5,F]  247-7-254ms    | [S3,MB1,B]  255-20-275ms   | [S3,MB6,F]  275-7-282ms    | [S3,MB2,B]  284-20-304ms   | [S3,MB7,F]  304-7-311ms    | [S3,MB3,B]  312-20-332ms   | [S7,MB4,F]  332-7-340ms    | [S7,MB4,B]  345-25-371ms   | [S7,MB5,F]  371-8-379ms    | [S7,MB5,B]  381-25-407ms   | [S7,MB6,F]  407-8-415ms    | [S7,MB6,B]  417-26-443ms   | [S7,MB7,F]  443-8-451ms    | [S7,MB7,B]  453-25-479ms   | [S3,MB4,B]  482-20-502ms   | [S3,MB5,B]  503-20-523ms   | [S3,MB6,B]  523-20-544ms   | [S3,MB7,B]  548-20-568ms  
+[rank0]:2026-01-03 08:23:40,951 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:23:43,555 - Avg. fwd time: 7.6729 / Avg. bwd time: 22.9145 / Avg. batch time: 534.1575 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:23:43,590 - Avg. fwd time: 7.1149 / Avg. bwd time: 20.1636 / Avg. batch time: 566.1672 (ms) / GPU bubble ratio: 22.91%
+[rank1]:2026-01-03 08:23:43,628 - Avg. fwd time: 8.0166 / Avg. bwd time: 22.6818 / Avg. batch time: 614.7374 (ms) / GPU bubble ratio: 20.10%
+[rank0]:2026-01-03 08:23:43,664 - Avg. fwd time: 7.1870 / Avg. bwd time: 21.4134 / Avg. batch time: 649.6842 (ms) / GPU bubble ratio: 29.56%
+[rank2]:2026-01-03 08:23:43,691 -  step: 750  loss: -4.0000  grad_norm:  0.4006  memory: 45.36GiB(32.45%)  tps: 6,051  tflops: 282.21  mfu: 28.54%
+[rank1]:2026-01-03 08:23:43,694 -  step: 750  loss: -4.0000  grad_norm:  0.4006  memory: 56.21GiB(40.20%)  tps: 6,051  tflops: 282.21  mfu: 28.54%
+[rank0]:2026-01-03 08:23:43,697 -  step: 750  loss: -4.0000  grad_norm:  0.4006  memory: 61.68GiB(44.11%)  tps: 6,051  tflops: 282.21  mfu: 28.54%
+[rank3]:2026-01-03 08:23:43,695 -  step: 750  loss:  0.1441  grad_norm:  0.4006  memory: 51.75GiB(37.01%)  tps: 6,051  tflops: 282.22  mfu: 28.54%
+[rank0]:2026-01-03 08:25:55,016 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:25:57,649 - Avg. fwd time: 7.6723 / Avg. bwd time: 22.9145 / Avg. batch time: 534.1448 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:25:57,684 - Avg. fwd time: 7.1148 / Avg. bwd time: 20.1636 / Avg. batch time: 566.1256 (ms) / GPU bubble ratio: 22.91%
+[rank1]:2026-01-03 08:25:57,723 - Avg. fwd time: 8.0162 / Avg. bwd time: 22.6818 / Avg. batch time: 614.6924 (ms) / GPU bubble ratio: 20.10%
+[rank3]:2026-01-03 08:25:57,791 -  step: 800  loss:  0.2641  grad_norm:  0.5662  memory: 51.75GiB(37.01%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank0]:2026-01-03 08:25:57,759 - Avg. fwd time: 7.1872 / Avg. bwd time: 21.4137 / Avg. batch time: 649.6409 (ms) / GPU bubble ratio: 29.56%
+[rank0]:2026-01-03 08:25:57,793 -  step: 800  loss: -4.0000  grad_norm:  0.5662  memory: 61.68GiB(44.11%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank2]:2026-01-03 08:25:57,787 -  step: 800  loss: -4.0000  grad_norm:  0.5662  memory: 45.36GiB(32.45%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank1]:2026-01-03 08:25:57,789 -  step: 800  loss: -4.0000  grad_norm:  0.5662  memory: 56.21GiB(40.20%)  tps: 6,109  tflops: 284.93  mfu: 28.81%
+[rank3]:2026-01-03 08:25:58,003 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0825_step800_rank3.svg
+[rank3]:			> Batch Time: 649.23 ms, GPU Bubble Ratio: 29.23%, 24.12%, 32.54%, 24.37%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  39-8-47ms      | [S4,MB1,F]  48-6-55ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-7-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  202-6-209ms    | [S4,MB1,B]  225-20-245ms   | [S4,MB4,F]  245-6-252ms    | [S4,MB2,B]  253-20-273ms   | [S4,MB5,F]  275-6-281ms    | [S4,MB3,B]  282-20-302ms   | [S4,MB6,F]  307-7-314ms    | [S0,MB0,B]  314-22-337ms   | [S4,MB7,F]  340-6-347ms    | [S0,MB1,B]  347-22-370ms   | [S0,MB2,B]  373-22-395ms   | [S0,MB3,B]  406-22-429ms   | [S4,MB4,B]  429-20-449ms   | [S4,MB5,B]  452-20-472ms   | [S4,MB6,B]  480-20-501ms   | [S4,MB7,B]  522-20-542ms   | [S0,MB4,B]  548-22-570ms   | [S0,MB5,B]  573-22-596ms   | [S0,MB6,B]  599-22-621ms   | [S0,MB7,B]  626-22-649ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  71-6-77ms      | [S1,MB4,F]  137-8-146ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  173-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  209-8-217ms    | [S5,MB2,B]  217-20-238ms   | [S1,MB7,F]  245-8-253ms    | [S5,MB3,B]  254-20-274ms   | [S5,MB4,F]  274-6-281ms    | [S1,MB0,B]  281-25-307ms   | [S5,MB5,F]  307-6-314ms    | [S1,MB1,B]  314-25-339ms   | [S5,MB6,F]  340-7-347ms    | [S1,MB2,B]  347-25-372ms   | [S5,MB7,F]  373-7-380ms    | [S1,MB3,B]  380-25-405ms   | [S5,MB4,B]  406-20-426ms   | [S5,MB5,B]  431-20-451ms   | [S5,MB6,B]  460-20-480ms   | [S5,MB7,B]  500-20-520ms   | [S1,MB4,B]  522-25-547ms   | [S1,MB5,B]  547-25-573ms   | [S1,MB6,B]  573-25-598ms   | [S1,MB7,B]  598-25-624ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  110-6-116ms    | [S6,MB0,B]  116-20-137ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  181-6-188ms    | [S6,MB2,B]  188-20-208ms   | [S2,MB5,F]  217-6-224ms    | [S6,MB3,B]  224-20-244ms   | [S2,MB6,F]  245-6-252ms    | [S2,MB0,B]  253-20-274ms   | [S2,MB7,F]  274-6-281ms    | [S2,MB1,B]  281-20-301ms   | [S6,MB4,F]  302-7-309ms    | [S2,MB2,B]  313-20-334ms   | [S6,MB5,F]  334-6-341ms    | [S2,MB3,B]  347-20-367ms   | [S6,MB6,F]  367-6-374ms    | [S6,MB4,B]  380-20-400ms   | [S6,MB7,F]  403-6-410ms    | [S6,MB5,B]  410-20-430ms   | [S6,MB6,B]  439-20-459ms   | [S6,MB7,B]  477-20-497ms   | [S2,MB4,B]  500-20-520ms   | [S2,MB5,B]  520-20-540ms   | [S2,MB6,B]  540-20-561ms   | [S2,MB7,B]  566-20-586ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-44ms      | [S3,MB2,F]  45-6-51ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-145ms   | [S7,MB2,F]  145-7-153ms    | [S7,MB2,B]  155-25-180ms   | [S7,MB3,F]  181-7-189ms    | [S7,MB3,B]  191-25-217ms   | [S3,MB4,F]  217-7-224ms    | [S3,MB0,B]  224-20-244ms   | [S3,MB5,F]  245-7-252ms    | [S3,MB1,B]  252-20-272ms   | [S3,MB6,F]  273-7-280ms    | [S3,MB2,B]  281-20-301ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  309-20-329ms   | [S7,MB4,F]  329-7-337ms    | [S7,MB4,B]  341-25-366ms   | [S7,MB5,F]  367-7-375ms    | [S7,MB5,B]  377-25-403ms   | [S7,MB6,F]  403-7-411ms    | [S7,MB6,B]  413-25-439ms   | [S7,MB7,F]  439-8-447ms    | [S7,MB7,B]  449-25-475ms   | [S3,MB4,B]  477-20-498ms   | [S3,MB5,B]  498-20-518ms   | [S3,MB6,B]  518-20-538ms   | [S3,MB7,B]  543-20-563ms  
+[rank0]:2026-01-03 08:28:09,717 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:28:12,303 - Avg. fwd time: 7.6737 / Avg. bwd time: 22.9166 / Avg. batch time: 534.1961 (ms) / GPU bubble ratio: 8.38%
+[rank1]:2026-01-03 08:28:12,380 - Avg. fwd time: 8.0178 / Avg. bwd time: 22.6826 / Avg. batch time: 614.7762 (ms) / GPU bubble ratio: 20.10%
+[rank2]:2026-01-03 08:28:12,339 - Avg. fwd time: 7.1163 / Avg. bwd time: 20.1644 / Avg. batch time: 566.2053 (ms) / GPU bubble ratio: 22.91%
+[rank1]:2026-01-03 08:28:12,447 -  step: 850  loss: -4.0000  grad_norm:  0.3685  memory: 56.21GiB(40.20%)  tps: 6,084  tflops: 283.74  mfu: 28.69%
+[rank0]:2026-01-03 08:28:12,417 - Avg. fwd time: 7.1887 / Avg. bwd time: 21.4143 / Avg. batch time: 649.7283 (ms) / GPU bubble ratio: 29.56%
+[rank0]:2026-01-03 08:28:12,451 -  step: 850  loss: -4.0000  grad_norm:  0.3685  memory: 61.68GiB(44.11%)  tps: 6,084  tflops: 283.74  mfu: 28.69%
+[rank3]:2026-01-03 08:28:12,449 -  step: 850  loss:  0.1192  grad_norm:  0.3685  memory: 51.75GiB(37.01%)  tps: 6,084  tflops: 283.74  mfu: 28.69%
+[rank2]:2026-01-03 08:28:12,445 -  step: 850  loss: -4.0000  grad_norm:  0.3685  memory: 45.36GiB(32.45%)  tps: 6,084  tflops: 283.74  mfu: 28.69%
+[rank0]:2026-01-03 08:30:22,798 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:30:25,396 - Avg. fwd time: 7.6700 / Avg. bwd time: 22.9119 / Avg. batch time: 534.0618 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:30:25,433 - Avg. fwd time: 7.1139 / Avg. bwd time: 20.1621 / Avg. batch time: 566.0422 (ms) / GPU bubble ratio: 22.90%
+[rank1]:2026-01-03 08:30:25,474 - Avg. fwd time: 8.0148 / Avg. bwd time: 22.6803 / Avg. batch time: 614.6100 (ms) / GPU bubble ratio: 20.09%
+[rank0]:2026-01-03 08:30:25,510 - Avg. fwd time: 7.1859 / Avg. bwd time: 21.4132 / Avg. batch time: 649.5564 (ms) / GPU bubble ratio: 29.55%
+[rank2]:2026-01-03 08:30:25,537 -  step: 900  loss: -4.0000  grad_norm:  0.4496  memory: 45.36GiB(32.45%)  tps: 6,155  tflops: 287.08  mfu: 29.03%
+[rank1]:2026-01-03 08:30:25,540 -  step: 900  loss: -4.0000  grad_norm:  0.4496  memory: 56.21GiB(40.20%)  tps: 6,155  tflops: 287.08  mfu: 29.03%
+[rank3]:2026-01-03 08:30:25,542 -  step: 900  loss:  0.1850  grad_norm:  0.4496  memory: 51.75GiB(37.01%)  tps: 6,155  tflops: 287.08  mfu: 29.03%
+[rank0]:2026-01-03 08:30:25,544 -  step: 900  loss: -4.0000  grad_norm:  0.4496  memory: 61.68GiB(44.11%)  tps: 6,155  tflops: 287.08  mfu: 29.03%
+[rank3]:2026-01-03 08:30:25,754 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0830_step900_rank3.svg
+[rank3]:			> Batch Time: 648.25 ms, GPU Bubble Ratio: 29.13%, 24.06%, 32.49%, 24.35%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  48-6-54ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-7-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  201-6-208ms    | [S4,MB1,B]  224-20-244ms   | [S4,MB4,F]  245-6-251ms    | [S4,MB2,B]  252-20-272ms   | [S4,MB5,F]  274-6-281ms    | [S4,MB3,B]  281-20-301ms   | [S4,MB6,F]  306-7-313ms    | [S0,MB0,B]  313-22-336ms   | [S4,MB7,F]  339-7-346ms    | [S0,MB1,B]  346-22-369ms   | [S0,MB2,B]  372-22-395ms   | [S0,MB3,B]  405-22-427ms   | [S4,MB4,B]  428-20-448ms   | [S4,MB5,B]  450-20-470ms   | [S4,MB6,B]  479-20-500ms   | [S4,MB7,B]  521-20-541ms   | [S0,MB4,B]  547-22-569ms   | [S0,MB5,B]  572-22-595ms   | [S0,MB6,B]  598-22-620ms   | [S0,MB7,B]  625-22-648ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  70-6-77ms      | [S1,MB4,F]  137-8-145ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  172-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  208-8-217ms    | [S5,MB2,B]  217-20-237ms   | [S1,MB7,F]  244-8-253ms    | [S5,MB3,B]  253-20-273ms   | [S5,MB4,F]  274-6-280ms    | [S1,MB0,B]  281-25-306ms   | [S5,MB5,F]  306-6-313ms    | [S1,MB1,B]  313-25-338ms   | [S5,MB6,F]  339-7-346ms    | [S1,MB2,B]  346-25-371ms   | [S5,MB7,F]  372-7-379ms    | [S1,MB3,B]  379-25-404ms   | [S5,MB4,B]  405-20-425ms   | [S5,MB5,B]  429-20-450ms   | [S5,MB6,B]  459-20-479ms   | [S5,MB7,B]  499-19-519ms   | [S1,MB4,B]  521-25-546ms   | [S1,MB5,B]  546-25-572ms   | [S1,MB6,B]  572-25-597ms   | [S1,MB7,B]  597-25-622ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  109-6-116ms    | [S6,MB0,B]  116-20-136ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  180-6-187ms    | [S6,MB2,B]  187-20-208ms   | [S2,MB5,F]  216-6-223ms    | [S6,MB3,B]  223-20-243ms   | [S2,MB6,F]  244-6-251ms    | [S2,MB0,B]  253-20-273ms   | [S2,MB7,F]  273-6-280ms    | [S2,MB1,B]  280-20-301ms   | [S6,MB4,F]  301-7-308ms    | [S2,MB2,B]  313-20-333ms   | [S6,MB5,F]  333-6-340ms    | [S2,MB3,B]  346-20-366ms   | [S6,MB6,F]  366-6-373ms    | [S6,MB4,B]  379-20-399ms   | [S6,MB7,F]  402-6-409ms    | [S6,MB5,B]  409-20-429ms   | [S6,MB6,B]  438-20-458ms   | [S6,MB7,B]  477-20-497ms   | [S2,MB4,B]  499-20-519ms   | [S2,MB5,B]  519-20-539ms   | [S2,MB6,B]  539-20-560ms   | [S2,MB7,B]  565-20-585ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-44ms      | [S3,MB2,F]  45-6-51ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-144ms   | [S7,MB2,F]  145-7-152ms    | [S7,MB2,B]  154-25-180ms   | [S7,MB3,F]  180-7-188ms    | [S7,MB3,B]  190-25-216ms   | [S3,MB4,F]  216-7-223ms    | [S3,MB0,B]  223-20-244ms   | [S3,MB5,F]  244-7-251ms    | [S3,MB1,B]  251-20-271ms   | [S3,MB6,F]  272-7-279ms    | [S3,MB2,B]  280-20-300ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  308-20-328ms   | [S7,MB4,F]  329-7-336ms    | [S7,MB4,B]  340-25-366ms   | [S7,MB5,F]  366-7-374ms    | [S7,MB5,B]  376-25-401ms   | [S7,MB6,F]  401-7-409ms    | [S7,MB6,B]  412-25-437ms   | [S7,MB7,F]  438-7-445ms    | [S7,MB7,B]  448-25-473ms   | [S3,MB4,B]  476-20-497ms   | [S3,MB5,B]  497-20-517ms   | [S3,MB6,B]  517-20-538ms   | [S3,MB7,B]  542-20-562ms  
+[rank0]:2026-01-03 08:32:37,077 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:32:39,692 - Avg. fwd time: 7.6702 / Avg. bwd time: 22.9121 / Avg. batch time: 534.0729 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:32:39,729 - Avg. fwd time: 7.1146 / Avg. bwd time: 20.1624 / Avg. batch time: 566.0786 (ms) / GPU bubble ratio: 22.90%
+[rank1]:2026-01-03 08:32:39,768 - Avg. fwd time: 8.0156 / Avg. bwd time: 22.6810 / Avg. batch time: 614.6515 (ms) / GPU bubble ratio: 20.09%
+[rank0]:2026-01-03 08:32:39,805 - Avg. fwd time: 7.1871 / Avg. bwd time: 21.4139 / Avg. batch time: 649.5997 (ms) / GPU bubble ratio: 29.55%
+[rank2]:2026-01-03 08:32:39,832 -  step: 950  loss: -4.0000  grad_norm:  0.7292  memory: 45.36GiB(32.45%)  tps: 6,100  tflops: 284.51  mfu: 28.77%
+[rank1]:2026-01-03 08:32:39,834 -  step: 950  loss: -4.0000  grad_norm:  0.7292  memory: 56.21GiB(40.20%)  tps: 6,100  tflops: 284.51  mfu: 28.77%
+[rank3]:2026-01-03 08:32:39,836 -  step: 950  loss:  0.2447  grad_norm:  0.7292  memory: 51.75GiB(37.01%)  tps: 6,100  tflops: 284.51  mfu: 28.77%
+[rank0]:2026-01-03 08:32:39,838 -  step: 950  loss: -4.0000  grad_norm:  0.7292  memory: 61.68GiB(44.11%)  tps: 6,100  tflops: 284.51  mfu: 28.77%
+[rank0]:2026-01-03 08:34:51,662 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:34:54,252 - Avg. fwd time: 7.6718 / Avg. bwd time: 22.9145 / Avg. batch time: 534.1362 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:34:54,287 - Avg. fwd time: 7.1163 / Avg. bwd time: 20.1643 / Avg. batch time: 566.1238 (ms) / GPU bubble ratio: 22.90%
+[rank1]:2026-01-03 08:34:54,327 - Avg. fwd time: 8.0175 / Avg. bwd time: 22.6830 / Avg. batch time: 614.7011 (ms) / GPU bubble ratio: 20.09%
+[rank1]:2026-01-03 08:34:54,393 -  step: 1000  loss: -4.0000  grad_norm:  0.2893  memory: 56.21GiB(40.20%)  tps: 6,088  tflops: 283.95  mfu: 28.71%
+[rank1]:2026-01-03 08:34:54,393 - Saving the checkpoint (or staging if async is enabled).
+[rank3]:2026-01-03 08:34:54,395 -  step: 1000  loss:  0.1511  grad_norm:  0.2893  memory: 51.75GiB(37.01%)  tps: 6,088  tflops: 283.95  mfu: 28.71%
+[rank3]:2026-01-03 08:34:54,395 - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2026-01-03 08:34:54,363 - Avg. fwd time: 7.1890 / Avg. bwd time: 21.4158 / Avg. batch time: 649.6524 (ms) / GPU bubble ratio: 29.55%
+[rank0]:2026-01-03 08:34:54,397 -  step: 1000  loss: -4.0000  grad_norm:  0.2893  memory: 61.68GiB(44.11%)  tps: 6,088  tflops: 283.95  mfu: 28.71%
+[rank0]:2026-01-03 08:34:54,397 - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2026-01-03 08:34:54,397 - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank2]:2026-01-03 08:34:54,390 -  step: 1000  loss: -4.0000  grad_norm:  0.2893  memory: 45.36GiB(32.45%)  tps: 6,088  tflops: 283.95  mfu: 28.71%
+[rank2]:2026-01-03 08:34:54,390 - Saving the checkpoint (or staging if async is enabled).
+[rank2]:2026-01-03 08:35:06,676 - Finished saving the checkpoint (or staging if async is enabled)in 12.29 seconds.
+[rank1]:2026-01-03 08:35:07,445 - Finished saving the checkpoint (or staging if async is enabled)in 13.05 seconds.
+[rank3]:2026-01-03 08:35:08,507 - Finished saving the checkpoint (or staging if async is enabled)in 14.11 seconds.
+[rank0]:2026-01-03 08:35:09,748 - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank0]:2026-01-03 08:35:09,750 - Finished saving the checkpoint (or staging if async is enabled)in 15.35 seconds.
+[rank3]:2026-01-03 08:35:10,071 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0835_step1000_rank3.svg
+[rank3]:			> Batch Time: 651.27 ms, GPU Bubble Ratio: 29.35%, 24.22%, 32.65%, 24.53%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  39-8-47ms      | [S4,MB1,F]  48-6-55ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-7-76ms      | [S0,MB5,F]  76-7-83ms      | [S0,MB6,F]  167-6-174ms    | [S4,MB0,B]  174-20-194ms   | [S0,MB7,F]  202-6-209ms    | [S4,MB1,B]  226-20-246ms   | [S4,MB4,F]  246-6-253ms    | [S4,MB2,B]  254-20-274ms   | [S4,MB5,F]  275-6-282ms    | [S4,MB3,B]  282-20-303ms   | [S4,MB6,F]  308-7-315ms    | [S0,MB0,B]  315-22-338ms   | [S4,MB7,F]  341-6-348ms    | [S0,MB1,B]  348-22-371ms   | [S0,MB2,B]  374-22-397ms   | [S0,MB3,B]  407-22-430ms   | [S4,MB4,B]  430-20-450ms   | [S4,MB5,B]  452-20-473ms   | [S4,MB6,B]  482-20-502ms   | [S4,MB7,B]  524-20-544ms   | [S0,MB4,B]  549-22-572ms   | [S0,MB5,B]  575-22-597ms   | [S0,MB6,B]  600-22-623ms   | [S0,MB7,B]  628-22-651ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  48-8-56ms      | [S5,MB1,F]  57-6-63ms      | [S5,MB2,F]  64-6-71ms      | [S5,MB3,F]  71-6-78ms      | [S1,MB4,F]  138-8-146ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  173-8-182ms    | [S5,MB1,B]  182-20-202ms   | [S1,MB6,F]  209-8-218ms    | [S5,MB2,B]  218-20-238ms   | [S1,MB7,F]  246-8-254ms    | [S5,MB3,B]  254-20-275ms   | [S5,MB4,F]  275-6-282ms    | [S1,MB0,B]  282-25-308ms   | [S5,MB5,F]  308-6-315ms    | [S1,MB1,B]  315-25-341ms   | [S5,MB6,F]  341-7-348ms    | [S1,MB2,B]  348-25-374ms   | [S5,MB7,F]  374-7-381ms    | [S1,MB3,B]  381-25-407ms   | [S5,MB4,B]  407-20-427ms   | [S5,MB5,B]  432-20-452ms   | [S5,MB6,B]  461-20-481ms   | [S5,MB7,B]  501-20-521ms   | [S1,MB4,B]  523-25-549ms   | [S1,MB5,B]  549-25-574ms   | [S1,MB6,B]  574-25-600ms   | [S1,MB7,B]  600-25-625ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  110-6-117ms    | [S6,MB0,B]  117-20-137ms   | [S6,MB3,F]  146-6-153ms    | [S6,MB1,B]  153-20-173ms   | [S2,MB4,F]  182-6-188ms    | [S6,MB2,B]  189-20-209ms   | [S2,MB5,F]  218-6-225ms    | [S6,MB3,B]  225-20-245ms   | [S2,MB6,F]  246-6-253ms    | [S2,MB0,B]  254-20-275ms   | [S2,MB7,F]  275-6-282ms    | [S2,MB1,B]  282-20-302ms   | [S6,MB4,F]  303-7-310ms    | [S2,MB2,B]  315-20-335ms   | [S6,MB5,F]  335-6-342ms    | [S2,MB3,B]  348-20-368ms   | [S6,MB6,F]  369-6-376ms    | [S6,MB4,B]  381-20-401ms   | [S6,MB7,F]  404-6-411ms    | [S6,MB5,B]  411-20-431ms   | [S6,MB6,B]  440-20-461ms   | [S6,MB7,B]  479-20-499ms   | [S2,MB4,B]  501-20-521ms   | [S2,MB5,B]  521-20-542ms   | [S2,MB6,B]  542-20-562ms   | [S2,MB7,B]  567-20-587ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-110ms    | [S7,MB1,F]  110-7-117ms    | [S7,MB1,B]  120-25-145ms   | [S7,MB2,F]  145-7-153ms    | [S7,MB2,B]  155-25-181ms   | [S7,MB3,F]  181-7-189ms    | [S7,MB3,B]  191-25-217ms   | [S3,MB4,F]  217-7-225ms    | [S3,MB0,B]  225-20-245ms   | [S3,MB5,F]  246-7-253ms    | [S3,MB1,B]  253-20-273ms   | [S3,MB6,F]  273-7-280ms    | [S3,MB2,B]  282-20-302ms   | [S3,MB7,F]  302-7-309ms    | [S3,MB3,B]  310-20-330ms   | [S7,MB4,F]  330-7-338ms    | [S7,MB4,B]  342-25-368ms   | [S7,MB5,F]  368-7-376ms    | [S7,MB5,B]  378-25-404ms   | [S7,MB6,F]  404-8-412ms    | [S7,MB6,B]  414-25-440ms   | [S7,MB7,F]  440-7-448ms    | [S7,MB7,B]  450-25-476ms   | [S3,MB4,B]  478-20-499ms   | [S3,MB5,B]  499-20-520ms   | [S3,MB6,B]  520-20-540ms   | [S3,MB7,B]  545-20-565ms  
+[rank0]:2026-01-03 08:37:23,894 - [GC] Peforming periodical GC collection 1.97 seconds
+[rank3]:2026-01-03 08:37:26,596 - Avg. fwd time: 7.6717 / Avg. bwd time: 22.9236 / Avg. batch time: 534.2799 (ms) / GPU bubble ratio: 8.38%
+[rank2]:2026-01-03 08:37:26,635 - Avg. fwd time: 7.1162 / Avg. bwd time: 20.1640 / Avg. batch time: 566.3079 (ms) / GPU bubble ratio: 22.92%
+[rank1]:2026-01-03 08:37:26,675 - Avg. fwd time: 8.0173 / Avg. bwd time: 22.6831 / Avg. batch time: 614.8884 (ms) / GPU bubble ratio: 20.11%
+[rank1]:2026-01-03 08:37:26,744 -  step: 1050  loss: -4.0000  grad_norm:  0.8404  memory: 56.21GiB(40.20%)  tps: 5,377  tflops: 250.79  mfu: 25.36%
+[rank3]:2026-01-03 08:37:26,746 -  step: 1050  loss:  0.2507  grad_norm:  0.8404  memory: 51.75GiB(37.01%)  tps: 5,377  tflops: 250.79  mfu: 25.36%
+[rank2]:2026-01-03 08:37:26,742 -  step: 1050  loss: -4.0000  grad_norm:  0.8404  memory: 45.36GiB(32.45%)  tps: 5,377  tflops: 250.79  mfu: 25.36%
+[rank0]:2026-01-03 08:37:26,714 - Avg. fwd time: 7.1888 / Avg. bwd time: 21.4156 / Avg. batch time: 649.8387 (ms) / GPU bubble ratio: 29.57%
+[rank0]:2026-01-03 08:37:26,748 -  step: 1050  loss: -4.0000  grad_norm:  0.8404  memory: 61.68GiB(44.11%)  tps: 5,377  tflops: 250.79  mfu: 25.36%
+[rank0]:2026-01-03 08:39:40,128 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:39:42,738 - Avg. fwd time: 7.6786 / Avg. bwd time: 22.9322 / Avg. batch time: 534.5231 (ms) / GPU bubble ratio: 8.37%
+[rank2]:2026-01-03 08:39:42,777 - Avg. fwd time: 7.1220 / Avg. bwd time: 20.1689 / Avg. batch time: 566.5423 (ms) / GPU bubble ratio: 22.93%
+[rank1]:2026-01-03 08:39:42,818 - Avg. fwd time: 8.0239 / Avg. bwd time: 22.6884 / Avg. batch time: 615.1347 (ms) / GPU bubble ratio: 20.12%
+[rank2]:2026-01-03 08:39:42,885 -  step: 1100  loss: -4.0000  grad_norm:  0.3671  memory: 45.36GiB(32.45%)  tps: 6,017  tflops: 280.64  mfu: 28.38%
+[rank0]:2026-01-03 08:39:42,858 - Avg. fwd time: 7.1950 / Avg. bwd time: 21.4193 / Avg. batch time: 650.0946 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:39:42,892 -  step: 1100  loss: -4.0000  grad_norm:  0.3671  memory: 61.68GiB(44.11%)  tps: 6,017  tflops: 280.64  mfu: 28.38%
+[rank1]:2026-01-03 08:39:42,888 -  step: 1100  loss: -4.0000  grad_norm:  0.3671  memory: 56.21GiB(40.20%)  tps: 6,017  tflops: 280.64  mfu: 28.38%
+[rank3]:2026-01-03 08:39:42,890 -  step: 1100  loss:  0.2214  grad_norm:  0.3671  memory: 51.75GiB(37.01%)  tps: 6,017  tflops: 280.64  mfu: 28.38%
+[rank3]:2026-01-03 08:39:43,107 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0839_step1100_rank3.svg
+[rank3]:			> Batch Time: 656.80 ms, GPU Bubble Ratio: 29.56%, 24.31%, 32.74%, 24.37%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-7-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  24-7-31ms      | [S4,MB0,F]  39-9-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  56-7-63ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-77ms      | [S0,MB5,F]  77-7-85ms      | [S0,MB6,F]  168-7-175ms    | [S4,MB0,B]  175-20-196ms   | [S0,MB7,F]  204-7-211ms    | [S4,MB1,B]  228-20-248ms   | [S4,MB4,F]  248-7-255ms    | [S4,MB2,B]  256-20-276ms   | [S4,MB5,F]  278-7-285ms    | [S4,MB3,B]  285-20-306ms   | [S4,MB6,F]  311-7-318ms    | [S0,MB0,B]  318-22-341ms   | [S4,MB7,F]  344-7-351ms    | [S0,MB1,B]  351-22-374ms   | [S0,MB2,B]  377-22-400ms   | [S0,MB3,B]  410-22-433ms   | [S4,MB4,B]  433-20-454ms   | [S4,MB5,B]  457-20-477ms   | [S4,MB6,B]  486-20-507ms   | [S4,MB7,B]  529-20-549ms   | [S0,MB4,B]  554-22-577ms   | [S0,MB5,B]  580-22-603ms   | [S0,MB6,B]  606-22-628ms   | [S0,MB7,B]  634-22-656ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-7-64ms      | [S5,MB2,F]  65-7-72ms      | [S5,MB3,F]  72-7-79ms      | [S1,MB4,F]  139-8-148ms    | [S5,MB0,B]  148-20-168ms   | [S1,MB5,F]  175-8-184ms    | [S5,MB1,B]  184-20-204ms   | [S1,MB6,F]  211-8-220ms    | [S5,MB2,B]  220-20-240ms   | [S1,MB7,F]  248-8-257ms    | [S5,MB3,B]  257-20-277ms   | [S5,MB4,F]  278-7-285ms    | [S1,MB0,B]  285-25-311ms   | [S5,MB5,F]  310-7-317ms    | [S1,MB1,B]  318-25-343ms   | [S5,MB6,F]  343-7-351ms    | [S1,MB2,B]  351-25-377ms   | [S5,MB7,F]  377-7-384ms    | [S1,MB3,B]  384-25-410ms   | [S5,MB4,B]  410-20-431ms   | [S5,MB5,B]  436-20-456ms   | [S5,MB6,B]  466-20-486ms   | [S5,MB7,B]  506-20-526ms   | [S1,MB4,B]  528-25-554ms   | [S1,MB5,B]  554-25-579ms   | [S1,MB6,B]  579-25-605ms   | [S1,MB7,B]  605-25-631ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-7-36ms      | [S2,MB2,F]  38-6-45ms      | [S2,MB3,F]  47-7-54ms      | [S6,MB0,F]  57-8-66ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-138ms   | [S6,MB3,F]  147-6-154ms    | [S6,MB1,B]  154-20-174ms   | [S2,MB4,F]  183-7-190ms    | [S6,MB2,B]  190-20-211ms   | [S2,MB5,F]  220-7-227ms    | [S6,MB3,B]  227-20-247ms   | [S2,MB6,F]  248-7-255ms    | [S2,MB0,B]  257-20-277ms   | [S2,MB7,F]  277-7-284ms    | [S2,MB1,B]  285-20-305ms   | [S6,MB4,F]  305-7-312ms    | [S2,MB2,B]  317-20-338ms   | [S6,MB5,F]  338-7-345ms    | [S2,MB3,B]  351-20-371ms   | [S6,MB6,F]  371-7-378ms    | [S6,MB4,B]  384-20-404ms   | [S6,MB7,F]  408-7-415ms    | [S6,MB5,B]  415-20-435ms   | [S6,MB6,B]  445-20-465ms   | [S6,MB7,B]  484-20-504ms   | [S2,MB4,B]  506-20-526ms   | [S2,MB5,B]  526-20-547ms   | [S2,MB6,B]  547-20-568ms   | [S2,MB7,B]  573-20-593ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  54-6-61ms      | [S7,MB0,F]  73-10-83ms     | [S7,MB0,B]  85-25-111ms    | [S7,MB1,F]  111-7-119ms    | [S7,MB1,B]  121-25-147ms   | [S7,MB2,F]  147-8-155ms    | [S7,MB2,B]  157-25-183ms   | [S7,MB3,F]  183-8-191ms    | [S7,MB3,B]  193-26-219ms   | [S3,MB4,F]  219-7-227ms    | [S3,MB0,B]  227-20-247ms   | [S3,MB5,F]  248-7-255ms    | [S3,MB1,B]  255-20-275ms   | [S3,MB6,F]  276-7-283ms    | [S3,MB2,B]  284-20-304ms   | [S3,MB7,F]  305-7-312ms    | [S3,MB3,B]  313-20-333ms   | [S7,MB4,F]  333-8-341ms    | [S7,MB4,B]  345-25-371ms   | [S7,MB5,F]  371-8-379ms    | [S7,MB5,B]  381-26-407ms   | [S7,MB6,F]  408-8-416ms    | [S7,MB6,B]  418-26-444ms   | [S7,MB7,F]  445-8-453ms    | [S7,MB7,B]  455-26-481ms   | [S3,MB4,B]  483-20-504ms   | [S3,MB5,B]  504-20-525ms   | [S3,MB6,B]  525-20-546ms   | [S3,MB7,B]  550-20-570ms  
+[rank0]:2026-01-03 08:41:54,921 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 08:41:57,557 - Avg. fwd time: 7.1233 / Avg. bwd time: 20.1701 / Avg. batch time: 566.6091 (ms) / GPU bubble ratio: 22.93%
+[rank3]:2026-01-03 08:41:57,520 - Avg. fwd time: 7.6799 / Avg. bwd time: 22.9337 / Avg. batch time: 534.5673 (ms) / GPU bubble ratio: 8.37%
+[rank1]:2026-01-03 08:41:57,598 - Avg. fwd time: 8.0253 / Avg. bwd time: 22.6896 / Avg. batch time: 615.2057 (ms) / GPU bubble ratio: 20.12%
+[rank1]:2026-01-03 08:41:57,667 -  step: 1150  loss: -4.0000  grad_norm:  0.5493  memory: 56.21GiB(40.20%)  tps: 6,078  tflops: 283.48  mfu: 28.66%
+[rank2]:2026-01-03 08:41:57,664 -  step: 1150  loss: -4.0000  grad_norm:  0.5493  memory: 45.36GiB(32.45%)  tps: 6,078  tflops: 283.48  mfu: 28.66%
+[rank3]:2026-01-03 08:41:57,669 -  step: 1150  loss:  0.2111  grad_norm:  0.5493  memory: 51.75GiB(37.01%)  tps: 6,078  tflops: 283.49  mfu: 28.66%
+[rank0]:2026-01-03 08:41:57,637 - Avg. fwd time: 7.1962 / Avg. bwd time: 21.4203 / Avg. batch time: 650.1692 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:41:57,671 -  step: 1150  loss: -4.0000  grad_norm:  0.5493  memory: 61.68GiB(44.11%)  tps: 6,078  tflops: 283.48  mfu: 28.66%
+[rank0]:2026-01-03 08:44:09,409 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 08:44:12,071 - Avg. fwd time: 7.1243 / Avg. bwd time: 20.1707 / Avg. batch time: 566.6265 (ms) / GPU bubble ratio: 22.93%
+[rank3]:2026-01-03 08:44:12,035 - Avg. fwd time: 7.6810 / Avg. bwd time: 22.9348 / Avg. batch time: 534.6004 (ms) / GPU bubble ratio: 8.37%
+[rank1]:2026-01-03 08:44:12,113 - Avg. fwd time: 8.0267 / Avg. bwd time: 22.6908 / Avg. batch time: 615.2248 (ms) / GPU bubble ratio: 20.11%
+[rank1]:2026-01-03 08:44:12,181 -  step: 1200  loss: -4.0000  grad_norm:  0.4418  memory: 56.21GiB(40.20%)  tps: 6,090  tflops: 284.04  mfu: 28.72%
+[rank2]:2026-01-03 08:44:12,178 -  step: 1200  loss: -4.0000  grad_norm:  0.4418  memory: 45.36GiB(32.45%)  tps: 6,090  tflops: 284.04  mfu: 28.72%
+[rank3]:2026-01-03 08:44:12,183 -  step: 1200  loss:  0.2640  grad_norm:  0.4418  memory: 51.75GiB(37.01%)  tps: 6,090  tflops: 284.04  mfu: 28.72%
+[rank0]:2026-01-03 08:44:12,151 - Avg. fwd time: 7.1974 / Avg. bwd time: 21.4209 / Avg. batch time: 650.1901 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:44:12,185 -  step: 1200  loss: -4.0000  grad_norm:  0.4418  memory: 61.68GiB(44.11%)  tps: 6,090  tflops: 284.04  mfu: 28.72%
+[rank3]:2026-01-03 08:44:12,406 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0844_step1200_rank3.svg
+[rank3]:			> Batch Time: 651.73 ms, GPU Bubble Ratio: 29.38%, 24.21%, 32.67%, 24.45%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  39-8-48ms      | [S4,MB1,F]  48-6-55ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-7-83ms      | [S0,MB6,F]  167-6-174ms    | [S4,MB0,B]  174-20-194ms   | [S0,MB7,F]  203-6-210ms    | [S4,MB1,B]  226-20-246ms   | [S4,MB4,F]  246-6-253ms    | [S4,MB2,B]  253-20-274ms   | [S4,MB5,F]  275-6-282ms    | [S4,MB3,B]  282-20-303ms   | [S4,MB6,F]  308-7-315ms    | [S0,MB0,B]  316-22-338ms   | [S4,MB7,F]  341-6-348ms    | [S0,MB1,B]  348-22-371ms   | [S0,MB2,B]  374-22-397ms   | [S0,MB3,B]  408-22-430ms   | [S4,MB4,B]  430-20-451ms   | [S4,MB5,B]  453-20-473ms   | [S4,MB6,B]  482-20-503ms   | [S4,MB7,B]  524-20-544ms   | [S0,MB4,B]  549-22-572ms   | [S0,MB5,B]  575-22-597ms   | [S0,MB6,B]  601-22-623ms   | [S0,MB7,B]  629-22-651ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-6-64ms      | [S5,MB2,F]  64-6-71ms      | [S5,MB3,F]  71-6-78ms      | [S1,MB4,F]  138-8-146ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  174-8-182ms    | [S5,MB1,B]  182-20-202ms   | [S1,MB6,F]  210-8-218ms    | [S5,MB2,B]  218-20-238ms   | [S1,MB7,F]  246-8-254ms    | [S5,MB3,B]  255-20-275ms   | [S5,MB4,F]  275-6-282ms    | [S1,MB0,B]  282-25-308ms   | [S5,MB5,F]  308-6-315ms    | [S1,MB1,B]  315-25-341ms   | [S5,MB6,F]  341-7-348ms    | [S1,MB2,B]  348-25-374ms   | [S5,MB7,F]  374-7-381ms    | [S1,MB3,B]  381-25-407ms   | [S5,MB4,B]  407-20-428ms   | [S5,MB5,B]  432-20-452ms   | [S5,MB6,B]  462-20-482ms   | [S5,MB7,B]  502-20-522ms   | [S1,MB4,B]  523-25-549ms   | [S1,MB5,B]  549-25-574ms   | [S1,MB6,B]  574-25-600ms   | [S1,MB7,B]  600-25-626ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  110-6-117ms    | [S6,MB0,B]  117-20-137ms   | [S6,MB3,F]  146-6-153ms    | [S6,MB1,B]  153-20-173ms   | [S2,MB4,F]  182-6-189ms    | [S6,MB2,B]  189-20-209ms   | [S2,MB5,F]  218-6-225ms    | [S6,MB3,B]  225-20-245ms   | [S2,MB6,F]  246-6-253ms    | [S2,MB0,B]  254-20-275ms   | [S2,MB7,F]  275-6-282ms    | [S2,MB1,B]  282-20-303ms   | [S6,MB4,F]  303-7-310ms    | [S2,MB2,B]  315-20-335ms   | [S6,MB5,F]  336-6-343ms    | [S2,MB3,B]  348-20-369ms   | [S6,MB6,F]  369-6-376ms    | [S6,MB4,B]  381-20-401ms   | [S6,MB7,F]  404-6-411ms    | [S6,MB5,B]  411-20-432ms   | [S6,MB6,B]  441-20-461ms   | [S6,MB7,B]  479-20-499ms   | [S2,MB4,B]  501-20-521ms   | [S2,MB5,B]  522-20-542ms   | [S2,MB6,B]  542-20-563ms   | [S2,MB7,B]  567-20-588ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-83ms     | [S7,MB0,B]  85-25-110ms    | [S7,MB1,F]  110-7-118ms    | [S7,MB1,B]  120-25-145ms   | [S7,MB2,F]  146-7-153ms    | [S7,MB2,B]  155-25-181ms   | [S7,MB3,F]  181-7-189ms    | [S7,MB3,B]  191-25-217ms   | [S3,MB4,F]  217-7-225ms    | [S3,MB0,B]  225-20-245ms   | [S3,MB5,F]  245-7-252ms    | [S3,MB1,B]  253-20-273ms   | [S3,MB6,F]  273-7-280ms    | [S3,MB2,B]  282-20-302ms   | [S3,MB7,F]  302-7-309ms    | [S3,MB3,B]  310-20-330ms   | [S7,MB4,F]  330-7-338ms    | [S7,MB4,B]  342-25-368ms   | [S7,MB5,F]  368-7-376ms    | [S7,MB5,B]  378-25-404ms   | [S7,MB6,F]  404-8-412ms    | [S7,MB6,B]  414-25-440ms   | [S7,MB7,F]  440-8-448ms    | [S7,MB7,B]  451-25-476ms   | [S3,MB4,B]  479-20-499ms   | [S3,MB5,B]  500-20-520ms   | [S3,MB6,B]  520-20-541ms   | [S3,MB7,B]  545-20-565ms  
+[rank0]:2026-01-03 08:46:23,797 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:46:26,405 - Avg. fwd time: 7.6812 / Avg. bwd time: 22.9348 / Avg. batch time: 534.6000 (ms) / GPU bubble ratio: 8.37%
+[rank1]:2026-01-03 08:46:26,482 - Avg. fwd time: 8.0270 / Avg. bwd time: 22.6909 / Avg. batch time: 615.2437 (ms) / GPU bubble ratio: 20.12%
+[rank2]:2026-01-03 08:46:26,441 - Avg. fwd time: 7.1247 / Avg. bwd time: 20.1708 / Avg. batch time: 566.6468 (ms) / GPU bubble ratio: 22.93%
+[rank0]:2026-01-03 08:46:26,520 - Avg. fwd time: 7.1977 / Avg. bwd time: 21.4210 / Avg. batch time: 650.2084 (ms) / GPU bubble ratio: 29.58%
+[rank1]:2026-01-03 08:46:26,550 -  step: 1250  loss: -4.0000  grad_norm:  0.5369  memory: 56.21GiB(40.20%)  tps: 6,097  tflops: 284.35  mfu: 28.75%
+[rank3]:2026-01-03 08:46:26,552 -  step: 1250  loss:  0.2507  grad_norm:  0.5369  memory: 51.75GiB(37.01%)  tps: 6,097  tflops: 284.35  mfu: 28.75%
+[rank2]:2026-01-03 08:46:26,548 -  step: 1250  loss: -4.0000  grad_norm:  0.5369  memory: 45.36GiB(32.45%)  tps: 6,097  tflops: 284.35  mfu: 28.75%
+[rank0]:2026-01-03 08:46:26,554 -  step: 1250  loss: -4.0000  grad_norm:  0.5369  memory: 61.68GiB(44.11%)  tps: 6,097  tflops: 284.35  mfu: 28.75%
+[rank0]:2026-01-03 08:48:38,153 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:48:40,753 - Avg. fwd time: 7.6818 / Avg. bwd time: 22.9355 / Avg. batch time: 534.6174 (ms) / GPU bubble ratio: 8.37%
+[rank2]:2026-01-03 08:48:40,789 - Avg. fwd time: 7.1253 / Avg. bwd time: 20.1714 / Avg. batch time: 566.6494 (ms) / GPU bubble ratio: 22.92%
+[rank1]:2026-01-03 08:48:40,834 - Avg. fwd time: 8.0277 / Avg. bwd time: 22.6915 / Avg. batch time: 615.2447 (ms) / GPU bubble ratio: 20.11%
+[rank1]:2026-01-03 08:48:40,902 -  step: 1300  loss: -4.0000  grad_norm:  0.3613  memory: 56.21GiB(40.20%)  tps: 6,097  tflops: 284.38  mfu: 28.75%
+[rank3]:2026-01-03 08:48:40,904 -  step: 1300  loss:  0.1792  grad_norm:  0.3613  memory: 51.75GiB(37.01%)  tps: 6,097  tflops: 284.39  mfu: 28.75%
+[rank2]:2026-01-03 08:48:40,900 -  step: 1300  loss: -4.0000  grad_norm:  0.3613  memory: 45.36GiB(32.45%)  tps: 6,097  tflops: 284.38  mfu: 28.75%
+[rank0]:2026-01-03 08:48:40,872 - Avg. fwd time: 7.1985 / Avg. bwd time: 21.4216 / Avg. batch time: 650.2112 (ms) / GPU bubble ratio: 29.57%
+[rank0]:2026-01-03 08:48:40,906 -  step: 1300  loss: -4.0000  grad_norm:  0.3613  memory: 61.68GiB(44.11%)  tps: 6,097  tflops: 284.38  mfu: 28.75%
+[rank3]:2026-01-03 08:48:41,123 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0848_step1300_rank3.svg
+[rank3]:			> Batch Time: 649.23 ms, GPU Bubble Ratio: 29.30%, 24.20%, 32.66%, 24.50%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  48-6-54ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-7-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-193ms   | [S0,MB7,F]  202-6-208ms    | [S4,MB1,B]  225-20-245ms   | [S4,MB4,F]  245-6-252ms    | [S4,MB2,B]  252-20-272ms   | [S4,MB5,F]  274-6-281ms    | [S4,MB3,B]  281-20-301ms   | [S4,MB6,F]  307-7-314ms    | [S0,MB0,B]  314-22-337ms   | [S4,MB7,F]  340-6-347ms    | [S0,MB1,B]  347-22-370ms   | [S0,MB2,B]  373-22-396ms   | [S0,MB3,B]  406-22-428ms   | [S4,MB4,B]  429-20-449ms   | [S4,MB5,B]  451-20-471ms   | [S4,MB6,B]  480-20-500ms   | [S4,MB7,B]  522-20-542ms   | [S0,MB4,B]  547-22-569ms   | [S0,MB5,B]  572-22-595ms   | [S0,MB6,B]  598-22-620ms   | [S0,MB7,B]  626-22-649ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-37ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  63-6-70ms      | [S5,MB3,F]  71-6-77ms      | [S1,MB4,F]  137-8-146ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  173-8-181ms    | [S5,MB1,B]  181-20-201ms   | [S1,MB6,F]  209-8-217ms    | [S5,MB2,B]  217-20-238ms   | [S1,MB7,F]  245-8-253ms    | [S5,MB3,B]  254-20-274ms   | [S5,MB4,F]  274-6-281ms    | [S1,MB0,B]  281-25-306ms   | [S5,MB5,F]  307-6-313ms    | [S1,MB1,B]  314-25-339ms   | [S5,MB6,F]  340-7-347ms    | [S1,MB2,B]  347-25-372ms   | [S5,MB7,F]  373-7-380ms    | [S1,MB3,B]  380-25-405ms   | [S5,MB4,B]  406-20-426ms   | [S5,MB5,B]  431-20-451ms   | [S5,MB6,B]  460-20-480ms   | [S5,MB7,B]  499-19-519ms   | [S1,MB4,B]  521-25-546ms   | [S1,MB5,B]  547-25-572ms   | [S1,MB6,B]  572-25-597ms   | [S1,MB7,B]  598-25-623ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  109-6-116ms    | [S6,MB0,B]  116-20-136ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  181-6-188ms    | [S6,MB2,B]  188-20-208ms   | [S2,MB5,F]  217-6-224ms    | [S6,MB3,B]  224-20-244ms   | [S2,MB6,F]  245-6-252ms    | [S2,MB0,B]  253-20-273ms   | [S2,MB7,F]  274-6-281ms    | [S2,MB1,B]  281-20-301ms   | [S6,MB4,F]  302-6-309ms    | [S2,MB2,B]  314-20-334ms   | [S6,MB5,F]  334-6-341ms    | [S2,MB3,B]  347-20-367ms   | [S6,MB6,F]  367-6-374ms    | [S6,MB4,B]  380-20-400ms   | [S6,MB7,F]  403-6-410ms    | [S6,MB5,B]  410-20-430ms   | [S6,MB6,B]  439-20-459ms   | [S6,MB7,B]  477-20-497ms   | [S2,MB4,B]  499-20-519ms   | [S2,MB5,B]  520-20-540ms   | [S2,MB6,B]  540-20-560ms   | [S2,MB7,B]  566-20-586ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-44ms      | [S3,MB2,F]  45-6-51ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-109ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-145ms   | [S7,MB2,F]  145-7-152ms    | [S7,MB2,B]  155-25-180ms   | [S7,MB3,F]  180-7-188ms    | [S7,MB3,B]  190-25-216ms   | [S3,MB4,F]  216-7-224ms    | [S3,MB0,B]  224-20-244ms   | [S3,MB5,F]  244-6-251ms    | [S3,MB1,B]  252-20-272ms   | [S3,MB6,F]  272-7-279ms    | [S3,MB2,B]  281-20-301ms   | [S3,MB7,F]  301-6-308ms    | [S3,MB3,B]  308-20-329ms   | [S7,MB4,F]  329-7-337ms    | [S7,MB4,B]  341-25-367ms   | [S7,MB5,F]  367-7-374ms    | [S7,MB5,B]  377-25-402ms   | [S7,MB6,F]  403-7-411ms    | [S7,MB6,B]  413-25-438ms   | [S7,MB7,F]  439-7-447ms    | [S7,MB7,B]  449-25-475ms   | [S3,MB4,B]  477-20-497ms   | [S3,MB5,B]  498-20-518ms   | [S3,MB6,B]  518-20-538ms   | [S3,MB7,B]  543-20-563ms  
+[rank0]:2026-01-03 08:50:53,698 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:50:56,309 - Avg. fwd time: 7.6849 / Avg. bwd time: 22.9395 / Avg. batch time: 534.7286 (ms) / GPU bubble ratio: 8.37%
+[rank2]:2026-01-03 08:50:56,346 - Avg. fwd time: 7.1277 / Avg. bwd time: 20.1736 / Avg. batch time: 566.7847 (ms) / GPU bubble ratio: 22.93%
+[rank1]:2026-01-03 08:50:56,390 - Avg. fwd time: 8.0305 / Avg. bwd time: 22.6939 / Avg. batch time: 615.3851 (ms) / GPU bubble ratio: 20.12%
+[rank0]:2026-01-03 08:50:56,431 - Avg. fwd time: 7.2011 / Avg. bwd time: 21.4232 / Avg. batch time: 650.3583 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:50:56,465 -  step: 1350  loss: -4.0000  grad_norm:  0.4799  memory: 61.68GiB(44.11%)  tps: 6,043  tflops: 281.85  mfu: 28.50%
+[rank1]:2026-01-03 08:50:56,461 -  step: 1350  loss: -4.0000  grad_norm:  0.4799  memory: 56.21GiB(40.20%)  tps: 6,043  tflops: 281.85  mfu: 28.50%
+[rank3]:2026-01-03 08:50:56,463 -  step: 1350  loss:  0.1233  grad_norm:  0.4799  memory: 51.75GiB(37.01%)  tps: 6,043  tflops: 281.86  mfu: 28.50%
+[rank2]:2026-01-03 08:50:56,459 -  step: 1350  loss: -4.0000  grad_norm:  0.4799  memory: 45.36GiB(32.45%)  tps: 6,043  tflops: 281.85  mfu: 28.50%
+[rank0]:2026-01-03 08:53:07,962 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:53:10,605 - Avg. fwd time: 7.6850 / Avg. bwd time: 22.9396 / Avg. batch time: 534.7279 (ms) / GPU bubble ratio: 8.37%
+[rank2]:2026-01-03 08:53:10,642 - Avg. fwd time: 7.1279 / Avg. bwd time: 20.1737 / Avg. batch time: 566.7690 (ms) / GPU bubble ratio: 22.93%
+[rank1]:2026-01-03 08:53:10,688 - Avg. fwd time: 8.0306 / Avg. bwd time: 22.6942 / Avg. batch time: 615.3680 (ms) / GPU bubble ratio: 20.11%
+[rank2]:2026-01-03 08:53:10,756 -  step: 1400  loss: -4.0000  grad_norm:  0.4776  memory: 45.36GiB(32.45%)  tps: 6,100  tflops: 284.50  mfu: 28.77%
+[rank0]:2026-01-03 08:53:10,729 - Avg. fwd time: 7.2013 / Avg. bwd time: 21.4233 / Avg. batch time: 650.3435 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:53:10,763 -  step: 1400  loss: -4.0000  grad_norm:  0.4776  memory: 61.68GiB(44.11%)  tps: 6,100  tflops: 284.50  mfu: 28.77%
+[rank1]:2026-01-03 08:53:10,759 -  step: 1400  loss: -4.0000  grad_norm:  0.4776  memory: 56.21GiB(40.20%)  tps: 6,100  tflops: 284.50  mfu: 28.77%
+[rank3]:2026-01-03 08:53:10,761 -  step: 1400  loss:  0.3589  grad_norm:  0.4776  memory: 51.75GiB(37.01%)  tps: 6,100  tflops: 284.50  mfu: 28.77%
+[rank3]:2026-01-03 08:53:10,980 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0853_step1400_rank3.svg
+[rank3]:			> Batch Time: 654.80 ms, GPU Bubble Ratio: 29.43%, 24.23%, 32.70%, 24.35%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-7-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  24-7-31ms      | [S4,MB0,F]  39-8-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  56-7-63ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-77ms      | [S0,MB5,F]  77-7-84ms      | [S0,MB6,F]  168-6-175ms    | [S4,MB0,B]  175-20-196ms   | [S0,MB7,F]  204-7-211ms    | [S4,MB1,B]  227-20-248ms   | [S4,MB4,F]  248-6-255ms    | [S4,MB2,B]  255-20-276ms   | [S4,MB5,F]  277-7-284ms    | [S4,MB3,B]  284-20-305ms   | [S4,MB6,F]  310-7-317ms    | [S0,MB0,B]  318-22-340ms   | [S4,MB7,F]  344-7-351ms    | [S0,MB1,B]  351-22-374ms   | [S0,MB2,B]  377-22-400ms   | [S0,MB3,B]  410-22-433ms   | [S4,MB4,B]  433-20-453ms   | [S4,MB5,B]  456-20-476ms   | [S4,MB6,B]  485-20-506ms   | [S4,MB7,B]  527-20-547ms   | [S0,MB4,B]  553-22-575ms   | [S0,MB5,B]  578-22-601ms   | [S0,MB6,B]  604-22-626ms   | [S0,MB7,B]  632-22-654ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-7-64ms      | [S5,MB2,F]  64-7-72ms      | [S5,MB3,F]  72-7-79ms      | [S1,MB4,F]  139-8-148ms    | [S5,MB0,B]  148-20-168ms   | [S1,MB5,F]  175-8-183ms    | [S5,MB1,B]  184-20-204ms   | [S1,MB6,F]  211-8-220ms    | [S5,MB2,B]  220-20-240ms   | [S1,MB7,F]  247-8-256ms    | [S5,MB3,B]  256-20-276ms   | [S5,MB4,F]  277-6-284ms    | [S1,MB0,B]  284-25-310ms   | [S5,MB5,F]  310-7-317ms    | [S1,MB1,B]  317-25-343ms   | [S5,MB6,F]  343-7-350ms    | [S1,MB2,B]  351-25-376ms   | [S5,MB7,F]  376-7-384ms    | [S1,MB3,B]  384-25-409ms   | [S5,MB4,B]  410-20-430ms   | [S5,MB5,B]  435-20-455ms   | [S5,MB6,B]  464-20-484ms   | [S5,MB7,B]  505-20-525ms   | [S1,MB4,B]  527-25-552ms   | [S1,MB5,B]  552-25-578ms   | [S1,MB6,B]  578-25-603ms   | [S1,MB7,B]  603-25-629ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-45ms      | [S2,MB3,F]  47-6-54ms      | [S6,MB0,F]  57-8-66ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-138ms   | [S6,MB3,F]  147-6-154ms    | [S6,MB1,B]  154-20-174ms   | [S2,MB4,F]  183-6-190ms    | [S6,MB2,B]  190-20-210ms   | [S2,MB5,F]  219-7-226ms    | [S6,MB3,B]  227-20-247ms   | [S2,MB6,F]  247-7-254ms    | [S2,MB0,B]  256-20-276ms   | [S2,MB7,F]  277-7-284ms    | [S2,MB1,B]  284-20-304ms   | [S6,MB4,F]  305-7-312ms    | [S2,MB2,B]  317-20-337ms   | [S6,MB5,F]  338-7-345ms    | [S2,MB3,B]  350-20-371ms   | [S6,MB6,F]  371-6-378ms    | [S6,MB4,B]  384-20-404ms   | [S6,MB7,F]  407-6-414ms    | [S6,MB5,B]  414-20-434ms   | [S6,MB6,B]  444-20-464ms   | [S6,MB7,B]  482-20-503ms   | [S2,MB4,B]  505-20-525ms   | [S2,MB5,B]  525-20-545ms   | [S2,MB6,B]  546-20-566ms   | [S2,MB7,B]  571-20-591ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  54-6-60ms      | [S7,MB0,F]  73-10-83ms     | [S7,MB0,B]  85-25-111ms    | [S7,MB1,F]  111-7-119ms    | [S7,MB1,B]  121-25-146ms   | [S7,MB2,F]  147-7-155ms    | [S7,MB2,B]  157-25-183ms   | [S7,MB3,F]  183-8-191ms    | [S7,MB3,B]  193-26-219ms   | [S3,MB4,F]  219-7-226ms    | [S3,MB0,B]  226-20-247ms   | [S3,MB5,F]  247-7-254ms    | [S3,MB1,B]  254-20-275ms   | [S3,MB6,F]  275-7-282ms    | [S3,MB2,B]  284-20-304ms   | [S3,MB7,F]  304-7-311ms    | [S3,MB3,B]  312-20-332ms   | [S7,MB4,F]  332-8-340ms    | [S7,MB4,B]  345-25-370ms   | [S7,MB5,F]  370-8-378ms    | [S7,MB5,B]  381-25-406ms   | [S7,MB6,F]  407-8-415ms    | [S7,MB6,B]  417-26-443ms   | [S7,MB7,F]  443-8-451ms    | [S7,MB7,B]  454-26-480ms   | [S3,MB4,B]  482-20-503ms   | [S3,MB5,B]  503-20-523ms   | [S3,MB6,B]  524-20-544ms   | [S3,MB7,B]  548-20-568ms  
+[rank0]:2026-01-03 08:55:24,176 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank1]:2026-01-03 08:55:26,860 - Avg. fwd time: 8.0346 / Avg. bwd time: 22.6973 / Avg. batch time: 615.5411 (ms) / GPU bubble ratio: 20.12%
+[rank2]:2026-01-03 08:55:26,817 - Avg. fwd time: 7.1313 / Avg. bwd time: 20.1765 / Avg. batch time: 566.9363 (ms) / GPU bubble ratio: 22.93%
+[rank3]:2026-01-03 08:55:26,778 - Avg. fwd time: 7.6892 / Avg. bwd time: 22.9450 / Avg. batch time: 534.8725 (ms) / GPU bubble ratio: 8.36%
+[rank1]:2026-01-03 08:55:26,930 -  step: 1450  loss: -4.0000  grad_norm:  0.4011  memory: 56.21GiB(40.20%)  tps: 6,016  tflops: 280.59  mfu: 28.37%
+[rank2]:2026-01-03 08:55:26,927 -  step: 1450  loss: -4.0000  grad_norm:  0.4011  memory: 45.36GiB(32.45%)  tps: 6,016  tflops: 280.59  mfu: 28.37%
+[rank3]:2026-01-03 08:55:26,932 -  step: 1450  loss:  0.1862  grad_norm:  0.4011  memory: 51.75GiB(37.01%)  tps: 6,016  tflops: 280.59  mfu: 28.37%
+[rank0]:2026-01-03 08:55:26,900 - Avg. fwd time: 7.2052 / Avg. bwd time: 21.4259 / Avg. batch time: 650.5251 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:55:26,934 -  step: 1450  loss: -4.0000  grad_norm:  0.4011  memory: 61.68GiB(44.11%)  tps: 6,016  tflops: 280.59  mfu: 28.37%
+[rank0]:2026-01-03 08:57:40,514 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:57:43,174 - Avg. fwd time: 7.6944 / Avg. bwd time: 22.9514 / Avg. batch time: 535.0563 (ms) / GPU bubble ratio: 8.36%
+[rank1]:2026-01-03 08:57:43,261 - Avg. fwd time: 8.0393 / Avg. bwd time: 22.7010 / Avg. batch time: 615.7271 (ms) / GPU bubble ratio: 20.12%
+[rank2]:2026-01-03 08:57:43,214 - Avg. fwd time: 7.1355 / Avg. bwd time: 20.1799 / Avg. batch time: 567.1125 (ms) / GPU bubble ratio: 22.93%
+[rank1]:2026-01-03 08:57:43,330 -  step: 1500  loss: -4.0000  grad_norm:  0.6637  memory: 56.21GiB(40.20%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank2]:2026-01-03 08:57:43,328 -  step: 1500  loss: -4.0000  grad_norm:  0.6637  memory: 45.36GiB(32.45%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank0]:2026-01-03 08:57:43,300 - Avg. fwd time: 7.2099 / Avg. bwd time: 21.4286 / Avg. batch time: 650.7198 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 08:57:43,334 -  step: 1500  loss: -4.0000  grad_norm:  0.6637  memory: 61.68GiB(44.11%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank3]:2026-01-03 08:57:43,332 -  step: 1500  loss:  0.2552  grad_norm:  0.6637  memory: 51.75GiB(37.01%)  tps: 6,006  tflops: 280.12  mfu: 28.32%
+[rank3]:2026-01-03 08:57:43,546 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0857_step1500_rank3.svg
+[rank3]:			> Batch Time: 657.31 ms, GPU Bubble Ratio: 29.49%, 24.32%, 32.74%, 24.28%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-7-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  24-7-31ms      | [S4,MB0,F]  39-9-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  56-7-63ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-78ms      | [S0,MB5,F]  78-7-85ms      | [S0,MB6,F]  169-7-176ms    | [S4,MB0,B]  176-20-196ms   | [S0,MB7,F]  205-7-212ms    | [S4,MB1,B]  228-20-249ms   | [S4,MB4,F]  249-7-256ms    | [S4,MB2,B]  256-20-277ms   | [S4,MB5,F]  278-7-285ms    | [S4,MB3,B]  286-20-306ms   | [S4,MB6,F]  311-7-318ms    | [S0,MB0,B]  319-22-341ms   | [S4,MB7,F]  345-7-352ms    | [S0,MB1,B]  352-22-375ms   | [S0,MB2,B]  378-22-401ms   | [S0,MB3,B]  411-22-434ms   | [S4,MB4,B]  434-20-454ms   | [S4,MB5,B]  457-20-478ms   | [S4,MB6,B]  487-20-507ms   | [S4,MB7,B]  529-20-549ms   | [S0,MB4,B]  555-22-577ms   | [S0,MB5,B]  581-22-603ms   | [S0,MB6,B]  606-22-629ms   | [S0,MB7,B]  634-22-657ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-7-64ms      | [S5,MB2,F]  65-7-72ms      | [S5,MB3,F]  72-7-79ms      | [S1,MB4,F]  139-8-148ms    | [S5,MB0,B]  148-20-168ms   | [S1,MB5,F]  175-8-184ms    | [S5,MB1,B]  184-20-204ms   | [S1,MB6,F]  212-8-220ms    | [S5,MB2,B]  221-20-241ms   | [S1,MB7,F]  248-8-257ms    | [S5,MB3,B]  257-20-278ms   | [S5,MB4,F]  278-7-285ms    | [S1,MB0,B]  285-25-311ms   | [S5,MB5,F]  311-7-318ms    | [S1,MB1,B]  318-25-344ms   | [S5,MB6,F]  344-7-351ms    | [S1,MB2,B]  352-25-377ms   | [S5,MB7,F]  377-7-385ms    | [S1,MB3,B]  385-25-410ms   | [S5,MB4,B]  410-20-431ms   | [S5,MB5,B]  436-20-457ms   | [S5,MB6,B]  466-20-486ms   | [S5,MB7,B]  507-20-527ms   | [S1,MB4,B]  529-25-554ms   | [S1,MB5,B]  554-25-579ms   | [S1,MB6,B]  580-25-605ms   | [S1,MB7,B]  606-25-631ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-7-36ms      | [S2,MB2,F]  38-7-45ms      | [S2,MB3,F]  47-7-54ms      | [S6,MB0,F]  57-8-66ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-139ms   | [S6,MB3,F]  147-6-154ms    | [S6,MB1,B]  154-20-175ms   | [S2,MB4,F]  184-7-191ms    | [S6,MB2,B]  191-20-211ms   | [S2,MB5,F]  220-7-227ms    | [S6,MB3,B]  228-20-248ms   | [S2,MB6,F]  248-7-255ms    | [S2,MB0,B]  257-20-278ms   | [S2,MB7,F]  278-7-285ms    | [S2,MB1,B]  285-20-305ms   | [S6,MB4,F]  306-7-313ms    | [S2,MB2,B]  318-20-338ms   | [S6,MB5,F]  339-7-346ms    | [S2,MB3,B]  351-20-372ms   | [S6,MB6,F]  372-7-379ms    | [S6,MB4,B]  384-20-405ms   | [S6,MB7,F]  408-7-415ms    | [S6,MB5,B]  415-20-436ms   | [S6,MB6,B]  445-20-466ms   | [S6,MB7,B]  484-20-504ms   | [S2,MB4,B]  506-20-527ms   | [S2,MB5,B]  527-20-547ms   | [S2,MB6,B]  547-20-568ms   | [S2,MB7,B]  573-20-593ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  54-6-61ms      | [S7,MB0,F]  73-10-83ms     | [S7,MB0,B]  85-25-111ms    | [S7,MB1,F]  111-7-119ms    | [S7,MB1,B]  121-25-147ms   | [S7,MB2,F]  147-8-155ms    | [S7,MB2,B]  157-26-183ms   | [S7,MB3,F]  183-8-192ms    | [S7,MB3,B]  194-26-220ms   | [S3,MB4,F]  220-7-227ms    | [S3,MB0,B]  227-20-248ms   | [S3,MB5,F]  248-7-255ms    | [S3,MB1,B]  255-20-276ms   | [S3,MB6,F]  276-7-283ms    | [S3,MB2,B]  285-20-305ms   | [S3,MB7,F]  306-7-313ms    | [S3,MB3,B]  313-20-334ms   | [S7,MB4,F]  334-8-342ms    | [S7,MB4,B]  346-25-372ms   | [S7,MB5,F]  372-8-380ms    | [S7,MB5,B]  382-26-408ms   | [S7,MB6,F]  408-8-416ms    | [S7,MB6,B]  418-26-445ms   | [S7,MB7,F]  445-8-453ms    | [S7,MB7,B]  455-26-481ms   | [S3,MB4,B]  484-20-504ms   | [S3,MB5,B]  505-20-525ms   | [S3,MB6,B]  525-20-546ms   | [S3,MB7,B]  550-20-570ms  
+[rank0]:2026-01-03 08:59:56,944 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 08:59:59,584 - Avg. fwd time: 7.6990 / Avg. bwd time: 22.9571 / Avg. batch time: 535.2145 (ms) / GPU bubble ratio: 8.35%
+[rank1]:2026-01-03 08:59:59,663 - Avg. fwd time: 8.0435 / Avg. bwd time: 22.7041 / Avg. batch time: 615.9130 (ms) / GPU bubble ratio: 20.13%
+[rank2]:2026-01-03 08:59:59,621 - Avg. fwd time: 7.1391 / Avg. bwd time: 20.1826 / Avg. batch time: 567.2915 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 08:59:59,733 -  step: 1550  loss: -4.0000  grad_norm:  0.5026  memory: 56.21GiB(40.20%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank0]:2026-01-03 08:59:59,703 - Avg. fwd time: 7.2140 / Avg. bwd time: 21.4310 / Avg. batch time: 650.9119 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 08:59:59,737 -  step: 1550  loss: -4.0000  grad_norm:  0.5026  memory: 61.68GiB(44.11%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank2]:2026-01-03 08:59:59,731 -  step: 1550  loss: -4.0000  grad_norm:  0.5026  memory: 45.36GiB(32.45%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank3]:2026-01-03 08:59:59,735 -  step: 1550  loss:  0.2663  grad_norm:  0.5026  memory: 51.75GiB(37.01%)  tps: 6,006  tflops: 280.11  mfu: 28.32%
+[rank0]:2026-01-03 09:02:12,527 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:02:15,178 - Avg. fwd time: 7.7013 / Avg. bwd time: 22.9600 / Avg. batch time: 535.2920 (ms) / GPU bubble ratio: 8.35%
+[rank2]:2026-01-03 09:02:15,216 - Avg. fwd time: 7.1409 / Avg. bwd time: 20.1842 / Avg. batch time: 567.3584 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 09:02:15,263 - Avg. fwd time: 8.0455 / Avg. bwd time: 22.7056 / Avg. batch time: 615.9836 (ms) / GPU bubble ratio: 20.12%
+[rank0]:2026-01-03 09:02:15,304 - Avg. fwd time: 7.2162 / Avg. bwd time: 21.4323 / Avg. batch time: 650.9871 (ms) / GPU bubble ratio: 29.59%
+[rank1]:2026-01-03 09:02:15,334 -  step: 1600  loss: -4.0000  grad_norm:  0.8120  memory: 56.21GiB(40.20%)  tps: 6,041  tflops: 281.77  mfu: 28.49%
+[rank0]:2026-01-03 09:02:15,338 -  step: 1600  loss: -4.0000  grad_norm:  0.8120  memory: 61.68GiB(44.11%)  tps: 6,041  tflops: 281.77  mfu: 28.49%
+[rank3]:2026-01-03 09:02:15,336 -  step: 1600  loss:  0.4005  grad_norm:  0.8120  memory: 51.75GiB(37.01%)  tps: 6,041  tflops: 281.77  mfu: 28.49%
+[rank2]:2026-01-03 09:02:15,331 -  step: 1600  loss: -4.0000  grad_norm:  0.8120  memory: 45.36GiB(32.45%)  tps: 6,041  tflops: 281.77  mfu: 28.49%
+[rank3]:2026-01-03 09:02:15,548 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0902_step1600_rank3.svg
+[rank3]:			> Batch Time: 655.27 ms, GPU Bubble Ratio: 29.41%, 24.31%, 32.71%, 24.29%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-7-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  24-7-31ms      | [S4,MB0,F]  39-8-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  56-7-63ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-77ms      | [S0,MB5,F]  77-7-84ms      | [S0,MB6,F]  168-7-175ms    | [S4,MB0,B]  176-20-196ms   | [S0,MB7,F]  204-7-211ms    | [S4,MB1,B]  228-20-248ms   | [S4,MB4,F]  248-6-255ms    | [S4,MB2,B]  256-20-276ms   | [S4,MB5,F]  278-7-285ms    | [S4,MB3,B]  285-20-305ms   | [S4,MB6,F]  311-7-318ms    | [S0,MB0,B]  318-22-341ms   | [S4,MB7,F]  344-7-351ms    | [S0,MB1,B]  351-22-374ms   | [S0,MB2,B]  377-22-400ms   | [S0,MB3,B]  410-22-433ms   | [S4,MB4,B]  433-20-453ms   | [S4,MB5,B]  456-20-476ms   | [S4,MB6,B]  485-20-506ms   | [S4,MB7,B]  528-20-548ms   | [S0,MB4,B]  553-22-576ms   | [S0,MB5,B]  579-22-601ms   | [S0,MB6,B]  604-22-627ms   | [S0,MB7,B]  632-22-655ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-6-64ms      | [S5,MB2,F]  64-7-71ms      | [S5,MB3,F]  72-7-79ms      | [S1,MB4,F]  139-8-148ms    | [S5,MB0,B]  148-20-168ms   | [S1,MB5,F]  175-8-183ms    | [S5,MB1,B]  184-20-204ms   | [S1,MB6,F]  211-8-220ms    | [S5,MB2,B]  220-20-240ms   | [S1,MB7,F]  248-8-257ms    | [S5,MB3,B]  257-20-277ms   | [S5,MB4,F]  277-6-284ms    | [S1,MB0,B]  285-25-310ms   | [S5,MB5,F]  310-7-317ms    | [S1,MB1,B]  317-25-343ms   | [S5,MB6,F]  343-7-350ms    | [S1,MB2,B]  351-25-376ms   | [S5,MB7,F]  376-7-384ms    | [S1,MB3,B]  384-25-409ms   | [S5,MB4,B]  409-20-430ms   | [S5,MB5,B]  435-20-456ms   | [S5,MB6,B]  464-20-485ms   | [S5,MB7,B]  505-20-525ms   | [S1,MB4,B]  527-25-553ms   | [S1,MB5,B]  552-25-578ms   | [S1,MB6,B]  578-25-604ms   | [S1,MB7,B]  604-25-629ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-45ms      | [S2,MB3,F]  47-6-54ms      | [S6,MB0,F]  57-8-66ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-138ms   | [S6,MB3,F]  147-6-154ms    | [S6,MB1,B]  154-20-174ms   | [S2,MB4,F]  183-7-190ms    | [S6,MB2,B]  191-20-211ms   | [S2,MB5,F]  220-7-227ms    | [S6,MB3,B]  227-20-247ms   | [S2,MB6,F]  248-7-255ms    | [S2,MB0,B]  257-20-277ms   | [S2,MB7,F]  277-7-284ms    | [S2,MB1,B]  284-20-305ms   | [S6,MB4,F]  305-7-312ms    | [S2,MB2,B]  317-20-337ms   | [S6,MB5,F]  338-7-345ms    | [S2,MB3,B]  350-20-371ms   | [S6,MB6,F]  371-7-378ms    | [S6,MB4,B]  383-20-404ms   | [S6,MB7,F]  407-6-414ms    | [S6,MB5,B]  414-20-435ms   | [S6,MB6,B]  444-20-464ms   | [S6,MB7,B]  483-20-503ms   | [S2,MB4,B]  505-20-525ms   | [S2,MB5,B]  525-20-546ms   | [S2,MB6,B]  546-20-566ms   | [S2,MB7,B]  571-20-591ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  73-10-83ms     | [S7,MB0,B]  85-25-111ms    | [S7,MB1,F]  111-7-119ms    | [S7,MB1,B]  121-25-146ms   | [S7,MB2,F]  147-8-155ms    | [S7,MB2,B]  157-25-183ms   | [S7,MB3,F]  183-8-191ms    | [S7,MB3,B]  193-26-219ms   | [S3,MB4,F]  219-7-227ms    | [S3,MB0,B]  227-20-247ms   | [S3,MB5,F]  247-7-255ms    | [S3,MB1,B]  255-20-275ms   | [S3,MB6,F]  275-7-283ms    | [S3,MB2,B]  284-20-304ms   | [S3,MB7,F]  305-7-312ms    | [S3,MB3,B]  312-20-332ms   | [S7,MB4,F]  332-8-340ms    | [S7,MB4,B]  345-25-371ms   | [S7,MB5,F]  371-8-379ms    | [S7,MB5,B]  381-25-407ms   | [S7,MB6,F]  407-8-415ms    | [S7,MB6,B]  417-26-443ms   | [S7,MB7,F]  443-8-452ms    | [S7,MB7,B]  454-26-480ms   | [S3,MB4,B]  482-20-503ms   | [S3,MB5,B]  503-20-524ms   | [S3,MB6,B]  524-20-544ms   | [S3,MB7,B]  548-20-569ms  
+[rank0]:2026-01-03 09:04:28,776 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:04:31,430 - Avg. fwd time: 7.7043 / Avg. bwd time: 22.9637 / Avg. batch time: 535.3987 (ms) / GPU bubble ratio: 8.35%
+[rank1]:2026-01-03 09:04:31,511 - Avg. fwd time: 8.0484 / Avg. bwd time: 22.7079 / Avg. batch time: 616.1146 (ms) / GPU bubble ratio: 20.13%
+[rank2]:2026-01-03 09:04:31,468 - Avg. fwd time: 7.1434 / Avg. bwd time: 20.1860 / Avg. batch time: 567.4838 (ms) / GPU bubble ratio: 22.95%
+[rank0]:2026-01-03 09:04:31,552 - Avg. fwd time: 7.2190 / Avg. bwd time: 21.4339 / Avg. batch time: 651.1238 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 09:04:31,586 -  step: 1650  loss: -4.0000  grad_norm:  0.8588  memory: 61.68GiB(44.11%)  tps: 6,013  tflops: 280.43  mfu: 28.35%
+[rank1]:2026-01-03 09:04:31,582 -  step: 1650  loss: -4.0000  grad_norm:  0.8588  memory: 56.21GiB(40.20%)  tps: 6,013  tflops: 280.43  mfu: 28.35%
+[rank2]:2026-01-03 09:04:31,580 -  step: 1650  loss: -4.0000  grad_norm:  0.8588  memory: 45.36GiB(32.45%)  tps: 6,013  tflops: 280.43  mfu: 28.35%
+[rank3]:2026-01-03 09:04:31,585 -  step: 1650  loss:  0.4343  grad_norm:  0.8588  memory: 51.75GiB(37.01%)  tps: 6,013  tflops: 280.43  mfu: 28.35%
+[rank0]:2026-01-03 09:06:45,121 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 09:06:47,805 - Avg. fwd time: 7.1461 / Avg. bwd time: 20.1880 / Avg. batch time: 567.5857 (ms) / GPU bubble ratio: 22.95%
+[rank3]:2026-01-03 09:06:47,766 - Avg. fwd time: 7.7074 / Avg. bwd time: 22.9676 / Avg. batch time: 535.5087 (ms) / GPU bubble ratio: 8.35%
+[rank0]:2026-01-03 09:06:47,897 - Avg. fwd time: 7.2219 / Avg. bwd time: 21.4355 / Avg. batch time: 651.2404 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 09:06:47,930 -  step: 1700  loss: -4.0000  grad_norm:  0.6414  memory: 61.68GiB(44.11%)  tps: 6,008  tflops: 280.23  mfu: 28.33%
+[rank1]:2026-01-03 09:06:47,855 - Avg. fwd time: 8.0515 / Avg. bwd time: 22.7103 / Avg. batch time: 616.2229 (ms) / GPU bubble ratio: 20.13%
+[rank1]:2026-01-03 09:06:47,926 -  step: 1700  loss: -4.0000  grad_norm:  0.6414  memory: 56.21GiB(40.20%)  tps: 6,008  tflops: 280.23  mfu: 28.33%
+[rank2]:2026-01-03 09:06:47,924 -  step: 1700  loss: -4.0000  grad_norm:  0.6414  memory: 45.36GiB(32.45%)  tps: 6,008  tflops: 280.23  mfu: 28.33%
+[rank3]:2026-01-03 09:06:47,928 -  step: 1700  loss:  0.4013  grad_norm:  0.6414  memory: 51.75GiB(37.01%)  tps: 6,008  tflops: 280.23  mfu: 28.33%
+[rank3]:2026-01-03 09:06:48,149 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0906_step1700_rank3.svg
+[rank3]:			> Batch Time: 654.81 ms, GPU Bubble Ratio: 29.45%, 24.24%, 32.70%, 24.35%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-7-16ms       | [S0,MB2,F]  16-7-23ms      | [S0,MB3,F]  23-7-30ms      | [S4,MB0,F]  39-8-48ms      | [S4,MB1,F]  48-7-55ms      | [S4,MB2,F]  55-7-62ms      | [S4,MB3,F]  63-7-70ms      | [S0,MB4,F]  70-7-77ms      | [S0,MB5,F]  77-7-84ms      | [S0,MB6,F]  168-7-175ms    | [S4,MB0,B]  175-20-195ms   | [S0,MB7,F]  204-6-211ms    | [S4,MB1,B]  227-20-247ms   | [S4,MB4,F]  248-6-255ms    | [S4,MB2,B]  255-20-276ms   | [S4,MB5,F]  277-7-284ms    | [S4,MB3,B]  284-20-304ms   | [S4,MB6,F]  310-7-317ms    | [S0,MB0,B]  317-23-340ms   | [S4,MB7,F]  343-7-350ms    | [S0,MB1,B]  350-22-373ms   | [S0,MB2,B]  377-22-399ms   | [S0,MB3,B]  410-22-433ms   | [S4,MB4,B]  433-20-453ms   | [S4,MB5,B]  455-20-476ms   | [S4,MB6,B]  485-20-505ms   | [S4,MB7,B]  527-20-547ms   | [S0,MB4,B]  552-22-575ms   | [S0,MB5,B]  578-22-601ms   | [S0,MB6,B]  604-22-626ms   | [S0,MB7,B]  632-22-654ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-47ms      | [S5,MB0,F]  48-8-57ms      | [S5,MB1,F]  57-7-64ms      | [S5,MB2,F]  64-7-71ms      | [S5,MB3,F]  71-7-79ms      | [S1,MB4,F]  139-8-147ms    | [S5,MB0,B]  147-20-167ms   | [S1,MB5,F]  174-8-183ms    | [S5,MB1,B]  183-20-203ms   | [S1,MB6,F]  211-8-219ms    | [S5,MB2,B]  220-20-240ms   | [S1,MB7,F]  247-8-256ms    | [S5,MB3,B]  256-20-276ms   | [S5,MB4,F]  277-6-284ms    | [S1,MB0,B]  284-25-309ms   | [S5,MB5,F]  310-7-317ms    | [S1,MB1,B]  317-25-342ms   | [S5,MB6,F]  343-7-350ms    | [S1,MB2,B]  350-25-376ms   | [S5,MB7,F]  376-7-384ms    | [S1,MB3,B]  384-25-409ms   | [S5,MB4,B]  409-20-430ms   | [S5,MB5,B]  434-20-455ms   | [S5,MB6,B]  464-20-484ms   | [S5,MB7,B]  504-20-524ms   | [S1,MB4,B]  526-25-552ms   | [S1,MB5,B]  552-25-577ms   | [S1,MB6,B]  577-25-603ms   | [S1,MB7,B]  603-25-629ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  38-6-45ms      | [S2,MB3,F]  47-6-54ms      | [S6,MB0,F]  57-8-66ms      | [S6,MB1,F]  66-6-73ms      | [S6,MB2,F]  111-6-118ms    | [S6,MB0,B]  118-20-138ms   | [S6,MB3,F]  147-6-153ms    | [S6,MB1,B]  154-20-174ms   | [S2,MB4,F]  183-6-190ms    | [S6,MB2,B]  190-20-210ms   | [S2,MB5,F]  219-7-226ms    | [S6,MB3,B]  226-20-247ms   | [S2,MB6,F]  247-7-254ms    | [S2,MB0,B]  256-20-276ms   | [S2,MB7,F]  276-7-284ms    | [S2,MB1,B]  284-20-304ms   | [S6,MB4,F]  304-7-312ms    | [S2,MB2,B]  316-20-337ms   | [S6,MB5,F]  337-7-344ms    | [S2,MB3,B]  350-20-370ms   | [S6,MB6,F]  370-7-378ms    | [S6,MB4,B]  383-20-404ms   | [S6,MB7,F]  406-6-413ms    | [S6,MB5,B]  414-20-434ms   | [S6,MB6,B]  443-20-463ms   | [S6,MB7,B]  481-20-502ms   | [S2,MB4,B]  504-20-524ms   | [S2,MB5,B]  524-20-545ms   | [S2,MB6,B]  545-20-565ms   | [S2,MB7,B]  570-20-590ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-38ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  73-10-83ms     | [S7,MB0,B]  85-25-111ms    | [S7,MB1,F]  110-7-118ms    | [S7,MB1,B]  120-25-146ms   | [S7,MB2,F]  146-8-154ms    | [S7,MB2,B]  157-25-182ms   | [S7,MB3,F]  182-8-190ms    | [S7,MB3,B]  193-26-219ms   | [S3,MB4,F]  219-7-226ms    | [S3,MB0,B]  226-20-247ms   | [S3,MB5,F]  247-7-254ms    | [S3,MB1,B]  254-20-275ms   | [S3,MB6,F]  275-7-282ms    | [S3,MB2,B]  283-20-304ms   | [S3,MB7,F]  304-7-311ms    | [S3,MB3,B]  311-20-332ms   | [S7,MB4,F]  332-8-340ms    | [S7,MB4,B]  344-25-370ms   | [S7,MB5,F]  370-8-378ms    | [S7,MB5,B]  380-25-406ms   | [S7,MB6,F]  406-8-414ms    | [S7,MB6,B]  416-26-442ms   | [S7,MB7,F]  443-8-451ms    | [S7,MB7,B]  453-26-479ms   | [S3,MB4,B]  481-20-502ms   | [S3,MB5,B]  502-20-523ms   | [S3,MB6,B]  523-20-543ms   | [S3,MB7,B]  548-20-568ms  
+[rank0]:2026-01-03 09:09:01,363 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:09:04,023 - Avg. fwd time: 7.7100 / Avg. bwd time: 22.9708 / Avg. batch time: 535.6005 (ms) / GPU bubble ratio: 8.35%
+[rank0]:2026-01-03 09:09:04,148 - Avg. fwd time: 7.2244 / Avg. bwd time: 21.4369 / Avg. batch time: 651.3616 (ms) / GPU bubble ratio: 29.60%
+[rank1]:2026-01-03 09:09:04,106 - Avg. fwd time: 8.0540 / Avg. bwd time: 22.7123 / Avg. batch time: 616.3374 (ms) / GPU bubble ratio: 20.13%
+[rank2]:2026-01-03 09:09:04,061 - Avg. fwd time: 7.1481 / Avg. bwd time: 20.1896 / Avg. batch time: 567.6955 (ms) / GPU bubble ratio: 22.95%
+[rank0]:2026-01-03 09:09:04,182 -  step: 1750  loss: -4.0000  grad_norm:  0.6141  memory: 61.68GiB(44.11%)  tps: 6,012  tflops: 280.42  mfu: 28.35%
+[rank1]:2026-01-03 09:09:04,178 -  step: 1750  loss: -4.0000  grad_norm:  0.6141  memory: 56.21GiB(40.20%)  tps: 6,012  tflops: 280.42  mfu: 28.35%
+[rank2]:2026-01-03 09:09:04,175 -  step: 1750  loss: -4.0000  grad_norm:  0.6141  memory: 45.36GiB(32.45%)  tps: 6,012  tflops: 280.42  mfu: 28.35%
+[rank3]:2026-01-03 09:09:04,180 -  step: 1750  loss:  0.4080  grad_norm:  0.6141  memory: 51.75GiB(37.01%)  tps: 6,012  tflops: 280.42  mfu: 28.35%
+[rank0]:2026-01-03 09:11:15,376 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank2]:2026-01-03 09:11:17,965 - Avg. fwd time: 7.1467 / Avg. bwd time: 20.1883 / Avg. batch time: 567.6151 (ms) / GPU bubble ratio: 22.95%
+[rank3]:2026-01-03 09:11:17,926 - Avg. fwd time: 7.7082 / Avg. bwd time: 22.9686 / Avg. batch time: 535.5353 (ms) / GPU bubble ratio: 8.35%
+[rank0]:2026-01-03 09:11:18,052 - Avg. fwd time: 7.2228 / Avg. bwd time: 21.4362 / Avg. batch time: 651.2780 (ms) / GPU bubble ratio: 29.59%
+[rank1]:2026-01-03 09:11:18,010 - Avg. fwd time: 8.0523 / Avg. bwd time: 22.7112 / Avg. batch time: 616.2556 (ms) / GPU bubble ratio: 20.13%
+[rank0]:2026-01-03 09:11:18,086 -  step: 1800  loss: -4.0000  grad_norm:  0.3235  memory: 61.68GiB(44.11%)  tps: 6,118  tflops: 285.34  mfu: 28.85%
+[rank1]:2026-01-03 09:11:18,082 -  step: 1800  loss: -4.0000  grad_norm:  0.3235  memory: 56.21GiB(40.20%)  tps: 6,118  tflops: 285.34  mfu: 28.85%
+[rank2]:2026-01-03 09:11:18,080 -  step: 1800  loss: -4.0000  grad_norm:  0.3235  memory: 45.36GiB(32.45%)  tps: 6,118  tflops: 285.34  mfu: 28.85%
+[rank3]:2026-01-03 09:11:18,084 -  step: 1800  loss:  0.0762  grad_norm:  0.3235  memory: 51.75GiB(37.01%)  tps: 6,118  tflops: 285.34  mfu: 28.85%
+[rank3]:2026-01-03 09:11:18,303 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0911_step1800_rank3.svg
+[rank3]:			> Batch Time: 641.16 ms, GPU Bubble Ratio: 29.10%, 24.04%, 32.49%, 24.54%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-22ms      | [S0,MB3,F]  23-6-29ms      | [S4,MB0,F]  38-8-46ms      | [S4,MB1,F]  47-6-53ms      | [S4,MB2,F]  53-6-60ms      | [S4,MB3,F]  60-6-67ms      | [S0,MB4,F]  67-6-74ms      | [S0,MB5,F]  74-6-81ms      | [S0,MB6,F]  164-6-170ms    | [S4,MB0,B]  171-20-191ms   | [S0,MB7,F]  199-6-205ms    | [S4,MB1,B]  221-20-241ms   | [S4,MB4,F]  241-6-248ms    | [S4,MB2,B]  248-20-268ms   | [S4,MB5,F]  270-6-277ms    | [S4,MB3,B]  277-20-297ms   | [S4,MB6,F]  302-6-309ms    | [S0,MB0,B]  309-22-332ms   | [S4,MB7,F]  335-6-341ms    | [S0,MB1,B]  342-22-364ms   | [S0,MB2,B]  367-22-390ms   | [S0,MB3,B]  400-22-422ms   | [S4,MB4,B]  423-20-443ms   | [S4,MB5,B]  445-20-465ms   | [S4,MB6,B]  473-20-493ms   | [S4,MB7,B]  514-20-534ms   | [S0,MB4,B]  540-22-562ms   | [S0,MB5,B]  565-22-588ms   | [S0,MB6,B]  590-22-613ms   | [S0,MB7,B]  618-22-641ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-19ms      | [S1,MB1,F]  20-8-28ms      | [S1,MB2,F]  28-8-37ms      | [S1,MB3,F]  37-8-45ms      | [S5,MB0,F]  46-8-55ms      | [S5,MB1,F]  55-6-62ms      | [S5,MB2,F]  62-6-69ms      | [S5,MB3,F]  69-6-76ms      | [S1,MB4,F]  135-8-143ms    | [S5,MB0,B]  144-20-164ms   | [S1,MB5,F]  170-8-178ms    | [S5,MB1,B]  179-20-199ms   | [S1,MB6,F]  205-8-214ms    | [S5,MB2,B]  214-20-234ms   | [S1,MB7,F]  241-8-249ms    | [S5,MB3,B]  249-20-269ms   | [S5,MB4,F]  270-6-276ms    | [S1,MB0,B]  277-25-302ms   | [S5,MB5,F]  302-6-309ms    | [S1,MB1,B]  309-25-334ms   | [S5,MB6,F]  334-6-341ms    | [S1,MB2,B]  342-25-367ms   | [S5,MB7,F]  367-6-374ms    | [S1,MB3,B]  374-25-399ms   | [S5,MB4,B]  400-20-420ms   | [S5,MB5,B]  424-20-444ms   | [S5,MB6,B]  453-20-473ms   | [S5,MB7,B]  492-19-512ms   | [S1,MB4,B]  514-25-539ms   | [S1,MB5,B]  539-25-564ms   | [S1,MB6,B]  564-25-589ms   | [S1,MB7,B]  590-25-615ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  19-8-28ms      | [S2,MB1,F]  28-6-35ms      | [S2,MB2,F]  37-6-43ms      | [S2,MB3,F]  45-6-52ms      | [S6,MB0,F]  55-8-63ms      | [S6,MB1,F]  64-6-70ms      | [S6,MB2,F]  108-6-114ms    | [S6,MB0,B]  114-20-134ms   | [S6,MB3,F]  143-6-149ms    | [S6,MB1,B]  149-20-169ms   | [S2,MB4,F]  178-6-185ms    | [S6,MB2,B]  185-20-205ms   | [S2,MB5,F]  213-6-220ms    | [S6,MB3,B]  220-20-240ms   | [S2,MB6,F]  241-6-247ms    | [S2,MB0,B]  249-20-269ms   | [S2,MB7,F]  269-6-276ms    | [S2,MB1,B]  276-20-297ms   | [S6,MB4,F]  297-6-304ms    | [S2,MB2,B]  308-20-329ms   | [S6,MB5,F]  329-6-336ms    | [S2,MB3,B]  341-20-361ms   | [S6,MB6,F]  362-6-368ms    | [S6,MB4,B]  374-20-394ms   | [S6,MB7,F]  397-6-403ms    | [S6,MB5,B]  403-20-424ms   | [S6,MB6,B]  432-20-452ms   | [S6,MB7,B]  470-19-490ms   | [S2,MB4,B]  492-20-512ms   | [S2,MB5,B]  512-20-532ms   | [S2,MB6,B]  532-20-553ms   | [S2,MB7,B]  557-20-578ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-8-37ms      | [S3,MB1,F]  37-6-44ms      | [S3,MB2,F]  44-6-50ms      | [S3,MB3,F]  52-6-58ms      | [S7,MB0,F]  70-9-80ms      | [S7,MB0,B]  82-25-107ms    | [S7,MB1,F]  107-7-115ms    | [S7,MB1,B]  117-25-142ms   | [S7,MB2,F]  142-7-150ms    | [S7,MB2,B]  152-25-177ms   | [S7,MB3,F]  178-7-185ms    | [S7,MB3,B]  187-25-213ms   | [S3,MB4,F]  213-6-220ms    | [S3,MB0,B]  220-20-240ms   | [S3,MB5,F]  240-6-247ms    | [S3,MB1,B]  248-20-268ms   | [S3,MB6,F]  268-6-275ms    | [S3,MB2,B]  276-20-296ms   | [S3,MB7,F]  297-6-303ms    | [S3,MB3,B]  304-20-324ms   | [S7,MB4,F]  324-7-331ms    | [S7,MB4,B]  336-25-361ms   | [S7,MB5,F]  361-7-369ms    | [S7,MB5,B]  371-25-396ms   | [S7,MB6,F]  396-7-404ms    | [S7,MB6,B]  406-25-432ms   | [S7,MB7,F]  432-7-439ms    | [S7,MB7,B]  442-25-467ms   | [S3,MB4,B]  469-20-490ms   | [S3,MB5,B]  490-20-510ms   | [S3,MB6,B]  510-20-530ms   | [S3,MB7,B]  535-19-555ms  
+[rank0]:2026-01-03 09:13:29,076 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:13:31,677 - Avg. fwd time: 7.7061 / Avg. bwd time: 22.9658 / Avg. batch time: 535.4569 (ms) / GPU bubble ratio: 8.35%
+[rank1]:2026-01-03 09:13:31,765 - Avg. fwd time: 8.0503 / Avg. bwd time: 22.7096 / Avg. batch time: 616.1838 (ms) / GPU bubble ratio: 20.13%
+[rank2]:2026-01-03 09:13:31,718 - Avg. fwd time: 7.1450 / Avg. bwd time: 20.1867 / Avg. batch time: 567.5462 (ms) / GPU bubble ratio: 22.95%
+[rank0]:2026-01-03 09:13:31,808 - Avg. fwd time: 7.2208 / Avg. bwd time: 21.4350 / Avg. batch time: 651.2022 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 09:13:31,842 -  step: 1850  loss: -4.0000  grad_norm:  0.5778  memory: 61.68GiB(44.11%)  tps: 6,125  tflops: 285.65  mfu: 28.88%
+[rank1]:2026-01-03 09:13:31,838 -  step: 1850  loss: -4.0000  grad_norm:  0.5778  memory: 56.21GiB(40.20%)  tps: 6,125  tflops: 285.65  mfu: 28.88%
+[rank2]:2026-01-03 09:13:31,835 -  step: 1850  loss: -4.0000  grad_norm:  0.5778  memory: 45.36GiB(32.45%)  tps: 6,125  tflops: 285.65  mfu: 28.88%
+[rank3]:2026-01-03 09:13:31,840 -  step: 1850  loss:  0.3571  grad_norm:  0.5778  memory: 51.75GiB(37.01%)  tps: 6,125  tflops: 285.65  mfu: 28.88%
+[rank0]:2026-01-03 09:15:42,018 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:15:44,600 - Avg. fwd time: 7.7029 / Avg. bwd time: 22.9617 / Avg. batch time: 535.3397 (ms) / GPU bubble ratio: 8.35%
+[rank2]:2026-01-03 09:15:44,641 - Avg. fwd time: 7.1424 / Avg. bwd time: 20.1845 / Avg. batch time: 567.4126 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 09:15:44,689 - Avg. fwd time: 8.0472 / Avg. bwd time: 22.7073 / Avg. batch time: 616.0463 (ms) / GPU bubble ratio: 20.12%
+[rank0]:2026-01-03 09:15:44,733 - Avg. fwd time: 7.2180 / Avg. bwd time: 21.4333 / Avg. batch time: 651.0590 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 09:15:44,767 -  step: 1900  loss: -4.0000  grad_norm:  0.3071  memory: 61.68GiB(44.11%)  tps: 6,163  tflops: 287.44  mfu: 29.06%
+[rank2]:2026-01-03 09:15:44,761 -  step: 1900  loss: -4.0000  grad_norm:  0.3071  memory: 45.36GiB(32.45%)  tps: 6,163  tflops: 287.44  mfu: 29.06%
+[rank1]:2026-01-03 09:15:44,763 -  step: 1900  loss: -4.0000  grad_norm:  0.3071  memory: 56.21GiB(40.20%)  tps: 6,163  tflops: 287.44  mfu: 29.06%
+[rank3]:2026-01-03 09:15:44,765 -  step: 1900  loss:  0.2043  grad_norm:  0.3071  memory: 51.75GiB(37.01%)  tps: 6,163  tflops: 287.44  mfu: 29.06%
+[rank3]:2026-01-03 09:15:44,984 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0915_step1900_rank3.svg
+[rank3]:			> Batch Time: 644.17 ms, GPU Bubble Ratio: 29.17%, 24.11%, 32.56%, 24.62%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-29ms      | [S4,MB0,F]  38-8-47ms      | [S4,MB1,F]  47-6-54ms      | [S4,MB2,F]  54-6-61ms      | [S4,MB3,F]  61-6-68ms      | [S0,MB4,F]  68-6-75ms      | [S0,MB5,F]  75-6-81ms      | [S0,MB6,F]  165-6-172ms    | [S4,MB0,B]  172-20-192ms   | [S0,MB7,F]  200-6-207ms    | [S4,MB1,B]  222-20-242ms   | [S4,MB4,F]  242-6-249ms    | [S4,MB2,B]  249-20-270ms   | [S4,MB5,F]  271-6-278ms    | [S4,MB3,B]  278-20-299ms   | [S4,MB6,F]  304-6-310ms    | [S0,MB0,B]  311-22-334ms   | [S4,MB7,F]  336-6-343ms    | [S0,MB1,B]  343-22-366ms   | [S0,MB2,B]  369-22-392ms   | [S0,MB3,B]  402-22-425ms   | [S4,MB4,B]  425-20-445ms   | [S4,MB5,B]  447-20-467ms   | [S4,MB6,B]  476-20-496ms   | [S4,MB7,B]  517-20-537ms   | [S0,MB4,B]  542-22-565ms   | [S0,MB5,B]  568-22-590ms   | [S0,MB6,B]  593-22-616ms   | [S0,MB7,B]  621-22-644ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-10-20ms      | [S1,MB1,F]  20-8-28ms      | [S1,MB2,F]  28-8-37ms      | [S1,MB3,F]  37-8-46ms      | [S5,MB0,F]  47-8-55ms      | [S5,MB1,F]  56-6-62ms      | [S5,MB2,F]  63-6-69ms      | [S5,MB3,F]  69-6-76ms      | [S1,MB4,F]  136-8-144ms    | [S5,MB0,B]  144-20-164ms   | [S1,MB5,F]  171-8-179ms    | [S5,MB1,B]  180-20-200ms   | [S1,MB6,F]  206-8-215ms    | [S5,MB2,B]  215-20-235ms   | [S1,MB7,F]  242-8-250ms    | [S5,MB3,B]  250-20-271ms   | [S5,MB4,F]  271-6-278ms    | [S1,MB0,B]  278-25-303ms   | [S5,MB5,F]  303-6-310ms    | [S1,MB1,B]  311-25-336ms   | [S5,MB6,F]  336-6-343ms    | [S1,MB2,B]  343-25-369ms   | [S5,MB7,F]  369-6-376ms    | [S1,MB3,B]  376-25-402ms   | [S5,MB4,B]  402-20-423ms   | [S5,MB5,B]  426-20-446ms   | [S5,MB6,B]  455-20-475ms   | [S5,MB7,B]  495-19-515ms   | [S1,MB4,B]  517-25-542ms   | [S1,MB5,B]  542-25-567ms   | [S1,MB6,B]  567-25-592ms   | [S1,MB7,B]  593-25-618ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-28ms      | [S2,MB1,F]  29-6-35ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  45-6-52ms      | [S6,MB0,F]  55-8-64ms      | [S6,MB1,F]  64-6-71ms      | [S6,MB2,F]  108-6-115ms    | [S6,MB0,B]  115-20-135ms   | [S6,MB3,F]  143-6-150ms    | [S6,MB1,B]  150-20-171ms   | [S2,MB4,F]  179-6-186ms    | [S6,MB2,B]  186-20-206ms   | [S2,MB5,F]  214-6-221ms    | [S6,MB3,B]  221-20-241ms   | [S2,MB6,F]  242-6-249ms    | [S2,MB0,B]  250-20-270ms   | [S2,MB7,F]  271-6-277ms    | [S2,MB1,B]  278-20-298ms   | [S6,MB4,F]  298-6-305ms    | [S2,MB2,B]  310-20-330ms   | [S6,MB5,F]  331-6-337ms    | [S2,MB3,B]  343-20-363ms   | [S6,MB6,F]  364-6-370ms    | [S6,MB4,B]  376-20-396ms   | [S6,MB7,F]  399-6-405ms    | [S6,MB5,B]  406-20-426ms   | [S6,MB6,B]  434-20-454ms   | [S6,MB7,B]  472-20-492ms   | [S2,MB4,B]  494-20-514ms   | [S2,MB5,B]  515-20-535ms   | [S2,MB6,B]  535-20-555ms   | [S2,MB7,B]  560-20-580ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  28-8-37ms      | [S3,MB1,F]  37-6-44ms      | [S3,MB2,F]  44-6-51ms      | [S3,MB3,F]  52-6-59ms      | [S7,MB0,F]  71-10-81ms     | [S7,MB0,B]  83-25-108ms    | [S7,MB1,F]  108-7-116ms    | [S7,MB1,B]  118-25-143ms   | [S7,MB2,F]  143-7-151ms    | [S7,MB2,B]  153-25-178ms   | [S7,MB3,F]  178-7-186ms    | [S7,MB3,B]  188-25-214ms   | [S3,MB4,F]  214-6-221ms    | [S3,MB0,B]  221-20-241ms   | [S3,MB5,F]  241-6-248ms    | [S3,MB1,B]  249-20-269ms   | [S3,MB6,F]  269-6-276ms    | [S3,MB2,B]  277-20-297ms   | [S3,MB7,F]  298-6-305ms    | [S3,MB3,B]  305-20-325ms   | [S7,MB4,F]  325-7-333ms    | [S7,MB4,B]  337-25-363ms   | [S7,MB5,F]  363-7-371ms    | [S7,MB5,B]  373-25-398ms   | [S7,MB6,F]  398-7-406ms    | [S7,MB6,B]  408-25-434ms   | [S7,MB7,F]  434-7-442ms    | [S7,MB7,B]  444-25-470ms   | [S3,MB4,B]  472-20-492ms   | [S3,MB5,B]  492-20-513ms   | [S3,MB6,B]  513-20-533ms   | [S3,MB7,B]  538-20-558ms  
+[rank0]:2026-01-03 09:17:54,814 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:17:57,392 - Avg. fwd time: 7.6994 / Avg. bwd time: 22.9571 / Avg. batch time: 535.2125 (ms) / GPU bubble ratio: 8.35%
+[rank2]:2026-01-03 09:17:57,434 - Avg. fwd time: 7.1396 / Avg. bwd time: 20.1821 / Avg. batch time: 567.2928 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 09:17:57,480 - Avg. fwd time: 8.0439 / Avg. bwd time: 22.7046 / Avg. batch time: 615.9186 (ms) / GPU bubble ratio: 20.12%
+[rank2]:2026-01-03 09:17:57,553 -  step: 1950  loss: -4.0000  grad_norm:  0.2778  memory: 45.36GiB(32.45%)  tps: 6,169  tflops: 287.73  mfu: 29.09%
+[rank0]:2026-01-03 09:17:57,526 - Avg. fwd time: 7.2149 / Avg. bwd time: 21.4315 / Avg. batch time: 650.9260 (ms) / GPU bubble ratio: 29.59%
+[rank0]:2026-01-03 09:17:57,560 -  step: 1950  loss: -4.0000  grad_norm:  0.2778  memory: 61.68GiB(44.11%)  tps: 6,169  tflops: 287.73  mfu: 29.09%
+[rank1]:2026-01-03 09:17:57,556 -  step: 1950  loss: -4.0000  grad_norm:  0.2778  memory: 56.21GiB(40.20%)  tps: 6,169  tflops: 287.73  mfu: 29.09%
+[rank3]:2026-01-03 09:17:57,558 -  step: 1950  loss:  0.1743  grad_norm:  0.2778  memory: 51.75GiB(37.01%)  tps: 6,169  tflops: 287.73  mfu: 29.09%
+[rank0]:2026-01-03 09:20:07,421 - [GC] Peforming periodical GC collection 0.00 seconds
+[rank3]:2026-01-03 09:20:10,009 - Avg. fwd time: 7.6959 / Avg. bwd time: 22.9526 / Avg. batch time: 535.0886 (ms) / GPU bubble ratio: 8.36%
+[rank2]:2026-01-03 09:20:10,049 - Avg. fwd time: 7.1369 / Avg. bwd time: 20.1797 / Avg. batch time: 567.1531 (ms) / GPU bubble ratio: 22.94%
+[rank1]:2026-01-03 09:20:10,099 - Avg. fwd time: 8.0408 / Avg. bwd time: 22.7022 / Avg. batch time: 615.7733 (ms) / GPU bubble ratio: 20.12%
+[rank2]:2026-01-03 09:20:10,171 -  step: 2000  loss: -4.0000  grad_norm:  0.2707  memory: 45.36GiB(32.45%)  tps: 6,177  tflops: 288.10  mfu: 29.13%
+[rank2]:2026-01-03 09:20:10,171 - ℹ️ final step: 2000  loss: -4.0000  grad_norm:  0.2707  tps: 6,199  tflops: 289.14  mfu: 28.02%
+[rank2]:2026-01-03 09:20:10,172 - Saving the checkpoint (or staging if async is enabled).
+[rank2]:2026-01-03 09:20:10,175 - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank1]:2026-01-03 09:20:10,174 -  step: 2000  loss: -4.0000  grad_norm:  0.2707  memory: 56.21GiB(40.20%)  tps: 6,177  tflops: 288.10  mfu: 29.13%
+[rank1]:2026-01-03 09:20:10,174 - ℹ️ final step: 2000  loss: -4.0000  grad_norm:  0.2707  tps: 6,200  tflops: 289.15  mfu: 28.02%
+[rank1]:2026-01-03 09:20:10,174 - Saving the checkpoint (or staging if async is enabled).
+[rank1]:2026-01-03 09:20:10,179 - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank0]:2026-01-03 09:20:10,144 - Avg. fwd time: 7.2119 / Avg. bwd time: 21.4295 / Avg. batch time: 650.7766 (ms) / GPU bubble ratio: 29.58%
+[rank0]:2026-01-03 09:20:10,178 -  step: 2000  loss: -4.0000  grad_norm:  0.2707  memory: 61.68GiB(44.11%)  tps: 6,177  tflops: 288.10  mfu: 29.13%
+[rank0]:2026-01-03 09:20:10,178 - ℹ️ final step: 2000  loss: -4.0000  grad_norm:  0.2707  tps: 6,200  tflops: 289.16  mfu: 28.03%
+[rank0]:2026-01-03 09:20:10,178 - Saving the checkpoint (or staging if async is enabled).
+[rank0]:2026-01-03 09:20:10,182 - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank3]:2026-01-03 09:20:10,176 -  step: 2000  loss:  0.2091  grad_norm:  0.2707  memory: 51.75GiB(37.01%)  tps: 6,177  tflops: 288.11  mfu: 29.13%
+[rank3]:2026-01-03 09:20:10,176 - ℹ️ final step: 2000  loss:  0.2091  grad_norm:  0.2707  tps: 6,202  tflops: 289.26  mfu: 28.04%
+[rank3]:2026-01-03 09:20:10,177 - Saving the checkpoint (or staging if async is enabled).
+[rank3]:2026-01-03 09:20:10,180 - Saving a model only checkpoint in torch.float16 at last step, step 2000.
+[rank0]:2026-01-03 09:20:20,725 - [GC] GC collection invoked by checkpointer. 0.00 seconds
+[rank2]:2026-01-03 09:20:20,782 - Destroying the purge thread.
+[rank1]:2026-01-03 09:20:20,782 - Destroying the purge thread.
+[rank0]:2026-01-03 09:20:20,783 - Sleeping 2 seconds for other ranks to complete
+[rank3]:2026-01-03 09:20:20,999 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0920_final2000_rank3.svg
+[rank3]:			> Batch Time: 650.23 ms, GPU Bubble Ratio: 29.30%, 24.16%, 32.60%, 24.40%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-9-9ms        | [S0,MB1,F]  9-6-16ms       | [S0,MB2,F]  16-6-23ms      | [S0,MB3,F]  23-6-30ms      | [S4,MB0,F]  39-8-47ms      | [S4,MB1,F]  48-6-55ms      | [S4,MB2,F]  55-6-62ms      | [S4,MB3,F]  62-6-69ms      | [S0,MB4,F]  69-6-76ms      | [S0,MB5,F]  76-7-83ms      | [S0,MB6,F]  166-6-173ms    | [S4,MB0,B]  173-20-194ms   | [S0,MB7,F]  202-6-209ms    | [S4,MB1,B]  225-20-245ms   | [S4,MB4,F]  246-6-252ms    | [S4,MB2,B]  253-20-273ms   | [S4,MB5,F]  275-6-281ms    | [S4,MB3,B]  282-20-302ms   | [S4,MB6,F]  307-7-314ms    | [S0,MB0,B]  314-22-337ms   | [S4,MB7,F]  340-6-347ms    | [S0,MB1,B]  347-22-370ms   | [S0,MB2,B]  373-22-396ms   | [S0,MB3,B]  406-22-429ms   | [S4,MB4,B]  429-20-449ms   | [S4,MB5,B]  452-20-472ms   | [S4,MB6,B]  481-20-501ms   | [S4,MB7,B]  523-20-543ms   | [S0,MB4,B]  548-22-571ms   | [S0,MB5,B]  574-22-596ms   | [S0,MB6,B]  599-22-622ms   | [S0,MB7,B]  627-22-650ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  9-11-20ms      | [S1,MB1,F]  20-8-29ms      | [S1,MB2,F]  29-8-38ms      | [S1,MB3,F]  38-8-46ms      | [S5,MB0,F]  47-8-56ms      | [S5,MB1,F]  56-6-63ms      | [S5,MB2,F]  64-6-70ms      | [S5,MB3,F]  71-6-78ms      | [S1,MB4,F]  137-8-146ms    | [S5,MB0,B]  146-20-166ms   | [S1,MB5,F]  173-8-181ms    | [S5,MB1,B]  182-20-202ms   | [S1,MB6,F]  209-8-217ms    | [S5,MB2,B]  218-20-238ms   | [S1,MB7,F]  245-8-254ms    | [S5,MB3,B]  254-20-274ms   | [S5,MB4,F]  275-6-282ms    | [S1,MB0,B]  282-25-307ms   | [S5,MB5,F]  307-6-314ms    | [S1,MB1,B]  314-25-340ms   | [S5,MB6,F]  340-7-347ms    | [S1,MB2,B]  347-25-372ms   | [S5,MB7,F]  373-7-380ms    | [S1,MB3,B]  380-25-405ms   | [S5,MB4,B]  406-20-426ms   | [S5,MB5,B]  431-20-451ms   | [S5,MB6,B]  460-20-480ms   | [S5,MB7,B]  500-20-520ms   | [S1,MB4,B]  522-25-548ms   | [S1,MB5,B]  547-25-573ms   | [S1,MB6,B]  573-25-598ms   | [S1,MB7,B]  599-25-624ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  20-8-29ms      | [S2,MB1,F]  29-6-36ms      | [S2,MB2,F]  37-6-44ms      | [S2,MB3,F]  46-6-53ms      | [S6,MB0,F]  56-8-65ms      | [S6,MB1,F]  65-6-72ms      | [S6,MB2,F]  110-6-117ms    | [S6,MB0,B]  117-20-137ms   | [S6,MB3,F]  145-6-152ms    | [S6,MB1,B]  152-20-172ms   | [S2,MB4,F]  181-6-188ms    | [S6,MB2,B]  188-20-208ms   | [S2,MB5,F]  217-6-224ms    | [S6,MB3,B]  224-20-245ms   | [S2,MB6,F]  245-6-252ms    | [S2,MB0,B]  254-20-274ms   | [S2,MB7,F]  274-6-281ms    | [S2,MB1,B]  281-20-302ms   | [S6,MB4,F]  302-7-309ms    | [S2,MB2,B]  314-20-334ms   | [S6,MB5,F]  334-6-341ms    | [S2,MB3,B]  347-20-367ms   | [S6,MB6,F]  367-6-374ms    | [S6,MB4,B]  380-20-400ms   | [S6,MB7,F]  403-6-410ms    | [S6,MB5,B]  410-20-430ms   | [S6,MB6,B]  439-20-460ms   | [S6,MB7,B]  478-20-498ms   | [S2,MB4,B]  500-20-520ms   | [S2,MB5,B]  520-20-541ms   | [S2,MB6,B]  541-20-561ms   | [S2,MB7,B]  566-20-587ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  29-8-37ms      | [S3,MB1,F]  38-6-45ms      | [S3,MB2,F]  45-6-52ms      | [S3,MB3,F]  53-6-60ms      | [S7,MB0,F]  72-10-82ms     | [S7,MB0,B]  84-25-110ms    | [S7,MB1,F]  109-7-117ms    | [S7,MB1,B]  119-25-145ms   | [S7,MB2,F]  145-7-153ms    | [S7,MB2,B]  155-25-181ms   | [S7,MB3,F]  181-7-189ms    | [S7,MB3,B]  191-25-217ms   | [S3,MB4,F]  217-7-224ms    | [S3,MB0,B]  224-20-245ms   | [S3,MB5,F]  245-7-252ms    | [S3,MB1,B]  252-20-272ms   | [S3,MB6,F]  273-7-280ms    | [S3,MB2,B]  281-20-301ms   | [S3,MB7,F]  302-7-309ms    | [S3,MB3,B]  309-20-329ms   | [S7,MB4,F]  329-7-337ms    | [S7,MB4,B]  341-25-367ms   | [S7,MB5,F]  367-7-375ms    | [S7,MB5,B]  377-25-403ms   | [S7,MB6,F]  403-8-411ms    | [S7,MB6,B]  413-25-439ms   | [S7,MB7,F]  439-8-447ms    | [S7,MB7,B]  449-25-475ms   | [S3,MB4,B]  477-20-498ms   | [S3,MB5,B]  498-20-519ms   | [S3,MB6,B]  519-20-539ms   | [S3,MB7,B]  544-20-564ms  
+[rank3]:2026-01-03 09:20:21,211 - ✅ Pipeline schedule is saved as: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200/pipeline_schedule/260103_0920_thry_final2000_rank3.svg
+[rank3]:			> Batch Time: 428.93 ms, GPU Bubble Ratio: 15.79%, 15.79%, 15.79%, 15.79%
+[rank3]:			  [Rank 0]	[S0,MB0,F]  0-7-7ms        | [S0,MB1,F]  7-7-15ms       | [S0,MB2,F]  15-7-22ms      | [S0,MB3,F]  22-7-30ms      | [S4,MB0,F]  30-7-37ms      | [S4,MB1,F]  37-7-45ms      | [S4,MB2,F]  45-7-52ms      | [S4,MB3,F]  52-7-60ms      | [S0,MB4,F]  60-7-67ms      | [S0,MB5,F]  67-7-75ms      | [S0,MB6,F]  75-7-82ms      | [S4,MB0,B]  105-15-120ms   | [S0,MB7,F]  120-7-127ms    | [S4,MB1,B]  127-15-142ms   | [S4,MB4,F]  150-7-158ms    | [S4,MB2,B]  158-15-173ms   | [S4,MB5,F]  173-7-180ms    | [S4,MB3,B]  180-15-195ms   | [S4,MB6,F]  195-7-203ms    | [S0,MB0,B]  203-15-218ms   | [S4,MB7,F]  218-7-225ms    | [S0,MB1,B]  225-15-240ms   | [S0,MB2,B]  240-15-255ms   | [S0,MB3,B]  263-15-278ms   | [S4,MB4,B]  285-15-301ms   | [S4,MB5,B]  308-15-323ms   | [S4,MB6,B]  331-15-346ms   | [S4,MB7,B]  353-15-368ms   | [S0,MB4,B]  368-15-383ms   | [S0,MB5,B]  383-15-398ms   | [S0,MB6,B]  398-15-413ms   | [S0,MB7,B]  413-15-428ms  
+[rank3]:			  [Rank 1]	[S1,MB0,F]  7-7-15ms       | [S1,MB1,F]  15-7-22ms      | [S1,MB2,F]  22-7-30ms      | [S1,MB3,F]  30-7-37ms      | [S5,MB0,F]  37-7-45ms      | [S5,MB1,F]  45-7-52ms      | [S5,MB2,F]  52-7-60ms      | [S5,MB3,F]  60-7-67ms      | [S1,MB4,F]  67-7-75ms      | [S5,MB0,B]  90-15-105ms    | [S1,MB5,F]  105-7-112ms    | [S5,MB1,B]  112-15-127ms   | [S1,MB6,F]  127-7-135ms    | [S5,MB2,B]  135-15-150ms   | [S1,MB7,F]  150-7-158ms    | [S5,MB3,B]  158-15-173ms   | [S5,MB4,F]  173-7-180ms    | [S1,MB0,B]  180-15-195ms   | [S5,MB5,F]  195-7-203ms    | [S1,MB1,B]  203-15-218ms   | [S5,MB6,F]  218-7-225ms    | [S1,MB2,B]  225-15-240ms   | [S5,MB7,F]  240-7-248ms    | [S1,MB3,B]  248-15-263ms   | [S5,MB4,B]  270-15-285ms   | [S5,MB5,B]  293-15-308ms   | [S5,MB6,B]  316-15-331ms   | [S5,MB7,B]  338-15-353ms   | [S1,MB4,B]  353-15-368ms   | [S1,MB5,B]  368-15-383ms   | [S1,MB6,B]  383-15-398ms   | [S1,MB7,B]  398-15-413ms  
+[rank3]:			  [Rank 2]	[S2,MB0,F]  15-7-22ms      | [S2,MB1,F]  22-7-30ms      | [S2,MB2,F]  30-7-37ms      | [S2,MB3,F]  37-7-45ms      | [S6,MB0,F]  45-7-52ms      | [S6,MB1,F]  52-7-60ms      | [S6,MB2,F]  60-7-67ms      | [S6,MB0,B]  75-15-90ms     | [S6,MB3,F]  90-7-97ms      | [S6,MB1,B]  97-15-112ms    | [S2,MB4,F]  112-7-120ms    | [S6,MB2,B]  120-15-135ms   | [S2,MB5,F]  135-7-142ms    | [S6,MB3,B]  142-15-158ms   | [S2,MB6,F]  158-7-165ms    | [S2,MB0,B]  165-15-180ms   | [S2,MB7,F]  180-7-188ms    | [S2,MB1,B]  188-15-203ms   | [S6,MB4,F]  203-7-210ms    | [S2,MB2,B]  210-15-225ms   | [S6,MB5,F]  225-7-233ms    | [S2,MB3,B]  233-15-248ms   | [S6,MB6,F]  248-7-255ms    | [S6,MB4,B]  255-15-270ms   | [S6,MB7,F]  270-7-278ms    | [S6,MB5,B]  278-15-293ms   | [S6,MB6,B]  301-15-316ms   | [S6,MB7,B]  323-15-338ms   | [S2,MB4,B]  338-15-353ms   | [S2,MB5,B]  353-15-368ms   | [S2,MB6,B]  368-15-383ms   | [S2,MB7,B]  383-15-398ms  
+[rank3]:			  [Rank 3]	[S3,MB0,F]  22-7-30ms      | [S3,MB1,F]  30-7-37ms      | [S3,MB2,F]  37-7-45ms      | [S3,MB3,F]  45-7-52ms      | [S7,MB0,F]  52-7-60ms      | [S7,MB0,B]  60-15-75ms     | [S7,MB1,F]  75-7-82ms      | [S7,MB1,B]  82-15-97ms     | [S7,MB2,F]  97-7-105ms     | [S7,MB2,B]  105-15-120ms   | [S7,MB3,F]  120-7-127ms    | [S7,MB3,B]  127-15-142ms   | [S3,MB4,F]  142-7-150ms    | [S3,MB0,B]  150-15-165ms   | [S3,MB5,F]  165-7-173ms    | [S3,MB1,B]  173-15-188ms   | [S3,MB6,F]  188-7-195ms    | [S3,MB2,B]  195-15-210ms   | [S3,MB7,F]  210-7-218ms    | [S3,MB3,B]  218-15-233ms   | [S7,MB4,F]  233-7-240ms    | [S7,MB4,B]  240-15-255ms   | [S7,MB5,F]  255-7-263ms    | [S7,MB5,B]  263-15-278ms   | [S7,MB6,F]  278-7-285ms    | [S7,MB6,B]  285-15-301ms   | [S7,MB7,F]  301-7-308ms    | [S7,MB7,B]  308-15-323ms   | [S3,MB4,B]  323-15-338ms   | [S3,MB5,B]  338-15-353ms   | [S3,MB6,B]  353-15-368ms   | [S3,MB7,B]  368-15-383ms  
+[rank3]:2026-01-03 09:20:21,211 - Destroying the purge thread.
+[rank3]:wandb: updating run metadata
+[rank3]:wandb: uploading output.log; uploading wandb-summary.json; uploading config.yaml
+[rank3]:wandb: uploading wandb-summary.json; uploading config.yaml
+[rank3]:wandb: 
+[rank3]:wandb: Run history:
+[rank3]:wandb:      final/avg_end_to_end(s) ▁
+[rank3]:wandb:               final/avg_loss ▁
+[rank3]:wandb:             final/avg_mfu(%) ▁
+[rank3]:wandb:             final/avg_tflops ▁
+[rank3]:wandb:    final/avg_throughput(tps) ▁
+[rank3]:wandb:              final/grad_norm ▁
+[rank3]:wandb:               final/max_loss ▁
+[rank3]:wandb:                    grad_norm  █▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb: loss_metrics/global_avg_loss ▇█▄▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb: loss_metrics/global_max_loss ▇█▄▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: Run summary:
+[rank3]:wandb:      final/avg_end_to_end(s) 2.64174
+[rank3]:wandb:               final/avg_loss 0.2091
+[rank3]:wandb:             final/avg_mfu(%) 28.0381
+[rank3]:wandb:             final/avg_tflops 289.26132
+[rank3]:wandb:    final/avg_throughput(tps) 6201.97941
+[rank3]:wandb:              final/grad_norm 0.27071
+[rank3]:wandb:               final/max_loss 0.2091
+[rank3]:wandb:                    grad_norm 0.27071
+[rank3]:wandb: loss_metrics/global_avg_loss 0.2091
+[rank3]:wandb: loss_metrics/global_max_loss 0.2091
+[rank3]:wandb:                          +14 ...
+[rank3]:wandb: 
+[rank3]:wandb: 🚀 View run 260102_Interleaved1F1B_nofreeze_h200 at: https://wandb.ai/orangingq/torchtitan/runs/2mhrzrkk
+[rank3]:wandb: ⭐️ View project at: https://wandb.ai/orangingq/torchtitan
+[rank3]:wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+[rank3]:wandb: Find logs at: ._data/tb/260102_Interleaved1F1B_nofreeze_h200/20260103-0749/wandb/run-20260103_074953-2mhrzrkk/logs
+[rank0]:2026-01-03 09:20:22,784 - Training completed
+[rank0]:2026-01-03 09:20:22,784 - Destroying the purge thread.
+[rank3]:2026-01-03 09:20:23,027 - Process group destroyed
+[rank2]:2026-01-03 09:20:23,063 - Process group destroyed
+[rank1]:2026-01-03 09:20:23,034 - Process group destroyed
+[rank0]:2026-01-03 09:20:23,065 - Process group destroyed
+[rank2]:[W103 09:20:24.861499189 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[rank1]:[W103 09:20:24.874029014 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[rank0]:[W103 09:20:24.887188159 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[rank3]:[W103 09:20:24.978971594 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+[rank2]:Stage 2: Modules to keep: {'layers.12', 'layers.10', 'layers.11', 'layers.9'}
+[rank2]:Stage 6: Modules to keep: {'layers.26', 'layers.28', 'layers.27', 'layers.25'}
+[rank1]:Stage 1: Modules to keep: {'layers.4', 'layers.8', 'layers.5', 'layers.6', 'layers.7'}
+[rank1]:Stage 5: Modules to keep: {'layers.24', 'layers.22', 'layers.23', 'layers.21'}
+[rank0]:Stage 0: Modules to keep: {'layers.0', 'layers.1', 'layers.3', 'layers.2', 'tok_embeddings'}
+[rank0]:Stage 4: Modules to keep: {'layers.19', 'layers.20', 'layers.17', 'layers.18'}
+[rank3]:Stage 3: Modules to keep: {'layers.16', 'layers.15', 'layers.14', 'layers.13'}
+[rank3]:Stage 7: Modules to keep: {'layers.29', 'layers.31', 'norm', 'output', 'layers.30'}
+[rank3]:----- TimelyFreeze⏰ Configuration:
+[rank3]:	- job:
+[rank3]:		- config_file: /opt/dlami/nvme/DMLAB/shcho/torchtitan/logs/h200/260102_llama8b/config_260102.toml
+[rank3]:		- dump_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data
+[rank3]:		- description: "Llama 3.1 8B Experiment
+[rank3]:260102: everything same with 1104_llama8b/1128, but with seed=42
+[rank3]:"
+[rank3]:		- use_for_integration_test: False
+[rank3]:		- print_args: False
+[rank3]:		- basename: 260102_Interleaved1F1B_nofreeze_h200
+[rank3]:	- profiling:
+[rank3]:		- enable_profiling: False
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/profile_trace/260102_Interleaved1F1B_nofreeze_h200
+[rank3]:		- profile_freq: 100
+[rank3]:		- enable_memory_snapshot: False
+[rank3]:		- save_memory_snapshot_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/memory_snapshot/260102_Interleaved1F1B_nofreeze_h200
+[rank3]:	- metrics:
+[rank3]:		- log_freq: 50
+[rank3]:		- enable_tensorboard: False
+[rank3]:		- disable_color_printing: True
+[rank3]:		- save_tb_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/tb/260102_Interleaved1F1B_nofreeze_h200
+[rank3]:		- save_for_all_ranks: False
+[rank3]:		- enable_wandb: True
+[rank3]:		- image_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/images/260102_Interleaved1F1B_nofreeze_h200
+[rank3]:		- pplog_freq: 200
+[rank3]:		- draw_freq: 100
+[rank3]:		- wandb_name: 260102_Interleaved1F1B_nofreeze_h200
+[rank3]:		- draw_graph: True
+[rank3]:	- model:
+[rank3]:		- name: llama3
+[rank3]:		- flavor: 8B
+[rank3]:		- tokenizer_path: ./assets/tokenizer/Llama-3.1-8B
+[rank3]:		- converters: []
+[rank3]:		- print_after_conversion: False
+[rank3]:	- optimizer:
+[rank3]:		- name: AdamW
+[rank3]:		- lr: 3e-06
+[rank3]:		- beta1: 0.9
+[rank3]:		- beta2: 0.999
+[rank3]:		- eps: 1e-08
+[rank3]:		- weight_decay: 0.1
+[rank3]:		- implementation: fused
+[rank3]:		- early_step_in_backward: False
+[rank3]:	- lr_scheduler:
+[rank3]:		- warmup_steps: 200
+[rank3]:		- decay_ratio: 0.8
+[rank3]:		- decay_type: cosine
+[rank3]:		- min_lr_factor: 0.0
+[rank3]:	- training:
+[rank3]:		- dataset: openhermes
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 16
+[rank3]:		- global_batch_size: 64
+[rank3]:		- seq_len: 1024
+[rank3]:		- max_norm: 1.0
+[rank3]:		- steps: 2000
+[rank3]:		- enable_cpu_offload: False
+[rank3]:		- mixed_precision_param: bfloat16
+[rank3]:		- mixed_precision_reduce: float32
+[rank3]:		- compile: False
+[rank3]:		- gc_freq: 50
+[rank3]:		- gc_debug: False
+[rank3]:		- seed: 42
+[rank3]:		- deterministic: True
+[rank3]:	- parallelism:
+[rank3]:		- data_parallel_replicate_degree: 1
+[rank3]:		- enable_compiled_autograd: False
+[rank3]:		- data_parallel_shard_degree: -1
+[rank3]:		- fsdp_reshard_after_forward: default
+[rank3]:		- tensor_parallel_degree: 1
+[rank3]:		- disable_loss_parallel: False
+[rank3]:		- enable_async_tensor_parallel: False
+[rank3]:		- pipeline_parallel_degree: 4
+[rank3]:		- pipeline_parallel_split_points: []
+[rank3]:		- module_fqns_per_model_part: None
+[rank3]:		- pipeline_parallel_first_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_last_stage_less_layers: 1
+[rank3]:		- pipeline_parallel_layers_per_stage: None
+[rank3]:		- pipeline_parallel_schedule: Interleaved1F1B
+[rank3]:		- pipeline_parallel_schedule_csv: 
+[rank3]:		- pipeline_parallel_microbatch_size: 2
+[rank3]:		- context_parallel_degree: 1
+[rank3]:		- context_parallel_rotate_method: allgather
+[rank3]:		- expert_parallel_degree: 1
+[rank3]:		- pp: 4
+[rank3]:		- stages_per_rank: 2
+[rank3]:		- stages_list: [3, 7]
+[rank3]:		- microbatches: 8
+[rank3]:	- checkpoint:
+[rank3]:		- enable_checkpoint: True
+[rank3]:		- checkpoint_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/checkpoint/260102_Interleaved1F1B_nofreeze_h200
+[rank3]:		- interval: 1000
+[rank3]:		- initial_load_path: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/base_model/Llama-3.1-8B/original_dcp
+[rank3]:		- initial_load_model_only: True
+[rank3]:		- initial_load_in_hf: False
+[rank3]:		- last_save_model_only: True
+[rank3]:		- last_save_in_hf: False
+[rank3]:		- export_dtype: float16
+[rank3]:		- async_mode: async
+[rank3]:		- keep_latest_k: 2
+[rank3]:		- load_step: -1
+[rank3]:		- exclude_from_loading: ['dataloader', 'lr_scheduler', 'optimizer', 'train_state']
+[rank3]:		- enable_first_step_checkpoint: False
+[rank3]:		- create_seed_checkpoint: False
+[rank3]:	- activation_checkpoint:
+[rank3]:		- mode: none
+[rank3]:		- selective_ac_option: op
+[rank3]:		- per_op_sac_force_recompute_mm_shapes_by_fqns: ['moe.router.gate']
+[rank3]:	- float8:
+[rank3]:		- enable_fsdp_float8_all_gather: False
+[rank3]:		- precompute_float8_dynamic_scale_for_fsdp: False
+[rank3]:		- recipe_name: None
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- emulate: False
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- mx:
+[rank3]:		- mxfp8_dim1_cast_kernel_choice: triton
+[rank3]:		- recipe_name: mxfp8
+[rank3]:		- filter_fqns: ['output']
+[rank3]:		- moe_fqns_prototype: []
+[rank3]:	- comm:
+[rank3]:		- init_timeout_seconds: 300
+[rank3]:		- train_timeout_seconds: 300
+[rank3]:		- trace_buf_size: 20000
+[rank3]:		- save_traces_folder: /opt/dlami/nvme/DMLAB/shcho/torchtitan_data/comm_traces/260102_Interleaved1F1B_nofreeze_h200
+[rank3]:		- world_size: 4
+[rank3]:		- global_rank: 3
+[rank3]:		- local_rank: 3
+[rank3]:		- dp: 1
+[rank3]:		- pp: 4
+[rank3]:		- pp_rank: 3
+[rank3]:		- dp_rank: 0
+[rank3]:		- master_dp_rank: 0
+[rank3]:	- memory_estimation:
+[rank3]:		- enabled: False
+[rank3]:		- disable_fake_mode: False
+[rank3]:	- fault_tolerance:
+[rank3]:		- enable: False
+[rank3]:		- process_group: gloo
+[rank3]:		- process_group_timeout_ms: 10000
+[rank3]:		- replica_id: 0
+[rank3]:		- group_size: 0
+[rank3]:		- min_replica_size: 1
+[rank3]:		- semi_sync_method: None
+[rank3]:		- sync_steps: 5
+[rank3]:		- should_quantize: False
+[rank3]:		- fragment_sync_delay: 0
+[rank3]:		- fragment_update_alpha: 0.0
+[rank3]:	- experimental:
+[rank3]:		- custom_import: 
+[rank3]:		- custom_args_module: 
+[rank3]:	- validation:
+[rank3]:		- enabled: False
+[rank3]:		- dataset: c4_validation
+[rank3]:		- dataset_path: None
+[rank3]:		- local_batch_size: 8
+[rank3]:		- seq_len: 2048
+[rank3]:		- freq: 10
+[rank3]:		- steps: -1
+[rank3]:	- lora:
+[rank3]:		- enable_lora: False
+[rank3]:		- lora_r: 16
+[rank3]:		- lora_alpha: 32
+[rank3]:		- lora_dropout: 0.05
+[rank3]:		- lora_target_modules: ['wq', 'wk', 'wv', 'wo', 'w1', 'w2', 'w3']
+[rank3]:	- freezing:
+[rank3]:		- freeze: False
+[rank3]:		- metric_type: apf
+[rank3]:		- phase_unit: 50
+[rank3]:		- stability_check_freq: 10
+[rank3]:		- max_freeze_ratio: 0.7
+[rank3]:		- adjustment: False
+[rank3]:		- threshold: 0.05
+[rank3]:		- percentile: 70
+[rank3]:
+[rank2]:[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank3]:[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank1]:[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[W103 09:20:30.051051844 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
